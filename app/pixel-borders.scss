@@ -1,0 +1,81 @@
+@use "../node_modules/pixel-borders/src/styles/pixel-borders/pixel-borders-mixins" as pb;
+
+// Base pixel-borders class with default styling
+.pixel-borders {
+  @include pb.pixel-borders(
+    $corner-size: 2,
+    $border-size: 2px,
+    $border-color: #323765
+  );
+}
+
+.pixel-borders-accent {
+    @include pb.pixel-borders(
+      $corner-size: 2,
+      $border-size: 2px,
+      $border-color: #f088ab
+    );
+  }
+
+  .pixel-borders-shine {
+    @include pb.pixel-borders(
+      $border-size: 1px,
+      $border-color: #fcfdfc
+    );
+  }
+
+// Base pixel-borders class with default styling
+.pixel-borders-dome {
+    @include pb.pixel-borders(
+      $border-size: 2px,
+      $border-color: #323765
+    );
+  }
+
+// Themed pixel boxes that match your color scheme
+.pixel-box-primary {
+  @include pb.pixel-box(
+    $corner-size: 1,
+    $border-size: 4px,
+    $background-color: #a84370,
+    $border-inset: true,
+    $border-inset-sides: 'all'
+  );
+}
+
+.pixel-box-secondary {
+  @include pb.pixel-box(
+    $corner-size: 1,
+    $border-size: 4px,
+    $background-color: #f1c4e6,
+    $border-inset: true,
+    $border-inset-sides: 'all'
+  );
+}
+
+.pixel-box-card {
+  @include pb.pixel-box(
+    $corner-size: 1,
+    $border-size: 4px,
+    $background-color: #faf5fa,
+    $border-inset: true,
+    $border-inset-sides: 'bottom-right'
+  );
+}
+
+// Size variants
+.pixel-borders-lg {
+  @include pb.pixel-borders(
+    $corner-size: 2,
+    $border-size: 6px,
+    $border-color: #323765
+  );
+}
+
+.pixel-borders-sm {
+  @include pb.pixel-borders(
+    $corner-size: 1,
+    $border-size: 2px,
+    $border-color: #323765
+  );
+}
