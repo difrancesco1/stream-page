@@ -79,3 +79,32 @@
     $border-color: #323765
   );
 }
+
+// Top-only pixel borders
+.pixel-borders-top {
+  $corner-size: 1;
+  $border-size: 2px;
+  $border-color: #323765;
+  
+  @supports (border-image-source: none) {
+    border-radius: ($border-size * ($corner-size + 2)) + ($corner-size * 2);
+  }
+
+  border-style: solid;
+  border-width: $border-size;
+  border-color: $border-color;
+
+  // Only apply pixel corners to top by adjusting slice values
+  // Format: top / right / bottom / left
+  border-image-slice: ($corner-size * 2) ($corner-size * 2) 0 ($corner-size * 2);
+  border-image-width: $corner-size $corner-size 0 $corner-size;
+  border-image-outset: 0;
+  border-image-source: url(pb.pixel-borders-image($corner-size, $border-color));
+  
+  // Add solid bottom border to complete the border
+  border-bottom: $border-size solid $border-color;
+  
+  // Make bottom corners square
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
