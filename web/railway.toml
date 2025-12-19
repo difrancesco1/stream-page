@@ -2,13 +2,13 @@
 
 [build]
 builder = "NIXPACKS"
-buildCommand = "pnpm install && pnpm build"
+buildCommand = "pnpm install && pnpm build && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/"
 
 [build.nixpacks]
 NODE_VERSION = "20"
 
 [deploy]
-startCommand = "cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/ && HOSTNAME=0.0.0.0 node .next/standalone/server.js"
+startCommand = "HOSTNAME=0.0.0.0 node .next/standalone/server.js"
 healthcheckPath = "/"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
