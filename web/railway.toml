@@ -8,7 +8,7 @@ buildCommand = "pnpm install && pnpm build"
 NODE_VERSION = "20"
 
 [deploy]
-startCommand = "node .next/standalone/server.js"
+startCommand = "HOSTNAME=0.0.0.0 node .next/standalone/server.js"
 healthcheckPath = "/"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
