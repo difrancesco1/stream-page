@@ -1,14 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from config import FRONTEND_URL, IS_RAILWAY
-from engine import get_db_session
 
-app = FastAPI()
+from config import FRONTEND_URL, IS_RAILWAY, PORT
 
-# Configure CORS - allow frontend URL from config
-allowed_origins = [FRONTEND_URL]
+app = FastAPI(title="ROS API")
+
+# Configure CORS
+allowed_origins = [
+    FRONTEND_URL,
+    "http://localhost:3000",
+]
 if IS_RAILWAY:
-    # On Railway, also allow the Railway-provided domain
     allowed_origins.append("https://*.up.railway.app")
 
 app.add_middleware(
@@ -19,8 +21,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def read_root():
-    return {"message": "Hello world"}
 
-get_db_session()
+@app.get("/")
+def health_check():
+    return {"status": "ok", "message": "ROS API is running"}
+
+
+@app.get("/api/health")
+def api_health():
+    """Health check endpoint for Railway."""
+    return {"status": "healthy"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
