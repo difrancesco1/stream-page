@@ -12,7 +12,7 @@
 .pixel-borders-accent {
     @include pb.pixel-borders(
       $corner-size: 2,
-      $border-size: 2px,
+      $border-size: 3px,
       $border-color: #f088ab
     );
   }

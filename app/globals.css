@@ -176,3 +176,40 @@
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   grid-template-rows: 21px 21px 1fr 21px;
 }
+
+.pixel-card {
+  box-shadow: 
+    3px 0px 0px 0px var(--border),
+    0px 3px 0px 0px var(--border),
+    3px 3px 0px 0px var(--border);
+}
+
+.pixel-btn {
+  background: var(--accent);
+  color: var(--border);
+  padding: 2px 8px;
+  border: none;
+  cursor: pointer;
+  image-rendering: pixelated;
+  box-shadow: 
+    inset -2px -2px 0px 0px #c0608a,
+    inset 2px 2px 0px 0px #ffb8d4,
+    0px 1px 0px 0px var(--border);
+  transition: all 0.05s ease;
+}
+
+.pixel-btn:hover {
+  background: #ffb8d4;
+  box-shadow: 
+    inset -2px -2px 0px 0px #f088ab,
+    inset 2px 2px 0px 0px #ffe0ec,
+    0px 1px 0px 0px var(--border);
+}
+
+.pixel-btn:active {
+  background: #c0608a;
+  box-shadow: 
+    inset 2px 2px 0px 0px #903060,
+    inset -2px -2px 0px 0px #f088ab;
+  transform: translateY(2px);
+}
