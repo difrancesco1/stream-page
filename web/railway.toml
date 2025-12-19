@@ -8,8 +8,4 @@ buildCommand = "pnpm install && pnpm build"
 NODE_VERSION = "20"
 
 [deploy]
-startCommand = "pnpm start"
-healthcheckPath = "/"
-healthcheckTimeout = 100
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 3
+startCommand = "pnpm start -p ${PORT:-3000}"
