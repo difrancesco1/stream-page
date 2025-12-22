@@ -1,8 +1,13 @@
 "use client"
 import Image from "next/image"
 
+type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures";
 
-export default function MainContainer() {
+interface MainContainerProps {
+    onOpenCard?: (cardId: CardId) => void;
+}
+
+export default function MainContainer({ onOpenCard }: MainContainerProps) {
     return (
         <div className="col-span-9 w-full h-full overflow-y-auto border-l flex flex-col gap-2 relative">
             <div className="flex flex-col flex-start px-1 py-1 gap-1 border-b-2">
@@ -54,10 +59,10 @@ export default function MainContainer() {
                 </div>
             </div>
             <footer className="w-full flex items-center justify-center gap-4 main-text border-t-2 bg-foreground rounded-b py-1">
-                <button className="pixel-btn">opgg</button>
-                <button className="pixel-btn">movies</button>
-                <button className="pixel-btn">int list</button>
-                <button className="pixel-btn">cat pictures</button>
+                <button className="pixel-btn" onClick={() => onOpenCard?.("opgg")}>opgg</button>
+                <button className="pixel-btn" onClick={() => onOpenCard?.("movies")}>movies</button>
+                <button className="pixel-btn" onClick={() => onOpenCard?.("intList")}>int list</button>
+                <button className="pixel-btn" onClick={() => onOpenCard?.("catPictures")}>cat pictures</button>
             </footer>
         </div>
         
