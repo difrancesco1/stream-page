@@ -1,5 +1,6 @@
 import "./globals.css";
 import "./pixel-borders.scss";
+import "@hackernoon/pixel-icon-library/fonts/iconfont.css";
 import { Silkscreen } from "next/font/google";
 
 const silkscreen = Silkscreen({

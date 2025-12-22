@@ -12,12 +12,16 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@hackernoon/pixel-icon-library": "^1.0.6",
+    "@iconify/react": "^6.0.2",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@svgr/webpack": "^8.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.556.0",
     "next": "^16.0.10",
     "pixel-borders": "^1.1.4",
+    "pixelarticons": "^1.8.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-draggable": "^4.5.0",
