@@ -60,8 +60,6 @@ export default function ProfileSection() {
                     <div className="h-[15px] bg-accent w-[80%]"></div>
                     <span className="top-0 absolute left-[35px] text-[11px] text-foreground">30yr</span>
                 </div>
-                
-                
                 {/* <Tooltip >
                     <TooltipTrigger asChild>
 

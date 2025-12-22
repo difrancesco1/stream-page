@@ -68,7 +68,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 :root {
-  --background: #2F2F2F;
+  --background: #fcfdfc;
   --foreground: #d0d8eb;
   --accent: #f088ab;
   --accent-shadow: #ce6588;
@@ -163,7 +163,7 @@
 .main-text {
   letter-spacing: var(--letter-spacing);
   color: var(--border);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .dome{
