@@ -41,7 +41,7 @@ export default function IntList({ onClose }: IntListProps) {
             setActiveTab={handleTabClick}
           />
         </div>
-        <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden ml-0.5">
+        <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden">
           <ProfileSection />
           <MainContainer />
         </div>
