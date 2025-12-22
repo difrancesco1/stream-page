@@ -1,5 +1,6 @@
 "use client"
 import Image from "next/image"
+
 type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures";
 
 interface MainContainerProps {
@@ -17,20 +18,20 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                     <span className="main-text">Software Engineer @ Seattle</span>
                 </div>
                 <div className="flex justify-start gap-1 py-1">
-                    <div className="p-0.5 bg-foreground pixel-borders">
-                        <Image src="/icon/twitch.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-9 h-9 object-contain" unoptimized/>
+                    <div className="p-0.5 bg-foreground pixel-borders flex items-center justify-center w-10 h-10">
+                        <i className="hn hn-twitch text-2xl text-border" />
                     </div>
-                    <div className="p-0.5 bg-foreground pixel-borders">
-                        <Image src="/icon/twitter.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-9 h-9 object-contain" unoptimized/>
+                    <div className="p-0.5 bg-foreground pixel-borders flex items-center justify-center w-10 h-10">
+                        <i className="hn hn-twitter text-2xl text-border" />
                     </div>
-                    <div className="p-0.5 bg-foreground pixel-borders">
-                        <Image src="/icon/edit-solid.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-9 h-9 object-contain" unoptimized/>                    
+                    <div className="p-0.5 bg-foreground pixel-borders flex items-center justify-center w-10 h-10">
+                        <i className="hn hn-edit text-2xl text-border" />
                     </div>
-                    <div className="p-0.5 bg-foreground pixel-borders">
-                        <Image src="/icon/tiktok.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-9 h-9 object-contain" unoptimized/>
+                    <div className="p-0.5 bg-foreground pixel-borders flex items-center justify-center w-10 h-10">
+                        <i className="hn hn-tiktok text-2xl text-border" />
                     </div>
-                    <div className="p-0.5 bg-foreground pixel-borders">
-                        <Image src="/icon/youtube.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-9 h-9 object-contain" unoptimized/>
+                    <div className="p-0.5 bg-foreground pixel-borders flex items-center justify-center w-10 h-10">
+                        <i className="hn hn-youtube text-2xl text-border" />
                     </div>
                 </div>
             </div>

@@ -16,7 +16,12 @@ class Platform(PyEnum):
     YOUTUBE = "youtube"
     DISCORD = "discord"
 
-
+class SectionType(PyEnum):
+    BIOGRAPHY = "biography"
+    SOCIALS = "socials"
+    LEAGUE_CHAMPIONS = "league_champions"
+    ART_ITEMS = "art_items"
+    MYSELF = "myself"
 class User(Base):
     __tablename__ = "user"
 
@@ -24,7 +29,7 @@ class User(Base):
         PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     username: Mapped[str] = mapped_column(String(50), unique=True)
-    password: Mapped[str]  # SQLAlchemy infers String
+    password: Mapped[str]
     display_name: Mapped[str | None]
     birthday: Mapped[str | None]
     profile_picture: Mapped[str | None]  # URL stored as string
@@ -71,3 +76,10 @@ class FavoriteChampions(Base):
     champions: Mapped[list[str]] = mapped_column(ARRAY(String))
 
     user: Mapped["User"] = relationship(back_populates="favorite_champions")
+
+class CardConfig(Base):
+    __tablename__ = "card_config"
+    
+    id: Mapped[uuid.UUID] = mapped_column(...)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
+    sections: Mapped[list[str]] = mapped_column(ARRAY(String))
