@@ -46,7 +46,7 @@ export default function ProfileSection() {
                         </div>
                     </div>
                 </div>
-                <a href="https://x.com/fourdee2" className="main-text text-[7px]! text-center">art by @fourdee2</a>
+                <a href="https://x.com/fourdee2" target="_blank" rel="noopener noreferrer" className="main-text text-[7px]! text-center">art by @fourdee2</a>
             </div>
             <div className="w-full px-1 main-text flex flex-col -mt-[5px]">
                 <div className="flex gap-[3%] flex-start " >
