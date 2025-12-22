@@ -1,53 +1,72 @@
 
 import Image from "next/image";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export default function ProfileSection() {
     "use client";
     return (
-        <div className="col-span-3 flex flex-col justify-between items-center gap-[3%] h-full overflow-hidden py-[2%]">
-            <div className="flex flex-col w-full justify center items-center gap-2">
-                <div className="relative w-[65%] aspect-square flex-shrink-0">
+        <div className="col-span-3 flex flex-col gap-[1%] items-center h-full overflow-hidden py-[2%] select-none">
+            <div className="flex flex-col w-full justify center items-center gap-[2px]">
+                <div className="relative w-[95%] aspect-square flex-shrink-0">
                     <Image 
-                        src="/profile.jpg" 
+                        src="/profile.gif" 
                         alt="Profile" 
                         fill
                         className="pixel-borders-dome rounded-sm object-cover"
                     />
                 </div>
-                <div className="w-[65%] flex items-center pixel-borders bg-accent/60">
-                    <span className="text-center text-gray-800 w-full text-[clamp(0.6rem,2vw,1rem)] leading-tight">Rosie</span>
+                <div className="w-[60%] flex items-center pixel-borders">
+                    <span className="text-center text-foreground w-full leading-tight bg-border/80">Rosie</span>
                 </div>
             </div>
-            <div className="flex gap-[17%] justify-center items-center w-full py-2 border-y">
-                <div className="flex flex-col items-center w-[20%]">
-                    <div className="relative w-full aspect-square">
-                        <Image
-                            src="/ziggs-profile.png"
-                            alt="Ziggs"
-                            fill
-                            className="rounded-sm object-cover"
-                        />
+            <div className="flex gap-[3%] flex-col w-full">
+                <div className="flex gap-[3%] justify-center items-center">
+                    <div className="flex flex-col items-center w-[45%] pixel-borders">
+                        <div className="relative w-full aspect-square">
+                            <Image
+                                src="/ziggs-profile2.png"
+                                alt="Ziggs"
+                                fill
+                                className="rounded-sm object-cover"
+                            />
+                        </div>
                     </div>
-                    <span className="main-text text-[clamp(0.5rem,1.5vw,0.875rem)]">Ziggs</span>
-                </div>
-                <div className="flex flex-col items-center w-[20%]">
-                    <div className="relative w-full aspect-square">
-                        <Image
-                            src="/LuluSquare.webp"
-                            alt="Ziggs"
-                            fill
-                            className="rounded-sm object-cover"
-                        />
+                    <div className="flex flex-col items-center w-[45%] pixel-borders">
+                        <div className="relative w-full aspect-square">
+                            <Image
+                                src="/ezreal-profile.png"
+                                alt="Ziggs"
+                                fill
+                                className="rounded-sm object-cover"
+                            />
+                        </div>
                     </div>
-                    <span className="main-text text-[clamp(0.5rem,1.5vw,0.875rem)]">Lulu</span>
                 </div>
+                <div className="main-text text-[7px]! text-center">art by @fourdee2</div>
+            </div>
+            <div className="w-full px-1 main-text flex flex-col -mt-[5px]">
+                <div className="flex gap-[3%] flex-start " >
+                    <span className="font-bold">bday</span>
+                    <div className="">[10/07]</div>
                 </div>
-                <span className="w-full text-center text-black text-[clamp(0.5rem,1.5vw,0.875rem)]">Birthday</span>
-                <div className="flex justify-center gap-[4%]">
-                    <div className="main-text px-[8%] py-[4%] border-2 text-[clamp(0.5rem,1.5vw,0.875rem)]">October</div>
-                    <div className="main-text px-[8%] py-[4%] border-2 text-black text-[clamp(0.5rem,1.5vw,0.875rem)]">07</div>
-                </div>
-                
+                <Tooltip >
+                    <TooltipTrigger asChild>
+                        <div className="pixel-borders relative -mt-[3px]">
+                            <div className="h-[3px] "></div>
+                            <div className="h-[1px] absolute -top-[0px] w-[58%] bg-accent left-[2.3px]"></div>
+                            <div className="h-[2px] absolute top-[2.5px] w-[55%] bg-accent left-[5.5px]"></div>
+                            <div className="h-[15px] bg-accent w-[60%]"></div>
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-border/80">
+                        <p>30yr</p>
+                    </TooltipContent>
+                </Tooltip>
+            </div>
         </div>
     );
 }
