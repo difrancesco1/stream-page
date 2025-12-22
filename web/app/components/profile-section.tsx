@@ -20,7 +20,7 @@ export default function ProfileSection() {
                     />
                 </div>
                 <div className="w-[60%] flex items-center pixel-borders">
-                    <span className="text-center text-foreground w-full leading-tight bg-border/100">Rosie</span>
+                    <span className="text-center text-foreground w-full leading-tight bg-border/80">Rosie</span>
                 </div>
             </div>
             <div className="flex gap-[3%] pt-[2px] flex-col w-full">
