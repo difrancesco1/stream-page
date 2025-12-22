@@ -9,7 +9,7 @@ interface MainContainerProps {
 export default function MainContainer({ onOpenCard }: MainContainerProps) {
     return (
         <div className="col-span-9 w-full h-full overflow-y-auto flex flex-col gap-2 relative select-none">
-            <div className="flex flex-col flex-start px-1 py-1 gap-1 border-b-2">
+            <div className="flex flex-col flex-start px-1 border-b-2">
                 <div className="flex gap-1 items-center">
                     <span className="main-text">twitch streamer</span>
                 </div>
@@ -18,19 +18,19 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                 </div>
                 <div className="flex justify-start gap-1 py-1">
                     <div className="p-0.5 bg-foreground pixel-borders">
-                        <Image src="/icon/twitch.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-5 h-5 object-contain" unoptimized/>
+                        <Image src="/icon/twitch.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-10 h-10 object-contain" unoptimized/>
                     </div>
                     <div className="p-0.5 bg-foreground pixel-borders">
-                        <Image src="/icon/twitter.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-5 h-5 object-contain" unoptimized/>
+                        <Image src="/icon/twitter.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-9 h-9 object-contain" unoptimized/>
                     </div>
                     <div className="p-0.5 bg-foreground pixel-borders">
-                        <Image src="/icon/edit-solid.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-5 h-5 object-contain" unoptimized/>                    
+                        <Image src="/icon/edit-solid.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-9 h-9 object-contain" unoptimized/>                    
                     </div>
                     <div className="p-0.5 bg-foreground pixel-borders">
-                        <Image src="/icon/tiktok.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-5 h-5 object-contain" unoptimized/>
+                        <Image src="/icon/tiktok.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-9 h-9 object-contain" unoptimized/>
                     </div>
                     <div className="p-0.5 bg-foreground pixel-borders">
-                        <Image src="/icon/youtube.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-5 h-5 object-contain" unoptimized/>
+                        <Image src="/icon/youtube.svg" alt="icon" width={0} height={0} sizes="100vw" className="w-9 h-9 object-contain" unoptimized/>
                     </div>
                 </div>
             </div>
