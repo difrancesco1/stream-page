@@ -20,16 +20,16 @@ export default function ProfileSection() {
                     />
                 </div>
                 <div className="w-[60%] flex items-center pixel-borders">
-                    <span className="text-center text-foreground w-full leading-tight bg-border/80">Rosie</span>
+                    <span className="text-center text-foreground w-full leading-tight bg-border/100">Rosie</span>
                 </div>
             </div>
-            <div className="flex gap-[3%] flex-col w-full">
+            <div className="flex gap-[3%] pt-[2px] flex-col w-full">
                 <div className="flex gap-[3%] justify-center items-center">
                     <div className="flex flex-col items-center w-[45%] pixel-borders">
                         <div className="relative w-full aspect-square">
                             <Image
                                 src="/ziggs-profile2.png"
-                                alt="Ziggs"
+                                alt="ziggs"
                                 fill
                                 className="rounded-sm object-cover"
                             />
@@ -39,7 +39,7 @@ export default function ProfileSection() {
                         <div className="relative w-full aspect-square">
                             <Image
                                 src="/ezreal-profile.png"
-                                alt="Ziggs"
+                                alt="ezreal"
                                 fill
                                 className="rounded-sm object-cover"
                             />
@@ -48,17 +48,17 @@ export default function ProfileSection() {
                 </div>
                 <a href="https://x.com/fourdee2" target="_blank" rel="noopener noreferrer" className="main-text text-[7px]! text-center">art by @fourdee2</a>
             </div>
-            <div className="w-full px-1 main-text flex flex-col -mt-[5px]">
+            <div className="w-full px-1 pt-[2px] main-text flex flex-col -mt-[5px]">
                 <div className="flex gap-[3%] flex-start " >
                     <span className="font-bold">bday</span>
                     <div className="">[10/07]</div>
                 </div>
                 <div className="pixel-borders relative -mt-[3px]">   
                     <div className="h-[3px] "></div>
-                    <div className="h-[1px] absolute -top-[0px] w-[57%] bg-accent left-[2.3px]"></div>
-                    <div className="h-[2px] absolute top-[2.5px] w-[54%] bg-accent left-[5.5px]"></div>
-                    <div className="h-[15px] bg-accent w-[60%]"></div>
-                    <span className="top-0 absolute left-[34px] text-[11px] text-foreground">30yr</span>
+                    <div className="h-[1px] absolute -top-[0px] w-[77%] bg-accent left-[2.3px]"></div>
+                    <div className="h-[2px] absolute top-[2.5px] w-[74%] bg-accent left-[5.5px]"></div>
+                    <div className="h-[15px] bg-accent w-[80%]"></div>
+                    <span className="top-0 absolute left-[35px] text-[11px] text-foreground">30yr</span>
                 </div>
                 
                 

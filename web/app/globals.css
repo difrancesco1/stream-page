@@ -68,9 +68,10 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 :root {
-  --background: #fcfdfc;
+  --background: #2F2F2F;
   --foreground: #d0d8eb;
   --accent: #f088ab;
+  --accent-shadow: #ce6588;
   --border: #161b67;
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
@@ -162,7 +163,7 @@
 .main-text {
   letter-spacing: var(--letter-spacing);
   color: var(--border);
-  font-size: 15px;
+  font-size: 13px;
 }
 
 .dome{
@@ -185,25 +186,25 @@
 }
 
 .pixel-btn {
-  background: var(--accent);
-  color: var(--border);
+  background: var(--border);
+  color: var(--foreground);
   padding: 2px 8px;
   border: none;
   cursor: pointer;
   image-rendering: pixelated;
   box-shadow: 
-    inset -2px -2px 0px 0px #c0608a,
-    inset 2px 2px 0px 0px #ffb8d4,
+    inset -2px -2px 0px 0px var(--border),
+    inset 2px 2px 0px 0px var(--foreground),
     0px 1px 0px 0px var(--border);
   transition: all 0.05s ease;
 }
 
 .pixel-btn:hover {
-  background: #ffb8d4;
+  background: var(--accent);
   box-shadow: 
-    inset -2px -2px 0px 0px #f088ab,
-    inset 2px 2px 0px 0px #ffe0ec,
-    0px 1px 0px 0px var(--border);
+    inset -2px -2px 0px 0px var(--accent-shadow),
+    inset 2px 2px 0px 0px var(--foreground),
+    0px 1px 0px 0px var(--accent-shadow);
 }
 
 .pixel-btn:active {
