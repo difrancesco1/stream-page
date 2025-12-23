@@ -3,10 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from streampage.config import FRONTEND_URL, IS_RAILWAY, PORT
+from streampage.api.user.user import users_router
+from streampage.config import FRONTEND_URL, IS_RAILWAY
 from streampage.db.engine import get_db
 
-app = FastAPI(title="ROS API")
+app = FastAPI(title="streampage")
 
 # Configure CORS
 allowed_origins = [
@@ -42,13 +43,12 @@ def db_health(db: Session = Depends(get_db)):
     try:
         result = db.execute(text("SELECT 1"))
         result.fetchone()
-        
-        # Also check that tables exist
+
         tables_result = db.execute(text(
             "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
         ))
         tables = [row[0] for row in tables_result.fetchall()]
-        
+
         return {
             "status": "connected",
             "database": "streampage",
@@ -58,6 +58,4 @@ def db_health(db: Session = Depends(get_db)):
         return {"status": "error", "message": str(e)}
 
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=PORT)
+app.include_router(users_router, prefix="/users")
