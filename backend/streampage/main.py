@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from config import FRONTEND_URL, IS_RAILWAY, PORT
-from engine import get_db
+from streampage.config import FRONTEND_URL, IS_RAILWAY, PORT
+from streampage.db.engine import get_db
 
 app = FastAPI(title="ROS API")
 

@@ -1,27 +1,16 @@
 import uuid
-from enum import Enum as PyEnum
 
 from sqlalchemy import String, ForeignKey, Enum
+from sqlalchemy import LargeBinary
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, ARRAY
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from streampage.db.enums import Platform, SectionType
 
 
 class Base(DeclarativeBase):
     pass
 
-
-class Platform(PyEnum):
-    TWITTER = "twitter"
-    TWITCH = "twitch"
-    YOUTUBE = "youtube"
-    DISCORD = "discord"
-
-class SectionType(PyEnum):
-    BIOGRAPHY = "biography"
-    SOCIALS = "socials"
-    LEAGUE_CHAMPIONS = "league_champions"
-    ART_ITEMS = "art_items"
-    MYSELF = "myself"
 class User(Base):
     __tablename__ = "user"
 
@@ -29,18 +18,40 @@ class User(Base):
         PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     username: Mapped[str] = mapped_column(String(50), unique=True)
-    password: Mapped[str]
     display_name: Mapped[str | None]
     birthday: Mapped[str | None]
     profile_picture: Mapped[str | None]  # URL stored as string
 
     # Relationships
+    logins: Mapped[list["UserLogin"]] = relationship(back_populates="user")
     biography: Mapped["Biography"] = relationship(back_populates="user")
     socials: Mapped[list["Social"]] = relationship(back_populates="user")
     favorite_champions: Mapped["FavoriteChampions"] = relationship(back_populates="user")
     featured_images: Mapped["FeaturedImages"] = relationship(back_populates="user")
     card_config: Mapped["CardConfig"] = relationship(back_populates="user")
 
+class UserLogin(Base):
+
+    __tablename__ = "UserLogin"
+
+    # Primary Key
+    username: Mapped[str] = mapped_column(primary_key=True, unique=True)
+
+    # Foreign Keys
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
+
+    # Data
+    password: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+
+    # Relationship mapping
+    user: Mapped["User"] = relationship("User", back_populates="logins")
+
+    def __init__(self, user: User, password: bytes):
+        self.user_id = user.id
+        self.username = user.username
+        self.password = password
 
 class Biography(Base):
     __tablename__ = "biography"

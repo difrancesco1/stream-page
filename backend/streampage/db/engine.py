@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
-from config import DATABASE_URL, IS_RAILWAY
+from streampage.config import DATABASE_URL, IS_RAILWAY
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

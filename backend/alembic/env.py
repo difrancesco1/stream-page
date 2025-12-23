@@ -8,8 +8,8 @@ from alembic import context
 # Add the backend directory to the path so we can import our modules
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from config import DATABASE_URL
-from models import Base
+from streampage.config import DATABASE_URL
+from streampage.db.models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
