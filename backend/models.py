@@ -38,6 +38,8 @@ class User(Base):
     biography: Mapped["Biography"] = relationship(back_populates="user")
     socials: Mapped[list["Social"]] = relationship(back_populates="user")
     favorite_champions: Mapped["FavoriteChampions"] = relationship(back_populates="user")
+    featured_images: Mapped["FeaturedImages"] = relationship(back_populates="user")
+    card_config: Mapped["CardConfig"] = relationship(back_populates="user")
 
 
 class Biography(Base):
@@ -66,6 +68,17 @@ class Social(Base):
     user: Mapped["User"] = relationship(back_populates="socials")
 
 
+class FeaturedImages(Base):
+    __tablename__ = "featured_images"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
+    images: Mapped[list[str]] = mapped_column(ARRAY(String))
+
+    user: Mapped["User"] = relationship(back_populates="featured_images")
+
 class FavoriteChampions(Base):
     __tablename__ = "favorite_champions"
 
@@ -77,9 +90,14 @@ class FavoriteChampions(Base):
 
     user: Mapped["User"] = relationship(back_populates="favorite_champions")
 
+
 class CardConfig(Base):
     __tablename__ = "card_config"
-    
-    id: Mapped[uuid.UUID] = mapped_column(...)
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
     sections: Mapped[list[str]] = mapped_column(ARRAY(String))
+
+    user: Mapped["User"] = relationship(back_populates="card_config")
