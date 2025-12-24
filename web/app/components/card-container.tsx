@@ -3,7 +3,7 @@
 import Draggable from "react-draggable";
 import { useRef, useState, useEffect, useCallback } from "react";
 import MainCard from "./main-card";
-import IntList from "./int-list-card";
+import IntList from "./int-list/int-list-card";
 import PlaceholderCard from "./placeholder-card";
 
 // Types for card state management

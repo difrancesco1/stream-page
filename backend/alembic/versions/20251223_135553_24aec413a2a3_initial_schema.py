@@ -1,8 +1,8 @@
 """initial_schema
 
-Revision ID: 200ce7eaacf5
+Revision ID: 24aec413a2a3
 Revises: 
-Create Date: 2025-12-23 12:35:17.125769
+Create Date: 2025-12-23 13:55:53.747904
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '200ce7eaacf5'
+revision: str = '24aec413a2a3'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,11 +23,18 @@ def upgrade() -> None:
     op.create_table('user',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('username', sa.String(length=50), nullable=False),
-    sa.Column('password', sa.String(), nullable=False),
     sa.Column('display_name', sa.String(), nullable=True),
     sa.Column('birthday', sa.String(), nullable=True),
     sa.Column('profile_picture', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('username')
+    )
+    op.create_table('UserLogin',
+    sa.Column('username', sa.String(), nullable=False),
+    sa.Column('user_id', sa.UUID(), nullable=False),
+    sa.Column('password', sa.LargeBinary(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('username'),
     sa.UniqueConstraint('username')
     )
     op.create_table('biography',
@@ -76,6 +83,7 @@ def downgrade() -> None:
     op.drop_table('favorite_champions')
     op.drop_table('card_config')
     op.drop_table('biography')
+    op.drop_table('UserLogin')
     op.drop_table('user')
     # ### end Alembic commands ###
 

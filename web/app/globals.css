@@ -214,3 +214,34 @@
     inset -2px -2px 0px 0px #f088ab;
   transform: translateY(2px);
 }
+
+.pixel-btn-sm {
+  background: var(--border);
+  color: var(--foreground);
+  padding: 1px 5px;
+  font-size: 12px;
+  border: none;
+  cursor: pointer;
+  image-rendering: pixelated;
+  box-shadow: 
+    inset -1px -1px 0px 0px var(--border),
+    inset 1px 1px 0px 0px var(--foreground),
+    0px 1px 0px 0px var(--border);
+  transition: all 0.05s ease;
+}
+
+.pixel-btn-sm:hover {
+  background: var(--accent);
+  box-shadow: 
+    inset -1px -1px 0px 0px var(--accent-shadow),
+    inset 1px 1px 0px 0px var(--foreground),
+    0px 1px 0px 0px var(--accent-shadow);
+}
+
+.pixel-btn-sm:active {
+  background: #c0608a;
+  box-shadow: 
+    inset 1px 1px 0px 0px #903060,
+    inset -1px -1px 0px 0px #f088ab;
+  transform: translateY(1px);
+}
