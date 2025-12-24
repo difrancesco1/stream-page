@@ -5,6 +5,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import MainCard from "./main-card";
 import IntList from "./int-list/int-list-card";
 import PlaceholderCard from "./placeholder-card";
+import OpggCard from "./opgg/opgg-card";
 
 // Types for card state management
 type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures";
@@ -236,7 +237,7 @@ export default function CardContainer() {
             style={{ zIndex: cards.opgg.zIndex }}
             onMouseDown={() => bringToFront("opgg")}
           >
-            <PlaceholderCard title="opgg" onClose={() => closeCard("opgg")} />
+            <OpggCard onClose={() => closeCard("opgg")} />
           </div>
         </Draggable>
       )}
