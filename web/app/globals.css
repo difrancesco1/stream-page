@@ -245,3 +245,8 @@
     inset -1px -1px 0px 0px #f088ab;
   transform: translateY(1px);
 }
+
+hr {
+  border: none;
+  border-top: 2px dashed var(--border);
+}

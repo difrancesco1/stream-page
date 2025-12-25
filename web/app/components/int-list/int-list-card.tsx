@@ -27,7 +27,7 @@ export default function IntListCard({ onClose }: IntListCardProps) {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
             >
-                <div className="px-2 py-2 w-full h-full">
+                <div className="px-1 py-1 w-full h-full">
                     <IntListPlayerCard />
                 </div>
                 <IntListFooter />
