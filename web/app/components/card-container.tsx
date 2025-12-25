@@ -7,6 +7,7 @@ import IntList from "./int-list/int-list-card";
 import OpggCard from "./opgg/opgg-card";
 import CatPictureContainer from "./cat-pics/cat-picture-container";
 import MediaContainer from "./media/media-container";
+import Image from "next/image";
 
 type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures";
 
@@ -158,10 +159,20 @@ export default function CardContainer() {
   }, [getStaggeredPosition]);
 
   return (
+
+    
     <div
       ref={containerRef}
       className="w-full h-full bg-card border border-border p-2 rounded-lg shadow-md relative"
     >
+      <Image
+        src="/background.gif"
+        alt="Background image"
+        fill // Fills the parent element
+        className="object-cover" // Ensures the image covers the area
+        quality={75} // Default quality, can be adjusted
+        priority // Preload the image if it's the LCP element
+      />
       {/* Main Card - Always visible */}
       <Draggable
         nodeRef={mainCardRef}
