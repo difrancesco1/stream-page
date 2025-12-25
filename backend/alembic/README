@@ -1,2 +1,16 @@
 Generic single-database configuration with PostgreSQL.
 
+Steps to update the db
+1. Wipe database (drop and recreate)
+cd/backend
+psql -U postgres -c "DROP DATABASE IF EXISTS streampage;"
+psql -U postgres -c "CREATE DATABASE streampage;"
+
+2. Delete the current initial alembic migration
+
+3. Generate a new migration
+alembic revision --autogenerate -m "initial_schema"
+
+4. run the new migration
+alembic upgrade head
+

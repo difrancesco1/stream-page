@@ -1,3 +1,4 @@
+import string
 import uuid
 
 from sqlalchemy import String, ForeignKey, Enum
@@ -112,3 +113,15 @@ class CardConfig(Base):
     sections: Mapped[list[str]] = mapped_column(ARRAY(String))
 
     user: Mapped["User"] = relationship(back_populates="card_config")
+
+class IntListEntry(Base):
+    __tablename__ = "int_list_entry"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    creator_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
+    puuid: Mapped[str] = mapped_column(unique=True)
+    summoner_name: Mapped[str]
+    summoner_tag: Mapped[str]
+    user_reason: Mapped[str] = mapped_column(String(30))
