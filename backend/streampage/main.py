@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from streampage.api.riot.riot import riot_router
 from streampage.api.user.user import users_router
 from streampage.config import FRONTEND_URL, IS_RAILWAY
 from streampage.db.engine import get_db
@@ -59,3 +60,4 @@ def db_health(db: Session = Depends(get_db)):
 
 
 app.include_router(users_router, prefix="/users")
+app.include_router(riot_router, prefix="/riot")
