@@ -10,8 +10,12 @@ interface OpggCardProps {
 }
 
 const tabs = [
-    {title: "account 1"},
-    {title: "account 2"},
+    {title: "/all"},
+    {title: "1"},
+    {title: "2"},
+    {title: "3"},
+    {title: "4"},
+    {title: "5"},
 ]
 
 export default function OpggCard ({ onClose }: OpggCardProps) {
@@ -19,7 +23,7 @@ export default function OpggCard ({ onClose }: OpggCardProps) {
     
     return (
         <>
-            <div className="relative wrapper pixel-borders pixel-card w-full max-w-[400px] h-auto min-h-[280px] aspect-[5/3] bg-foreground">
+            <div className="relative wrapper pixel-borders pixel-card w-full max-w-[200px] h-auto min-h-[350px] aspect-[5/3] bg-foreground">
 
                 <CardHeader
                     title="opgg"
@@ -30,7 +34,7 @@ export default function OpggCard ({ onClose }: OpggCardProps) {
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
                 >
-                <div className="px-2 py-2 w-full h-full">
+                <div className="px-1 py-1 w-full h-full">
                     <OpggGameCard />
                 </div>
                 <OppggCardFooter />

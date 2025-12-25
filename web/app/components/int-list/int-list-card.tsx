@@ -9,8 +9,9 @@ interface IntListCardProps {
 }
 
 const tabs = [
-    { title: "int list" },
-    { title: "Viewer" },
+    { title: "/all " },
+    { title: "rosie " },
+    { title: "yours " },
 ];
 
 export default function IntListCard({ onClose }: IntListCardProps) {

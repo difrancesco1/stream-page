@@ -153,6 +153,7 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    user-select: none;
   }
   body {
     @apply bg-background text-foreground;
@@ -160,9 +161,19 @@
   }
 }
 
+*{
+  user-select: none;
+}
+
 .main-text {
   letter-spacing: var(--letter-spacing);
   color: var(--border);
+  font-size: 14px;
+}
+
+.accent-text {
+  letter-spacing: var(--letter-spacing);
+  color: var(--accent);
   font-size: 14px;
 }
 
@@ -180,9 +191,9 @@
 
 .pixel-card {
   box-shadow: 
-    3px 0px 0px 0px var(--border),
+    5px 0px 0px 0px var(--border),
     0px 3px 0px 0px var(--border),
-    3px 3px 0px 0px var(--border);
+    5px 3px 0px 0px var(--border);
 }
 
 .pixel-btn {
