@@ -29,42 +29,42 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                         </div>
                     </div>
                     
-                    <div className="flex gap-2 px-2 pb-1">
+                    <div className="flex gap-2 px-1 pb-1">
                         <a href="https://www.twitch.tv/rosie" target="_blank" rel="noopener noreferrer">
-                            <div className="p-0.5 bg-foreground pixel-borders flex items-center justify-center w-9 h-9">
-                                <i className="hn hn-twitch text-3xl text-border/80 hover:text-accent" />
+                            <div className="p-0.5 bg-foreground flex items-center justify-center w-9 h-9">
+                                <i className="hn hn-twitch text-border/80 hover:text-accent hover:animate-bounce" />
                             </div>
                         </a>
                         <a href="https://x.com/ttvrosie" target="_blank" rel="noopener noreferrer">
-                            <div className="p-0.5 bg-foreground pixel-borders flex items-center justify-center w-9 h-9">
-                                <i className="hn hn-twitter text-3xl text-border/80 hover:text-accent" />
+                            <div className="p-0.5 bg-foreground flex items-center justify-center w-9 h-9">
+                                <i className="hn hn-twitter text-border/80 hover:text-accent hover:animate-bounce" />
                             </div>
                         </a>
                         
                         <a href="https://www.tiktok.com/@ttvrosie" target="_blank" rel="noopener noreferrer">
-                            <div className="p-0.5 bg-foreground pixel-borders flex items-center justify-center w-9 h-9">
-                                <i className="hn hn-tiktok text-3xl text-border/80 hover:text-accent" />
+                            <div className="p-0.5 bg-foreground flex items-center justify-center w-9 h-9">
+                                <i className="hn hn-tiktok text-border/80 hover:text-accent hover:animate-bounce" />
                             </div>
                         </a>
                         <a href="https://www.youtube.com/@ttvrosie" target="_blank" rel="noopener noreferrer">
-                            <div className="p-0.5 bg-foreground pixel-borders flex items-center justify-center w-9 h-9">
-                                <i className="hn hn-youtube text-3xl text-border/80 hover:text-accent" />
+                            <div className="p-0.5 bg-foreground  flex items-center justify-center w-9 h-9">
+                                <i className="hn hn-youtube text-border/80 hover:text-accent hover:animate-bounce" />
                             </div>
                         </a>
                         <a href="https://vgen.co/rosieuna" target="_blank" rel="noopener noreferrer">
-                            <div className="p-0.5 bg-foreground pixel-borders flex items-center justify-center w-9 h-9">
-                                <i className="hn hn-highlight text-3xl text-border/80 hover:text-accent" />
+                            <div className="p-0.5 bg-foreground flex items-center justify-center w-9 h-9">
+                                <i className="hn hn-highlight text-border/80 hover:text-accent hover:animate-bounce" />
                             </div>
                         </a>
                     </div>
                     
                 </div>
             </div>
-            <footer className="w-full flex items-center px-2 gap-2 main-text bg-foreground rounded-b py-[3px] border-t-2">
-                <button className="pixel-btn text-[12px]" onClick={() => onOpenCard?.("opgg")}>opgg</button>
-                <button className="pixel-btn text-[12px]" onClick={() => onOpenCard?.("movies")}>movies</button>
-                <button className="pixel-btn text-[12px]" onClick={() => onOpenCard?.("intList")}>intlist</button>
-                <button className="pixel-btn text-[12px]" onClick={() => onOpenCard?.("catPictures")}>cat</button>
+            <footer className=" bottom-0 w-full flex items-center px-2 gap-2 main-text bg-foreground rounded-b py-[3px] border-t-2">
+                <button className="pixel-btn text-[12px] hover:animate-pulse" onClick={() => onOpenCard?.("opgg")}>opgg</button>
+                <button className="pixel-btn text-[12px] hover:animate-pulse" onClick={() => onOpenCard?.("movies")}>movies</button>
+                <button className="pixel-btn text-[12px] hover:animate-pulse" onClick={() => onOpenCard?.("intList")}>intlist</button>
+                <button className="pixel-btn text-[12px] hover:animate-pulse" onClick={() => onOpenCard?.("catPictures")}>cat</button>
             </footer>
         </div>
         

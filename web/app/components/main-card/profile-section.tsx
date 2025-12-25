@@ -53,7 +53,7 @@ export default function ProfileSection() {
                     <div className="h-[1px] absolute -top-[0px] w-[77%] bg-accent left-[2.3px]"></div>
                     <div className="h-[2px] absolute top-[2.5px] w-[74%] bg-accent left-[5.5px]"></div>
                     <div className="h-[15px] bg-accent w-[80%]"></div>
-                    <span className="top-0 absolute left-[35px] text-[11px] text-foreground">30yr</span>
+                    <span className="top-0 absolute left-[35px] text-[11px] text-foreground animate-pulse">30yr</span>
                 </div>
             </div>
         </div>
