@@ -5,7 +5,7 @@
   @include pb.pixel-borders(
     $corner-size: 2,
     $border-size: 2px,
-    $border-color: #323765
+    $border-color: #161b67
   );
 }
 
@@ -28,7 +28,7 @@
 .pixel-borders-dome {
     @include pb.pixel-borders(
       $border-size: 2px,
-      $border-color: #323765
+      $border-color: #161b67
     );
   }
 
