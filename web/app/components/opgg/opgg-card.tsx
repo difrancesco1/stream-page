@@ -24,7 +24,6 @@ export default function OpggCard ({ onClose }: OpggCardProps) {
     return (
         <>
             <div className="relative wrapper pixel-borders pixel-card w-full max-w-[200px] h-auto min-h-[350px] aspect-[5/3] bg-foreground">
-
                 <CardHeader
                     title="opgg"
                     exitbtn={true}
