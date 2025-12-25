@@ -1,10 +1,5 @@
 
 import Image from "next/image";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 
 export default function ProfileSection() {
     "use client";
@@ -60,14 +55,6 @@ export default function ProfileSection() {
                     <div className="h-[15px] bg-accent w-[80%]"></div>
                     <span className="top-0 absolute left-[35px] text-[11px] text-foreground">30yr</span>
                 </div>
-                {/* <Tooltip >
-                    <TooltipTrigger asChild>
-
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-border/80">
-                        <p>30yr</p>
-                    </TooltipContent>
-                </Tooltip> */}
             </div>
         </div>
     );

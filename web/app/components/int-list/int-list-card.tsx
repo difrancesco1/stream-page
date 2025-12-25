@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react"
-import CardHeader from "../card-header"
+import CardHeader from "../shared/card-header"
 import IntListPlayerCard from "./int-list-player-card"
 import IntListFooter from "./int-list-footer"
 

@@ -2,12 +2,12 @@
 
 import Draggable from "react-draggable";
 import { useRef, useState, useEffect, useCallback } from "react";
-import MainCard from "./main-card";
+import MainCard from "./main-card/main-card";
 import IntList from "./int-list/int-list-card";
-import PlaceholderCard from "./placeholder-card";
 import OpggCard from "./opgg/opgg-card";
+import CatPictureContainer from "./cat-pics/cat-picture-container";
+import MediaContainer from "./media/media-container";
 
-// Types for card state management
 type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures";
 
 interface CardState {
@@ -20,7 +20,6 @@ interface CardState {
 
 type CardsRecord = Record<CardId, CardState>;
 
-// Initial card configurations
 const initialCards: CardsRecord = {
   main: {
     id: "main",
@@ -70,7 +69,6 @@ export default function CardContainer() {
   const [cards, setCards] = useState<CardsRecord>(initialCards);
   const zIndexCounterRef = useRef(10);
 
-  // Bring a card to the front (highest z-index)
   const bringToFront = useCallback((cardId: CardId) => {
     zIndexCounterRef.current += 1;
     const newZ = zIndexCounterRef.current;
@@ -83,7 +81,6 @@ export default function CardContainer() {
     }));
   }, []);
 
-  // Open a card (make visible and bring to front)
   const openCard = useCallback(
     (cardId: CardId) => {
       setCards((prevCards) => ({
@@ -98,7 +95,6 @@ export default function CardContainer() {
     [bringToFront]
   );
 
-  // Close a card (hide it)
   const closeCard = useCallback((cardId: CardId) => {
     setCards((prevCards) => ({
       ...prevCards,
@@ -109,7 +105,6 @@ export default function CardContainer() {
     }));
   }, []);
 
-  // Update card position
   const updateCardPosition = useCallback(
     (cardId: CardId, position: { x: number; y: number }) => {
       setCards((prevCards) => ({
@@ -123,7 +118,6 @@ export default function CardContainer() {
     []
   );
 
-  // Get staggered position for a card based on index
   const getStaggeredPosition = useCallback((index: number) => {
     if (!containerRef.current) return { x: 50, y: 50 };
     const container = containerRef.current.getBoundingClientRect();
@@ -134,7 +128,6 @@ export default function CardContainer() {
     };
   }, []);
 
-  // Initialize card positions on mount
   useEffect(() => {
     const initializePositions = () => {
       if (containerRef.current && mainCardRef.current) {
@@ -262,8 +255,7 @@ export default function CardContainer() {
             style={{ zIndex: cards.movies.zIndex }}
             onMouseDown={() => bringToFront("movies")}
           >
-            <PlaceholderCard
-              title="movies"
+            <MediaContainer
               onClose={() => closeCard("movies")}
             />
           </div>
@@ -290,8 +282,7 @@ export default function CardContainer() {
             style={{ zIndex: cards.catPictures.zIndex }}
             onMouseDown={() => bringToFront("catPictures")}
           >
-            <PlaceholderCard
-              title="cat pictures"
+            <CatPictureContainer
               onClose={() => closeCard("catPictures")}
             />
           </div>

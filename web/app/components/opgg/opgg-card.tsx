@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react";
-import CardHeader from "../card-header"
+import CardHeader from "../shared/card-header"
 import OppggCardFooter from "./opgg-card-footer";
 import OpggGameCard from "./opgg-game-card";
 

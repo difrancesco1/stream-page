@@ -1,5 +1,5 @@
 "use client";
-import CardHeader from "./card-header";
+import CardHeader from "../shared/card-header";
 import ProfileSection from "./profile-section";
 import MainContainer from "./main-container";
 
