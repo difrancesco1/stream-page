@@ -31,7 +31,7 @@ export default function CardHeader({
         {showTabs && (
           <>
             <div className="pixel-borders-top h-[47.45px] w-full" />
-            <div className="border border-t-0 w-full h-[28.45px] border-[2px] border-border absolute top-4.5 left-0" />
+            <div className="border border-t-0 w-full h-[28px] border-[2px] border-border absolute top-4.5 left-0" />
             <div className="border border-l-0 border-r-0 border-t-0 border-[2px] border-border absolute top-[2.78rem] inset-x-[-0.125rem]" />
           </>
         )}

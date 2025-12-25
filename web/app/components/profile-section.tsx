@@ -28,8 +28,8 @@ export default function ProfileSection() {
                     <div className="flex flex-col items-center w-[45%] pixel-borders">
                         <div className="relative w-full aspect-square">
                             <Image
-                                src="/ziggs-profile2.png"
-                                alt="ziggs"
+                                src="/ziggs-pic.png"
+                                alt="ponzu"
                                 fill
                                 className="rounded-sm object-cover"
                             />
@@ -38,8 +38,8 @@ export default function ProfileSection() {
                     <div className="flex flex-col items-center w-[45%] pixel-borders">
                         <div className="relative w-full aspect-square">
                             <Image
-                                src="/ezreal-profile.png"
-                                alt="ezreal"
+                                src="/janna-pic.png"
+                                alt="ziggs"
                                 fill
                                 className="rounded-sm object-cover"
                             />
