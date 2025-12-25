@@ -9,7 +9,7 @@ interface MainContainerProps {
 
 export default function MainContainer({ onOpenCard }: MainContainerProps) {
     return (
-        <div className="col-span-8 w-full h-full overflow-y-auto flex flex-col relative select-none border-l-2 border-t-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="col-span-8 w-full h-full overflow-y-auto flex flex-col relative border-l-2 border-t-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <div className="flex flex-col flex-start ">
                 <div className="flex gap-1 items-center px-1">
                     <span className="main-text">league twitch streamer</span>
