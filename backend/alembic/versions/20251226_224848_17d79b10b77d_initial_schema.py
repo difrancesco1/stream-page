@@ -1,8 +1,8 @@
 """initial_schema
 
-Revision ID: 236b36956780
+Revision ID: 17d79b10b77d
 Revises: 
-Create Date: 2025-12-24 19:52:16.965614
+Create Date: 2025-12-26 22:48:48.438196
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '236b36956780'
+revision: str = '17d79b10b77d'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -67,12 +67,15 @@ def upgrade() -> None:
     )
     op.create_table('int_list_entry',
     sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('creator_id', sa.UUID(), nullable=False),
+    sa.Column('page_owner_id', sa.UUID(), nullable=True),
+    sa.Column('contributor_id', sa.UUID(), nullable=False),
     sa.Column('puuid', sa.String(), nullable=False),
     sa.Column('summoner_name', sa.String(), nullable=False),
     sa.Column('summoner_tag', sa.String(), nullable=False),
     sa.Column('user_reason', sa.String(length=30), nullable=False),
-    sa.ForeignKeyConstraint(['creator_id'], ['user.id'], ),
+    sa.Column('rank_when_added', sa.String(length=50), nullable=True),
+    sa.ForeignKeyConstraint(['contributor_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['page_owner_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('puuid')
     )

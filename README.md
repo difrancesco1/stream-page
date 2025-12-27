@@ -8,13 +8,13 @@ A full-stack application with a FastAPI backend and Next.js frontend.
 
 Before getting started, ensure you have the following installed:
 
-| Tool | Version | Installation |
-|------|---------|--------------|
-| **Docker** | Latest | [docker.com](https://docker.com) |
-| **Node.js** | ≥20.9.0 | [nodejs.org](https://nodejs.org) |
-| **pnpm** | Latest | `npm install -g pnpm` |
-| **Python** | ≥3.11 | [python.org](https://python.org) |
-| **VS Code** | Latest | [code.visualstudio.com](https://code.visualstudio.com) |
+| Tool        | Version | Installation                                           |
+| ----------- | ------- | ------------------------------------------------------ |
+| **Docker**  | Latest  | [docker.com](https://docker.com)                       |
+| **Node.js** | ≥20.9.0 | [nodejs.org](https://nodejs.org)                       |
+| **pnpm**    | Latest  | `npm install -g pnpm`                                  |
+| **Python**  | ≥3.11   | [python.org](https://python.org)                       |
+| **VS Code** | Latest  | [code.visualstudio.com](https://code.visualstudio.com) |
 
 ---
 
@@ -47,23 +47,23 @@ You should see a container named `streampage` in the list.
 
 ### 3. Common Docker Commands
 
-| Command | Description |
-|---------|-------------|
-| `docker stop streampage` | Stop the database |
-| `docker start streampage` | Start the database |
-| `docker logs streampage` | View database logs |
+| Command                                                     | Description               |
+| ----------------------------------------------------------- | ------------------------- |
+| `docker stop streampage`                                    | Stop the database         |
+| `docker start streampage`                                   | Start the database        |
+| `docker logs streampage`                                    | View database logs        |
 | `docker exec -it streampage psql -U postgres -d streampage` | Connect to database shell |
 
 ---
 
 ## ⚙️ Backend Setup (FastAPI)
 
-The backend is a FastAPI application located in `ros/backend/`.
+The backend is a FastAPI application located in `/backend/`.
 
 ### 1. Navigate to Backend Directory
 
 ```bash
-cd ros/backend
+cd backend
 ```
 
 ### 2. Create a Virtual Environment
@@ -75,11 +75,13 @@ python -m venv venv
 ### 3. Activate the Virtual Environment
 
 **macOS/Linux:**
+
 ```bash
 source venv/bin/activate
 ```
 
 **Windows:**
+
 ```bash
 venv\Scripts\activate
 ```
@@ -110,12 +112,12 @@ The API will be available at: **http://localhost:8000**
 
 The backend uses these environment variables (with defaults for local development):
 
-| Variable | Default | Description |
-|----------|---------|-------------|
+| Variable       | Default                                                    | Description                  |
+| -------------- | ---------------------------------------------------------- | ---------------------------- |
 | `DATABASE_URL` | `postgresql://postgres:postgres@localhost:5432/streampage` | PostgreSQL connection string |
-| `FRONTEND_URL` | `http://localhost:3000` | Frontend URL for CORS |
-| `SECRET_KEY` | (dev default) | JWT signing key |
-| `RIOT_API_KEY` | (dev default) | Riot Games API key |
+| `FRONTEND_URL` | `http://localhost:3000`                                    | Frontend URL for CORS        |
+| `SECRET_KEY`   | (dev default)                                              | JWT signing key              |
+| `RIOT_API_KEY` | (dev default)                                              | Riot Games API key           |
 
 ### API Health Check Endpoints
 
@@ -132,7 +134,7 @@ The frontend is a Next.js application located in `ros/web/`.
 ### 1. Navigate to Frontend Directory
 
 ```bash
-cd ros/web
+cd web
 ```
 
 ### 2. Install Dependencies
@@ -151,10 +153,10 @@ The frontend will be available at: **http://localhost:3000**
 
 ### Frontend Environment Variables
 
-Create a `.env.local` file in `ros/web/` if you need to override defaults:
+Create a `.env.local` file in `web/` if you need to override defaults:
 
-| Variable | Default | Description |
-|----------|---------|-------------|
+| Variable              | Default                 | Description     |
+| --------------------- | ----------------------- | --------------- |
 | `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Backend API URL |
 
 ---
@@ -167,11 +169,11 @@ The project includes pre-configured VS Code launch configurations for easy debug
 
 Open the project in VS Code and go to the **Run and Debug** panel (`Cmd+Shift+D` / `Ctrl+Shift+D`):
 
-| Configuration | Description |
-|---------------|-------------|
-| **Backend: FastAPI** | Starts the FastAPI backend with debugger attached |
+| Configuration         | Description                                        |
+| --------------------- | -------------------------------------------------- |
+| **Backend: FastAPI**  | Starts the FastAPI backend with debugger attached  |
 | **Frontend: Next.js** | Starts the Next.js frontend with debugger attached |
-| **Full Stack** | Starts both backend and frontend simultaneously |
+| **Full Stack**        | Starts both backend and frontend simultaneously    |
 
 ### Using the Launch Configurations
 
@@ -185,17 +187,20 @@ Open the project in VS Code and go to the **Run and Debug** panel (`Cmd+Shift+D`
 ### What Each Configuration Does
 
 **Backend: FastAPI**
+
 - Runs uvicorn with hot-reload enabled
 - Attaches Python debugger (debugpy)
 - Sets `DATABASE_URL` environment variable
 - Runs on port 8000
 
 **Frontend: Next.js**
+
 - Runs `pnpm dev`
 - Automatically opens browser when ready
 - Runs on port 3000
 
 **Full Stack**
+
 - Runs both configurations in parallel
 - Stops all when any is stopped
 
@@ -204,10 +209,8 @@ Open the project in VS Code and go to the **Run and Debug** panel (`Cmd+Shift+D`
 ## 📁 Project Structure
 
 ```
-ros/
 ├── .vscode/
 │   └── launch.json          # VS Code debug configurations
-├── ros/
 │   ├── backend/
 │   │   ├── alembic/          # Database migrations
 │   │   ├── streampage/       # Main application code
@@ -288,6 +291,7 @@ alembic history
 ### Migration Errors
 
 If migrations fail, ensure:
+
 1. Database container is running
 2. `DATABASE_URL` is correctly set
 3. Run `alembic current` to see current migration state
@@ -296,13 +300,13 @@ If migrations fail, ensure:
 
 ## 📚 Useful Commands Reference
 
-| Task | Command |
-|------|---------|
-| Start database | `docker start streampage` |
-| Stop database | `docker stop streampage` |
-| Start backend | `cd ros/backend && uvicorn streampage.main:app --reload` |
-| Start frontend | `cd ros/web && pnpm dev` |
-| Run migrations | `cd ros/backend && alembic upgrade head` |
+| Task             | Command                                                      |
+| ---------------- | ------------------------------------------------------------ |
+| Start database   | `docker start streampage`                                    |
+| Stop database    | `docker stop streampage`                                     |
+| Start backend    | `cd ros/backend && uvicorn streampage.main:app --reload`     |
+| Start frontend   | `cd ros/web && pnpm dev`                                     |
+| Run migrations   | `cd ros/backend && alembic upgrade head`                     |
 | Create migration | `cd ros/backend && alembic revision --autogenerate -m "msg"` |
-| Install BE deps | `cd ros/backend && pip install -r requirements.txt` |
-| Install FE deps | `cd ros/web && pnpm install` |
+| Install BE deps  | `cd ros/backend && pip install -r requirements.txt`          |
+| Install FE deps  | `cd ros/web && pnpm install`                                 |
