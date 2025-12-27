@@ -125,7 +125,7 @@ class IntListEntry(Base):
     puuid: Mapped[str] = mapped_column(unique=True)
     summoner_name: Mapped[str]
     summoner_tag: Mapped[str]
-    user_reason: Mapped[str] = mapped_column(String(30))
+    user_reason: Mapped[str]
     rank_when_added: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     # Relationship to cached summoner data
