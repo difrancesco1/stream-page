@@ -51,8 +51,8 @@ interface ChampionIconProps {
 function ChampionIcon({ match }: ChampionIconProps) {
     return (
         <div 
-            className={`relative w-5 h-5 rounded-sm overflow-hidden border-2 ${
-                match.win ? 'border-blue-500' : 'border-red-500'
+            className={`relative w-4 h-4 rounded-sm overflow-hidden border-2 ${
+                match.win ? 'border-blue-400' : 'border-accent'
             }`}
             title={`${match.champion_name} - ${match.win ? 'Win' : 'Loss'}`}
         >
@@ -99,9 +99,9 @@ export default function IntListPlayerCard({ entries, isLoading, error }: IntList
     }
 
     return (
-        <div className="flex flex-col gap-2 pb-8">
+        <div className="flex flex-col gap-1 pb-8">
             {entries.map((entry) => (
-                <div key={entry.id} className="flex flex-col w-full pixel-borders p-1.5">
+                <div key={entry.id} className="flex flex-col w-full pixel-borders p-1">
                     {/* Top row: summoner#tag :: champion icons */}
                     <div className="flex items-center gap-1 flex-wrap">
                         <span className="main-text text-xs font-bold">
@@ -119,19 +119,19 @@ export default function IntListPlayerCard({ entries, isLoading, error }: IntList
                     </div>
                     
                     {/* Middle row: separator */}
-                    <div className="my-1 border-t border-dashed border-border/50" />
+                    <hr></hr>
                     
                     {/* Bottom row: rank progression :: reason */}
-                    <div className="flex items-center gap-1 flex-wrap">
-                        <span className="main-text text-[10px] text-border/80">
+                    <div className="flex items-center gap-1">
+                        <span className="text-[8px] text-spacing">
                             {formatRank(entry.rank_when_added)}
                         </span>
-                        <span className="main-text text-[10px] text-accent">→</span>
-                        <span className="main-text text-[10px] text-border/80">
+                        <span className="text-[8px] text-spacing">⮞</span>
+                        <span className="text-[8px] text-spacing">
                             {formatRank(entry.current_rank)}
                         </span>
-                        <span className="main-text text-[10px] text-border/60">::</span>
-                        <span className="main-text text-[10px] text-border/90">
+                        <span className="text-[8px] text-spacing ">::</span>
+                        <span className="text-[8px] text-spacing ">
                             {entry.user_reason}
                         </span>
                     </div>

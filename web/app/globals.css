@@ -172,6 +172,11 @@
   font-size: 14px;
 }
 
+.text-spacing {
+  letter-spacing: var(--letter-spacing);
+  color: var(--border);
+}
+
 .accent-text {
   letter-spacing: var(--letter-spacing);
   color: var(--accent);
