@@ -1,9 +1,9 @@
-import string
 import uuid
+from datetime import datetime
 
-from sqlalchemy import String, ForeignKey, Enum
+from sqlalchemy import String, ForeignKey, Enum, Integer, DateTime
 from sqlalchemy import LargeBinary
-from sqlalchemy.dialects.postgresql import UUID as PGUUID, ARRAY
+from sqlalchemy.dialects.postgresql import UUID as PGUUID, ARRAY, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from streampage.db.enums import Platform, SectionType
@@ -127,3 +127,38 @@ class IntListEntry(Base):
     summoner_tag: Mapped[str]
     user_reason: Mapped[str] = mapped_column(String(30))
     rank_when_added: Mapped[str | None] = mapped_column(String(50), nullable=True)
+
+    # Relationship to cached summoner data
+    summoner_data: Mapped["SummonerData"] = relationship(
+        "SummonerData",
+        foreign_keys="[IntListEntry.puuid]",
+        primaryjoin="IntListEntry.puuid == SummonerData.puuid",
+        uselist=False,
+        viewonly=True,
+    )
+
+
+class SummonerData(Base):
+    """Cached Riot API data for a summoner, keyed by PUUID."""
+    __tablename__ = "summoner_data"
+
+    # Primary key - the unique Riot PUUID
+    puuid: Mapped[str] = mapped_column(String, primary_key=True)
+    
+    # Summoner identity (can change over time, so we track latest)
+    game_name: Mapped[str] = mapped_column(String(100))
+    tag_line: Mapped[str] = mapped_column(String(10))
+    
+    # Ranked Solo/Duo data
+    tier: Mapped[str | None] = mapped_column(String(20), nullable=True)  # DIAMOND, MASTER, GRANDMASTER, etc.
+    rank: Mapped[str | None] = mapped_column(String(5), nullable=True)   # I, II, III, IV
+    league_points: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    wins: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    losses: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    
+    # Recent match history (stored as JSONB for efficient querying)
+    # Format: [{"champion_id": int, "champion_name": str, "win": bool}, ...]
+    recent_matches: Mapped[list | None] = mapped_column(JSONB, nullable=True)
+    
+    # Cache metadata
+    last_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

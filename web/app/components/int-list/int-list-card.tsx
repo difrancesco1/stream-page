@@ -27,7 +27,6 @@ export default function IntListCard({ onClose }: IntListCardProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch contributors to build tabs
     useEffect(() => {
         const fetchContributors = async () => {
             const result = await getIntListContributors();
