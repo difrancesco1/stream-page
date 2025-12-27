@@ -99,7 +99,7 @@ export default function IntListPlayerCard({ entries, isLoading, error }: IntList
     }
 
     return (
-        <div className="flex flex-col gap-1 pb-8">
+        <div className="flex flex-col gap-1">
             {entries.map((entry) => (
                 <div key={entry.id} className="flex flex-col w-full pixel-borders px-1">
                     {/* Top row: summoner#tag :: champion icons */}
