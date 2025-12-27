@@ -26,7 +26,6 @@ export default function IntListFooter({ onEntryAdded }: IntListFooterProps) {
             return
         }
 
-        // Parse IGN format: "Name#TAG"
         const ignParts = ign.split("#")
         if (ignParts.length !== 2) {
             setError("IGN format: Name#TAG")
@@ -38,25 +37,21 @@ export default function IntListFooter({ onEntryAdded }: IntListFooterProps) {
         setIsLoading(true)
         setError(null)
 
-        try {
-            const result = await addIntListEntry(
-                token,
-                summonerName.trim(),
-                tagline.trim(),
-                reason.trim()
-            )
+        const result = await addIntListEntry(
+            token,
+            summonerName.trim(),
+            tagline.trim(),
+            reason.trim()
+        )
 
-            if (result.success) {
-                setIgn("")
-                setReason("")
-                onEntryAdded?.()
-            } else {
-                setError(result.error || "Failed to add entry")
-            }
-        } catch {
-            setError("Something went wrong")
-        } finally {
-            setIsLoading(false)
+        setIsLoading(false)
+
+        if (result.success) {
+            setIgn("")
+            setReason("")
+            onEntryAdded?.()
+        } else {
+            setError(result.error || "Failed to add entry")
         }
     }
 
