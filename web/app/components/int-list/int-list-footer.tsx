@@ -90,7 +90,7 @@ export default function IntListFooter({ onEntryAdded }: IntListFooterProps) {
                     disabled={isLoading || !isAuthenticated}
                 />
                 <button 
-                    className="pixel-btn-sm disabled:opacity-50"
+                    className="pixel-borders h-5 w-5 text-border bg-accent disabled:opacity-50"
                     onClick={handleSubmit}
                     disabled={isLoading || !isAuthenticated}
                 >
