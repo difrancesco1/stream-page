@@ -7,7 +7,7 @@
       "request": "launch",
       "module": "uvicorn",
       "args": ["streampage.main:app", "--reload", "--port", "8000"],
-      "cwd": "${workspaceFolder}/ros/backend",
+      "cwd": "${workspaceFolder}/backend",
       "env": {
         "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/streampage"
       },
@@ -17,7 +17,7 @@
       "name": "Frontend: Next.js",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceFolder}/ros/web",
+      "cwd": "${workspaceFolder}/web",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev"],
       "console": "integratedTerminal",
