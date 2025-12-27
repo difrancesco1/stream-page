@@ -5,14 +5,14 @@ from streampage.api.opgg.models import (
     AddOpggAccountRequest,
     RemoveOpggAccountRequest,
     SortOpggAccountsRequest,
-    RemoveOpggGameRequest,
+    HideOpggGameRequest,
     ResponseMessage,
     RecentMatch,
     OpggAccountResponse,
     OpggAccountsResponse,
 )
 from streampage.db.engine import get_db_session
-from streampage.db.models import OpggEntry, User, SummonerData
+from streampage.db.models import OpggEntry, User, SummonerData, HiddenMatch
 from streampage.db.riot import get_puuid, get_cached_summoner_data, fetch_and_cache_summoner_data
 
 
@@ -127,35 +127,35 @@ def sort_opgg_accounts(
         return ResponseMessage(message="Successfully sorted accounts")
 
 
-@opgg_router.delete("/remove_game")
-def remove_opgg_game(
-    request: RemoveOpggGameRequest,
+@opgg_router.post("/hide_game")
+def hide_opgg_game(
+    request: HideOpggGameRequest,
     user=Depends(get_current_user),
 ) -> ResponseMessage:
-    """Remove a specific game from the match history."""
+    """Hide a specific game from the match history (persists across refreshes)."""
     with get_db_session() as session:
-        # Find the summoner data
-        summoner_data = session.query(SummonerData).filter(
-            SummonerData.puuid == request.puuid
+        # Look up rosie's user_id (hardcoded page owner for now)
+        rosie_user = session.query(User).filter(User.username == "rosie").first()
+        if not rosie_user:
+            raise HTTPException(status_code=404, detail="Page owner not found")
+
+        # Check if already hidden
+        existing = session.query(HiddenMatch).filter(
+            HiddenMatch.owner_id == rosie_user.id,
+            HiddenMatch.match_id == request.match_id,
         ).first()
-        if not summoner_data:
-            raise HTTPException(status_code=404, detail="Summoner not found")
+        if existing:
+            return ResponseMessage(message="Game already hidden")
 
-        # Check if we have matches and valid index
-        if not summoner_data.recent_matches:
-            raise HTTPException(status_code=400, detail="No matches to remove")
-
-        if request.match_index < 0 or request.match_index >= len(summoner_data.recent_matches):
-            raise HTTPException(status_code=400, detail="Invalid match index")
-
-        # Remove the match at the specified index
-        matches = list(summoner_data.recent_matches)
-        matches.pop(request.match_index)
-        summoner_data.recent_matches = matches
-
+        # Add to hidden matches
+        hidden = HiddenMatch(
+            owner_id=rosie_user.id,
+            match_id=request.match_id,
+        )
+        session.add(hidden)
         session.commit()
 
-        return ResponseMessage(message="Successfully removed game")
+        return ResponseMessage(message="Successfully hidden game")
 
 
 @opgg_router.get("/accounts")
@@ -166,6 +166,13 @@ def get_opgg_accounts() -> OpggAccountsResponse:
         rosie_user = session.query(User).filter(User.username == "rosie").first()
         if not rosie_user:
             return OpggAccountsResponse(accounts=[])
+
+        # Get hidden match IDs for this owner
+        hidden_match_ids = set(
+            row.match_id for row in session.query(HiddenMatch.match_id).filter(
+                HiddenMatch.owner_id == rosie_user.id
+            ).all()
+        )
 
         # Get all entries ordered by display_order
         entries = session.query(OpggEntry).filter(
@@ -179,11 +186,12 @@ def get_opgg_accounts() -> OpggAccountsResponse:
             if not summoner_data:
                 continue
 
-            # Convert matches to response model
+            # Convert matches to response model, filtering out hidden matches
             recent_matches = []
             if summoner_data.recent_matches:
                 recent_matches = [
                     RecentMatch(
+                        match_id=match.get("match_id", ""),
                         champion_id=match.get("champion_id", 0),
                         champion_name=match.get("champion_name", "Unknown"),
                         win=match.get("win", False),
@@ -192,6 +200,7 @@ def get_opgg_accounts() -> OpggAccountsResponse:
                         assists=match.get("assists", 0),
                     )
                     for match in summoner_data.recent_matches
+                    if match.get("match_id") not in hidden_match_ids
                 ]
 
             accounts.append(

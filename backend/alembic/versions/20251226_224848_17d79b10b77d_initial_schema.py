@@ -111,9 +111,31 @@ def upgrade() -> None:
         sa.UniqueConstraint('puuid')
     )
 
+    op.create_table('opgg_entry',
+        sa.Column('id', sa.UUID(), nullable=False),
+        sa.Column('owner_id', sa.UUID(), nullable=False),
+        sa.Column('contributor_id', sa.UUID(), nullable=True),
+        sa.Column('puuid', sa.String(), nullable=False),
+        sa.Column('display_order', sa.Integer(), nullable=False, server_default='0'),
+        sa.ForeignKeyConstraint(['owner_id'], ['user.id']),
+        sa.ForeignKeyConstraint(['contributor_id'], ['user.id']),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('puuid')
+    )
+
+    op.create_table('hidden_match',
+        sa.Column('id', sa.UUID(), nullable=False),
+        sa.Column('owner_id', sa.UUID(), nullable=False),
+        sa.Column('match_id', sa.String(), nullable=False, index=True),
+        sa.ForeignKeyConstraint(['owner_id'], ['user.id']),
+        sa.PrimaryKeyConstraint('id')
+    )
+
 
 def downgrade() -> None:
     # Drop tables in reverse order (dependent tables first)
+    op.drop_table('hidden_match')
+    op.drop_table('opgg_entry')
     op.drop_table('int_list_entry')
     op.drop_table('card_config')
     op.drop_table('favorite_champions')

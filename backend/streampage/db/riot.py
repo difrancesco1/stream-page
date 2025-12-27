@@ -69,7 +69,7 @@ def get_last_10_match_ids(puuid: str) -> list[str]:
 def get_match_details(match_id: str, puuid: str) -> Optional[dict]:
     """Get champion ID, win/loss, and KDA for a specific match and player.
     
-    Returns: {"champion_id": int, "champion_name": str, "win": bool, "kills": int, "deaths": int, "assists": int} or None
+    Returns: {"match_id": str, "champion_id": int, "champion_name": str, "win": bool, "kills": int, "deaths": int, "assists": int} or None
     """
     url = f"{RIOT_ACCOUNT_API_BASE}/lol/match/v5/matches/{match_id}"
     
@@ -84,6 +84,7 @@ def get_match_details(match_id: str, puuid: str) -> Optional[dict]:
         for participant in participants:
             if participant.get("puuid") == puuid:
                 return {
+                    "match_id": match_id,
                     "champion_id": participant.get("championId"),
                     "champion_name": participant.get("championName"),
                     "win": participant.get("win", False),
@@ -98,7 +99,7 @@ def get_match_details(match_id: str, puuid: str) -> Optional[dict]:
 def get_recent_matches(puuid: str) -> list[dict]:
     """Get details for the last 10 matches.
     
-    Returns: list of {"champion_id": int, "champion_name": str, "win": bool}
+    Returns: list of {"match_id": str, "champion_id": int, "champion_name": str, "win": bool, "kills": int, "deaths": int, "assists": int}
     """
     match_ids = get_last_10_match_ids(puuid)
     matches = []

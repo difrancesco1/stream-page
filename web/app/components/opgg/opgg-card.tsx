@@ -8,7 +8,7 @@ import {
     getOpggAccounts,
     addOpggAccount,
     refreshOpggAccounts,
-    removeOpggGame,
+    hideOpggGame,
     type OpggAccount,
     type RecentMatch,
 } from "@/app/api/opgg/actions";
@@ -32,8 +32,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [showAddForm, setShowAddForm] = useState(false);
-    const [summonerName, setSummonerName] = useState("");
-    const [tagline, setTagline] = useState("");
+    const [riotId, setRiotId] = useState("");
     const [addError, setAddError] = useState<string | null>(null);
 
     const fetchAccounts = useCallback(async () => {
@@ -85,12 +84,21 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
     };
 
     const handleAddAccount = async () => {
-        if (!token || !summonerName || !tagline) return;
+        if (!token || !riotId) return;
+        
+        const parts = riotId.split("#");
+        if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
+            setAddError("Please enter in format: Name#TAG");
+            return;
+        }
+        
+        const summonerName = parts[0].trim();
+        const tagline = parts[1].trim();
+        
         setAddError(null);
         const result = await addOpggAccount(token, summonerName, tagline);
         if (result.success) {
-            setSummonerName("");
-            setTagline("");
+            setRiotId("");
             setShowAddForm(false);
             await fetchAccounts();
         } else {
@@ -98,9 +106,9 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
         }
     };
 
-    const handleRemoveGame = async (matchIndex: number) => {
-        if (!token || !activeTab?.account) return;
-        const result = await removeOpggGame(token, activeTab.account.puuid, matchIndex);
+    const handleHideGame = async (matchId: string) => {
+        if (!token) return;
+        const result = await hideOpggGame(token, matchId);
         if (result.success) {
             await fetchAccounts();
         }
@@ -133,16 +141,9 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                             <div className="flex flex-col gap-2 p-2">
                                 <input
                                     type="text"
-                                    placeholder="Summoner Name"
-                                    value={summonerName}
-                                    onChange={(e) => setSummonerName(e.target.value)}
-                                    className="pixel-borders px-2 py-1 text-xs bg-background text-border"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Tag (e.g. NA1)"
-                                    value={tagline}
-                                    onChange={(e) => setTagline(e.target.value)}
+                                    placeholder="Name#TAG"
+                                    value={riotId}
+                                    onChange={(e) => setRiotId(e.target.value)}
                                     className="pixel-borders px-2 py-1 text-xs bg-background text-border"
                                 />
                                 {addError && (
@@ -177,16 +178,16 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                                 </button>
                             </div>
                         ) : (
-                            recentMatches.map((match, index) => (
+                            recentMatches.map((match) => (
                                 <OpggGameCard
-                                    key={index}
+                                    key={match.match_id}
                                     championName={match.champion_name}
                                     win={match.win}
                                     kills={match.kills}
                                     deaths={match.deaths}
                                     assists={match.assists}
-                                    matchIndex={index}
-                                    onRemove={handleRemoveGame}
+                                    matchId={match.match_id}
+                                    onHide={handleHideGame}
                                 />
                             ))
                         )}

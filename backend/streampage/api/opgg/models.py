@@ -16,9 +16,8 @@ class SortOpggAccountsRequest(BaseModel):
     account_ids: list[str]
 
 
-class RemoveOpggGameRequest(BaseModel):
-    puuid: str
-    match_index: int
+class HideOpggGameRequest(BaseModel):
+    match_id: str
 
 
 class ResponseMessage(BaseModel):
@@ -26,6 +25,7 @@ class ResponseMessage(BaseModel):
 
 
 class RecentMatch(BaseModel):
+    match_id: str
     champion_id: int
     champion_name: str
     win: bool

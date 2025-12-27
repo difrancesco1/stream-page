@@ -179,8 +179,19 @@ class SummonerData(Base):
     losses: Mapped[int | None] = mapped_column(Integer, nullable=True)
     
     # Recent match history (stored as JSONB for efficient querying)
-    # Format: [{"champion_id": int, "champion_name": str, "win": bool}, ...]
+    # Format: [{"match_id": str, "champion_id": int, "champion_name": str, "win": bool, ...}, ...]
     recent_matches: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     
     # Cache metadata
     last_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class HiddenMatch(Base):
+    """Tracks matches that have been hidden by the page owner."""
+    __tablename__ = "hidden_match"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
+    match_id: Mapped[str] = mapped_column(String, index=True)  # Riot match ID (e.g., "NA1_123456789")

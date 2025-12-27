@@ -9,6 +9,7 @@ export type OpggResult = {
 };
 
 export type RecentMatch = {
+    match_id: string;
     champion_id: number;
     champion_name: string;
     win: boolean;
@@ -156,21 +157,19 @@ export async function sortOpggAccounts(
     }
 }
 
-export async function removeOpggGame(
+export async function hideOpggGame(
     token: string,
-    puuid: string,
-    match_index: number
+    match_id: string
 ): Promise<OpggResult> {
     try {
-        const response = await fetch(`${API_URL}/opgg/remove_game`, {
-            method: "DELETE",
+        const response = await fetch(`${API_URL}/opgg/hide_game`, {
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                puuid,
-                match_index,
+                match_id,
             }),
         });
 
@@ -180,13 +179,13 @@ export async function removeOpggGame(
             return {
                 success: false,
                 message: "",
-                error: data.detail || data.message || "Failed to remove game",
+                error: data.detail || data.message || "Failed to hide game",
             };
         }
 
         return {
             success: true,
-            message: data.message || "Successfully removed game",
+            message: data.message || "Successfully hidden game",
         };
     } catch (error) {
         return {
