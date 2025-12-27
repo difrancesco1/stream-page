@@ -164,7 +164,15 @@
 
 *{
   user-select: none;
+  scrollbar-width: auto;
+	scrollbar-color: var(--accent) var(--background) !important;
 }
+
+::-webkit-scrollbar-track {
+	background: oklch(var(--p));
+}
+
+
 
 .main-text {
   letter-spacing: var(--letter-spacing);
