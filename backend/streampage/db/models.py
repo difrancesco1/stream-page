@@ -120,8 +120,10 @@ class IntListEntry(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    creator_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
+    page_owner_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user.id"), nullable=True)
+    contributor_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
     puuid: Mapped[str] = mapped_column(unique=True)
     summoner_name: Mapped[str]
     summoner_tag: Mapped[str]
     user_reason: Mapped[str] = mapped_column(String(30))
+    rank_when_added: Mapped[str | None] = mapped_column(String(50), nullable=True)

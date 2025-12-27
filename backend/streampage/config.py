@@ -19,4 +19,4 @@ SECRET_KEY: Final[str] = os.getenv("SECRET_KEY", "2cb48b02c2191d966bad7116")
 ALGORITHM: Final[str] = os.getenv("ALGORITHM", "HS256")
 OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="users/login")
 
-RIOT_API_KEY: Final[str] = os.getenv("RIOT_API_KEY", "RGAPI-e3776c79-5697-4b20-a7b5-e94b8f650156")
+RIOT_API_KEY: Final[str] = os.getenv("RIOT_API_KEY", "RGAPI-1e41c14f-1401-49f9-9106-044c2097e379")

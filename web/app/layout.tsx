@@ -2,6 +2,7 @@ import "./globals.css";
 import "./styles/pixel-borders.scss";
 import "@hackernoon/pixel-icon-library/fonts/iconfont.css";
 import { Silkscreen } from "next/font/google";
+import { AuthProvider } from "./context/auth-context";
 
 const silkscreen = Silkscreen({
   subsets: ["latin"],
@@ -15,7 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={silkscreen.className}>{children}</body>
+      <body className={silkscreen.className}>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

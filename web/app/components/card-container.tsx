@@ -8,6 +8,8 @@ import OpggCard from "./opgg/opgg-card";
 import CatPictureContainer from "./cat-pics/cat-picture-container";
 import MediaContainer from "./media/media-container";
 import Image from "next/image";
+import { useAuth } from "@/app/context/auth-context";
+import AuthModal from "./auth/auth-modal";
 
 type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures";
 
@@ -69,6 +71,9 @@ export default function CardContainer() {
 
   const [cards, setCards] = useState<CardsRecord>(initialCards);
   const zIndexCounterRef = useRef(10);
+
+  const { isAuthenticated, user, logout } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const bringToFront = useCallback((cardId: CardId) => {
     zIndexCounterRef.current += 1;
@@ -159,8 +164,6 @@ export default function CardContainer() {
   }, [getStaggeredPosition]);
 
   return (
-
-    
     <div
       ref={containerRef}
       className="w-full h-full bg-card p-2 rounded-lg shadow-md relative"
@@ -173,6 +176,26 @@ export default function CardContainer() {
         quality={0} 
         priority
       />
+
+      <div className="absolute top-4 right-4 z-[9999]">
+        {isAuthenticated ? (
+          <button 
+            className="pixel-btn text-xs flex items-center gap-2"
+            onClick={logout}
+          >
+            logout
+          </button>
+        ) : (
+          <button 
+            className="pixel-btn text-xs"
+            onClick={() => setAuthModalOpen(true)}
+          >
+            login
+          </button>
+        )}
+      </div>
+
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
       {/* Main Card - Always visible */}
       <Draggable
         nodeRef={mainCardRef}
