@@ -15,7 +15,7 @@ export default function ProfileSection() {
                     />
                 </div>
                 <div className="w-[60%] flex items-center ">
-                    <span className="text-center text-accent w-full leading-tight bg-background pixel-borders">Rosie</span>
+                    <span className="text-center text-accent w-full leading-tight bg-background pixel-borders hover:animate-spin">Rosie</span>
                 </div>
             </div>
             <div className="w-full px-1 pt-[2px] main-text flex flex-col -mt-[5px]">

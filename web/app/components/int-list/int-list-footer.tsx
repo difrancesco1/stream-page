@@ -62,7 +62,7 @@ export default function IntListFooter({ onEntryAdded }: IntListFooterProps) {
     }
 
     return (
-        <div className="absolute bottom-0 px-1 w-full border-t-2 flex flex-col">
+        <div className="px-1 w-full border-t-2 flex flex-col bg-foreground rounded-b">
             {error && (
                 <span className="text-[10px] text-red-400 px-1">{error}</span>
             )}
@@ -70,7 +70,7 @@ export default function IntListFooter({ onEntryAdded }: IntListFooterProps) {
                 <input 
                     className="px-2 py-[1.1px] text-xs 
                         bg-background pixel-borders w-30 text-border
-                        focus:border-accent placeholder:text-border/75
+                        focus:border-accent placeholder:text-border/50
                         disabled:opacity-50" 
                     placeholder="ign#tag"
                     value={ign}
@@ -81,7 +81,7 @@ export default function IntListFooter({ onEntryAdded }: IntListFooterProps) {
                 <input 
                     className="px-2 py-[1.1px] text-xs 
                         bg-background pixel-borders text-border flex-1
-                        focus:border-accent placeholder:text-border/75
+                        focus:border-accent placeholder:text-border/50
                         disabled:opacity-50" 
                     placeholder="reason"
                     value={reason}
@@ -90,7 +90,7 @@ export default function IntListFooter({ onEntryAdded }: IntListFooterProps) {
                     disabled={isLoading || !isAuthenticated}
                 />
                 <button 
-                    className="pixel-btn-sm disabled:opacity-50"
+                    className="pixel-btn-sm disabled:opacity-0"
                     onClick={handleSubmit}
                     disabled={isLoading || !isAuthenticated}
                 >

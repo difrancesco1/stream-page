@@ -174,7 +174,6 @@
 
 .text-spacing {
   letter-spacing: var(--letter-spacing);
-  color: var(--border);
 }
 
 .accent-text {

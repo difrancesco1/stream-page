@@ -180,14 +180,14 @@ export default function CardContainer() {
       <div className="absolute top-4 right-4 z-[9999]">
         {isAuthenticated ? (
           <button 
-            className="pixel-btn text-xs flex items-center gap-2"
+            className="pixel-btn text-xs flex items-center gap-2 hover:animate-pulse"
             onClick={logout}
           >
             logout
           </button>
         ) : (
           <button 
-            className="pixel-btn text-xs"
+            className="pixel-btn text-xs hover:animate-pulse"
             onClick={() => setAuthModalOpen(true)}
           >
             login

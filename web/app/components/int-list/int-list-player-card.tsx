@@ -101,13 +101,12 @@ export default function IntListPlayerCard({ entries, isLoading, error }: IntList
     return (
         <div className="flex flex-col gap-1 pb-8">
             {entries.map((entry) => (
-                <div key={entry.id} className="flex flex-col w-full pixel-borders p-1">
+                <div key={entry.id} className="flex flex-col w-full pixel-borders px-1">
                     {/* Top row: summoner#tag :: champion icons */}
-                    <div className="flex items-center gap-1 flex-wrap">
+                    <div className="flex justify-between items-center gap-1 flex-wrap">
                         <span className="main-text text-xs font-bold">
                             {entry.summoner_name}#{entry.summoner_tag}
                         </span>
-                        <span className="main-text text-xs text-border/60">::</span>
                         <div className="flex gap-0.5 flex-wrap">
                             {(entry.recent_matches || []).map((match, index) => (
                                 <ChampionIcon key={index} match={match} />
@@ -122,15 +121,16 @@ export default function IntListPlayerCard({ entries, isLoading, error }: IntList
                     <hr></hr>
                     
                     {/* Bottom row: rank progression :: reason */}
-                    <div className="flex items-center gap-1">
-                        <span className="text-[8px] text-spacing">
-                            {formatRank(entry.rank_when_added)}
-                        </span>
-                        <span className="text-[8px] text-spacing">⮞</span>
-                        <span className="text-[8px] text-spacing">
-                            {formatRank(entry.current_rank)}
-                        </span>
-                        <span className="text-[8px] text-spacing ">::</span>
+                    <div className="flex justify-between items-center text-border/50">
+                        <div className="text-[8px] text-spacing">
+                            <span>
+                                {formatRank(entry.rank_when_added)}
+                            </span>
+                            <span>⮞</span>
+                            <span>
+                                {formatRank(entry.current_rank)}
+                            </span>
+                        </div>
                         <span className="text-[8px] text-spacing ">
                             {entry.user_reason}
                         </span>

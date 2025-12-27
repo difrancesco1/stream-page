@@ -99,7 +99,7 @@ export default function IntListCard({ onClose }: IntListCardProps) {
                 activeTab={activeTab || undefined}
                 setActiveTab={handleSetActiveTab}
             >
-                <div className="px-1 py-1 w-full h-full overflow-y-auto">
+                <div className="px-1 py-1 w-full h-[calc(100%-24px)] overflow-y-auto">
                     <IntListPlayerCard 
                         entries={entries} 
                         isLoading={isLoading} 
