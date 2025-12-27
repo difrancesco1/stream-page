@@ -269,3 +269,20 @@ hr {
   border: none;
   border-top: 2px dashed var(--border);
 }
+
+input, textarea, select {
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: none !important;
+  --tw-ring-offset-shadow: none !important;
+}
+
+input:focus, input:active, input:focus-visible,
+textarea:focus, textarea:active, textarea:focus-visible,
+select:focus, select:active, select:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: none !important;
+  --tw-ring-offset-shadow: none !important;
+  border-color: inherit !important;
+}

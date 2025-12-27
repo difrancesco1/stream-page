@@ -131,9 +131,32 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id')
     )
 
+    # Media tables
+    op.create_table('media',
+        sa.Column('id', sa.UUID(), nullable=False),
+        sa.Column('category', sa.Enum('MOVIE', 'TV_SHOW', 'KDRAMA', 'ANIME', 'YOUTUBE', name='mediacategory'), nullable=False),
+        sa.Column('name', sa.String(length=200), nullable=False),
+        sa.Column('info', sa.String(length=500), nullable=False),
+        sa.Column('url', sa.String(length=500), nullable=False),
+        sa.Column('display_order', sa.Integer(), nullable=False),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+    op.create_table('media_upvote',
+        sa.Column('id', sa.UUID(), nullable=False),
+        sa.Column('media_id', sa.UUID(), nullable=False),
+        sa.Column('user_id', sa.UUID(), nullable=False),
+        sa.ForeignKeyConstraint(['media_id'], ['media.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('media_id', 'user_id', name='uq_media_upvote_media_user')
+    )
+
 
 def downgrade() -> None:
     # Drop tables in reverse order (dependent tables first)
+    op.drop_table('media_upvote')
+    op.drop_table('media')
     op.drop_table('hidden_match')
     op.drop_table('opgg_entry')
     op.drop_table('int_list_entry')
@@ -146,5 +169,6 @@ def downgrade() -> None:
     op.drop_table('summoner_data')
     op.drop_table('user')
     
-    # Drop the platform enum type
+    # Drop enum types
+    op.execute('DROP TYPE IF EXISTS mediacategory')
     op.execute('DROP TYPE IF EXISTS platform')

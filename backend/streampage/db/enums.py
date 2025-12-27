@@ -15,3 +15,11 @@ class SectionType(PyEnum):
     ART_ITEMS = "art_items"
     MYSELF = "myself"
 
+
+class MediaCategory(PyEnum):
+    MOVIE = "movie"
+    TV_SHOW = "tv_show"
+    KDRAMA = "kdrama"
+    ANIME = "anime"
+    YOUTUBE = "youtube"
+
