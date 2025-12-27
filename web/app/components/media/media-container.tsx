@@ -7,6 +7,7 @@ import MediaItem from "./media-item.tsx";
 
 interface MediaContainerProps {
     onClose?: () => void;
+    onMouseDown?: () => void;
 }
 
 const tabs = [
@@ -17,10 +18,13 @@ const tabs = [
     {title: "youtube"},
 ]
 
-export default function MediaContainer ({onClose}: MediaContainerProps) {
+export default function MediaContainer ({onClose, onMouseDown}: MediaContainerProps) {
     const [activeTab, setActiveTab] = useState(tabs[0]);
     return (
-        <div className="relative wrapper pixel-borders pixel-card w-full max-w-[400px] h-auto min-h-[280px] aspect-[5/3] bg-foreground">
+        <div 
+            className="relative wrapper pixel-borders pixel-card w-full max-w-[400px] h-auto min-h-[280px] aspect-[5/3] bg-foreground"
+            onMouseDown={onMouseDown}
+        >
             <CardHeader
                 title="movies and more"
                 exitbtn={true}

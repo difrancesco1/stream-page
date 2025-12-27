@@ -67,9 +67,9 @@ def get_last_10_match_ids(puuid: str) -> list[str]:
 
 
 def get_match_details(match_id: str, puuid: str) -> Optional[dict]:
-    """Get champion ID and win/loss for a specific match and player.
+    """Get champion ID, win/loss, and KDA for a specific match and player.
     
-    Returns: {"champion_id": int, "champion_name": str, "win": bool} or None
+    Returns: {"champion_id": int, "champion_name": str, "win": bool, "kills": int, "deaths": int, "assists": int} or None
     """
     url = f"{RIOT_ACCOUNT_API_BASE}/lol/match/v5/matches/{match_id}"
     
@@ -86,7 +86,10 @@ def get_match_details(match_id: str, puuid: str) -> Optional[dict]:
                 return {
                     "champion_id": participant.get("championId"),
                     "champion_name": participant.get("championName"),
-                    "win": participant.get("win", False)
+                    "win": participant.get("win", False),
+                    "kills": participant.get("kills", 0),
+                    "deaths": participant.get("deaths", 0),
+                    "assists": participant.get("assists", 0),
                 }
         
         return None

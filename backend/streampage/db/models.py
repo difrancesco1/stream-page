@@ -138,6 +138,28 @@ class IntListEntry(Base):
     )
 
 
+class OpggEntry(Base):
+    """Tracks accounts added to the OPGG card for a page owner."""
+    __tablename__ = "opgg_entry"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
+    contributor_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user.id"), nullable=True)
+    puuid: Mapped[str] = mapped_column(String, unique=True)
+    display_order: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Relationship to cached summoner data
+    summoner_data: Mapped["SummonerData"] = relationship(
+        "SummonerData",
+        foreign_keys="[OpggEntry.puuid]",
+        primaryjoin="OpggEntry.puuid == SummonerData.puuid",
+        uselist=False,
+        viewonly=True,
+    )
+
+
 class SummonerData(Base):
     """Cached Riot API data for a summoner, keyed by PUUID."""
     __tablename__ = "summoner_data"

@@ -12,6 +12,9 @@ export type RecentMatch = {
     champion_id: number;
     champion_name: string;
     win: boolean;
+    kills: number;
+    deaths: number;
+    assists: number;
 };
 
 export type IntListEntry = {

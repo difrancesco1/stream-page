@@ -12,6 +12,7 @@ import {
 
 interface IntListCardProps {
   onClose?: () => void;
+  onMouseDown?: () => void;
 }
 
 interface Tab {
@@ -19,7 +20,7 @@ interface Tab {
   user_id?: string;
 }
 
-export default function IntListCard({ onClose }: IntListCardProps) {
+export default function IntListCard({ onClose, onMouseDown }: IntListCardProps) {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTab, setActiveTab] = useState<Tab | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -101,7 +102,10 @@ export default function IntListCard({ onClose }: IntListCardProps) {
   );
 
   return (
-    <div className="relative wrapper pixel-borders pixel-card w-full max-w-[400px] h-auto min-h-[280px] aspect-[5/3] bg-foreground">
+    <div 
+      className="relative wrapper pixel-borders pixel-card w-full max-w-[400px] h-auto min-h-[280px] aspect-[5/3] bg-foreground"
+      onMouseDown={onMouseDown}
+    >
       <CardHeader
         title="int list"
         exitbtn={true}

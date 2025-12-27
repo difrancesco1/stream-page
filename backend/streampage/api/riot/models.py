@@ -16,6 +16,9 @@ class RecentMatch(BaseModel):
     champion_id: int
     champion_name: str
     win: bool
+    kills: int = 0
+    deaths: int = 0
+    assists: int = 0
 
 
 class IntListEntryResponse(BaseModel):

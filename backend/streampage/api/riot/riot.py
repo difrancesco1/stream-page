@@ -116,7 +116,10 @@ def get_int_list(
                     RecentMatch(
                         champion_id=match.get("champion_id", 0),
                         champion_name=match.get("champion_name", "Unknown"),
-                        win=match.get("win", False)
+                        win=match.get("win", False),
+                        kills=match.get("kills", 0),
+                        deaths=match.get("deaths", 0),
+                        assists=match.get("assists", 0),
                     )
                     for match in summoner_data.recent_matches
                 ]

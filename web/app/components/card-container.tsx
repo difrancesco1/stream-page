@@ -215,7 +215,7 @@ export default function CardContainer() {
           style={{ zIndex: cards.main.zIndex }}
           onMouseDown={() => bringToFront("main")}
         >
-          <MainCard onOpenCard={openCard} />
+          <MainCard onOpenCard={openCard} onMouseDown={() => bringToFront("main")} />
         </div>
       </Draggable>
 
@@ -239,7 +239,7 @@ export default function CardContainer() {
             style={{ zIndex: cards.intList.zIndex }}
             onMouseDown={() => bringToFront("intList")}
           >
-            <IntList onClose={() => closeCard("intList")} />
+            <IntList onClose={() => closeCard("intList")} onMouseDown={() => bringToFront("intList")} />
           </div>
         </Draggable>
       )}
@@ -264,7 +264,7 @@ export default function CardContainer() {
             style={{ zIndex: cards.opgg.zIndex }}
             onMouseDown={() => bringToFront("opgg")}
           >
-            <OpggCard onClose={() => closeCard("opgg")} />
+            <OpggCard onClose={() => closeCard("opgg")} onMouseDown={() => bringToFront("opgg")} />
           </div>
         </Draggable>
       )}
@@ -291,6 +291,7 @@ export default function CardContainer() {
           >
             <MediaContainer
               onClose={() => closeCard("movies")}
+              onMouseDown={() => bringToFront("movies")}
             />
           </div>
         </Draggable>
@@ -318,6 +319,7 @@ export default function CardContainer() {
           >
             <CatPictureContainer
               onClose={() => closeCard("catPictures")}
+              onMouseDown={() => bringToFront("catPictures")}
             />
           </div>
         </Draggable>
