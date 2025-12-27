@@ -11,7 +11,7 @@ export default function MediaItem () {
                     <span className="main-text">heartwarming. think abt life. happy ending.</span>
                 </div>
                 <button className="m-1 pixel-borders w-4 h-4 flex items-center justify-center bg-background text-accent hover:bg-accent hover:text-background transition-colors">
-                    <span className="text-xs font-bold leading-none">+</span>
+                    <span className="text-xs font-bold leading-none">^</span>
                 </button>
             </div>
         </>
