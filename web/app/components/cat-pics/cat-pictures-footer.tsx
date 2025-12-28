@@ -68,12 +68,12 @@ export default function CatPicturesFooter({ onImageUploaded }: CatPicturesFooter
             />
             <label
                 htmlFor="cat-file-input"
-                className="px-2 py-[1.1px] text-xs bg-background pixel-borders flex-1 cursor-pointer text-border truncate hover:bg-border/10"
+                className="pixel-borders pixel-input w-300 cursor-pointer"
             >
                 {selectedFile ? selectedFile.name : "Choose image..."}
             </label>
             <button
-                className="pixel-btn-sm disabled:opacity-50"
+                className="pixel-borders pixel-btn-border disabled:opacity-50"
                 onClick={handleUpload}
                 disabled={isUploading || !selectedFile}
                 title="Upload cat image"
