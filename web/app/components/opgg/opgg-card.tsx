@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect, useMemo } from "react";
+import Image from "next/image";
 import CardHeader from "../shared/card-header"
 import OppggCardFooter from "./opgg-card-footer";
 import OpggGameCard from "./opgg-game-card";
@@ -13,6 +14,54 @@ import {
     type RecentMatch,
 } from "@/app/api/opgg/actions";
 import { useAuth } from "@/app/context/auth-context";
+
+interface FloatingEmoteProps {
+    id: number;
+    onComplete: (id: number) => void;
+}
+
+function FloatingEmote({ id, onComplete }: FloatingEmoteProps) {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            onComplete(id);
+        }, 4000);
+        return () => clearTimeout(timer);
+    }, [id, onComplete]);
+
+    return (
+        <div 
+            className="absolute pointer-events-none z-50"
+            style={{
+                bottom: '10%',
+                right: '20%',
+                animation: 'floatUp 4s ease-out forwards',
+            }}
+        >
+            <Image
+                src="/RosieGun.png"
+                alt="Easter egg emote"
+                width={40}
+                height={40}
+                className="object-contain"
+            />
+            <style jsx>{`
+                @keyframes floatUp {
+                    0% {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                    70% {
+                        opacity: 1;
+                    }
+                    100% {
+                        opacity: 0;
+                        transform: translateY(-100px);
+                    }
+                }
+            `}</style>
+        </div>
+    );
+}
 
 // Rank comparison utilities
 const TIER_ORDER = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
@@ -63,10 +112,15 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
     const [showAddForm, setShowAddForm] = useState(false);
     const [riotId, setRiotId] = useState("");
     const [addError, setAddError] = useState<string | null>(null);
+    
+    // Easter egg state
+    const [showHiddenMatches, setShowHiddenMatches] = useState(false);
+    const [floatingEmotes, setFloatingEmotes] = useState<number[]>([]);
+    const [emoteIdCounter, setEmoteIdCounter] = useState(0);
 
-    const fetchAccounts = useCallback(async () => {
+    const fetchAccounts = useCallback(async (includeHidden: boolean = false) => {
         setIsLoading(true);
-        const result = await getOpggAccounts();
+        const result = await getOpggAccounts(includeHidden);
         if (result.success) {
             setAccounts(result.accounts);
             // Create tabs from accounts with "All" tab first
@@ -104,7 +158,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
     }, [activeTab]);
 
     useEffect(() => {
-        fetchAccounts();
+        fetchAccounts(showHiddenMatches);
     }, []);
 
     const handleSetActiveTab = useCallback((tab: { title: string }) => {
@@ -118,9 +172,26 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
         if (!token || isRefreshing) return;
         setIsRefreshing(true);
         await refreshOpggAccounts(token);
-        await fetchAccounts();
+        await fetchAccounts(showHiddenMatches);
         setIsRefreshing(false);
     };
+    
+    // Easter egg handlers
+    const handleEmoteComplete = useCallback((id: number) => {
+        setFloatingEmotes(prev => prev.filter(emoteId => emoteId !== id));
+    }, []);
+    
+    const handleEasterEggTrigger = useCallback(() => {
+        // Toggle hidden matches
+        const newShowHidden = !showHiddenMatches;
+        setShowHiddenMatches(newShowHidden);
+        fetchAccounts(newShowHidden);
+        
+        // Spawn floating emote
+        const newId = emoteIdCounter;
+        setEmoteIdCounter(prev => prev + 1);
+        setFloatingEmotes(prev => [...prev, newId]);
+    }, [showHiddenMatches, emoteIdCounter, fetchAccounts]);
 
     const handleAddAccount = async () => {
         if (!token || !riotId) return;
@@ -238,7 +309,9 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                                         {isLoading ? "..." : "add"}
                                     </button>
                                     <button
-                                        onClick={() => {
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
                                             setShowAddForm(false);
                                             setAddError(null);
                                         }}
@@ -284,8 +357,13 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                         onRefresh={handleRefresh}
                         isRefreshing={isRefreshing}
                         hasAccounts={accounts.length > 0}
+                        onEasterEggTrigger={handleEasterEggTrigger}
                     />
                 </CardHeader>
+                {/* Floating emotes for easter egg */}
+                {floatingEmotes.map(id => (
+                    <FloatingEmote key={id} id={id} onComplete={handleEmoteComplete} />
+                ))}
             </div>
         </>
     )

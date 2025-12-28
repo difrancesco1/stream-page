@@ -20,8 +20,10 @@ export default function Topbar({
       <span className="main-text">{title}</span>
       {exitbtn && (
         <button
+          type="button"
           className="pixel-borders pixel-btn-remove-sm -mx-[2px]"
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             onClose?.();
           }}>
