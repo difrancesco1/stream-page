@@ -155,11 +155,12 @@
   * {
     @apply border-border outline-ring/50;
     user-select: none;
+    cursor: none !important;
   }
   body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
-    cursor: url('../public/idle.gif'), auto;
+    cursor: none;
   }
 }
 
@@ -471,5 +472,5 @@ select:focus, select:active, select:focus-visible {
 /* cursor stuff */
 
 .cursor-loading {
-  cursor: url('../public/loading.gif'), wait;
+  cursor: url('/loading.gif'), wait;
 }

@@ -3,6 +3,7 @@ import "./styles/pixel-borders.scss";
 import "@hackernoon/pixel-icon-library/fonts/iconfont.css";
 import { Silkscreen } from "next/font/google";
 import { AuthProvider } from "./context/auth-context";
+import { AnimatedCursor } from "./components/shared/animated-cursor";
 
 const silkscreen = Silkscreen({
   subsets: ["latin"],
@@ -18,6 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={silkscreen.className}>
         <AuthProvider>{children}</AuthProvider>
+        <AnimatedCursor />
       </body>
     </html>
   );
