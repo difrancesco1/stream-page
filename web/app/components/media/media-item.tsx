@@ -49,7 +49,7 @@ export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, o
                         </button>
                     </div>
                 </div>
-                <hr></hr>
+                <hr className="mr-9"></hr>
                 <div className="grid-container -mt-1 px-1">
                     <span className="alt-text">{info.substring(0,50)}</span>
                     <span className="alt-text m-1">- rosie</span>

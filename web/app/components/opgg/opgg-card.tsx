@@ -157,13 +157,14 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
     const isAllTab = activeTab?.isAllTab ?? false;
     const currentAccount = activeTab?.account;
     
-    const recentMatches: (RecentMatch & { summonerName: string; rank: string | null })[] = useMemo(() => {
+    const recentMatches: (RecentMatch & { summonerName: string; rank: string | null; leaguePoints: number | null })[] = useMemo(() => {
         if (isAllTab) {
             const allMatches = accounts.flatMap(account => 
                 account.recent_matches.map(match => ({
                     ...match,
                     summonerName: account.game_name,
                     rank: account.tier && account.rank ? `${account.tier} ${account.rank}` : account.tier,
+                    leaguePoints: account.league_points ?? null,
                 }))
             );
             const sorted = allMatches.sort((a, b) => {
@@ -177,6 +178,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
             ...match,
             summonerName: currentAccount?.game_name || '',
             rank: currentAccount?.tier && currentAccount?.rank ? `${currentAccount.tier} ${currentAccount.rank}` : currentAccount?.tier || null,
+            leaguePoints: currentAccount?.league_points ?? null,
         }));
     }, [isAllTab, accounts, currentAccount]);
     
@@ -268,6 +270,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                                     onHide={handleHideGame}
                                     summonerName={match.summonerName}
                                     rank={match.rank}
+                                    leaguePoints={match.leaguePoints}
                                 />
                             ))
                         )}

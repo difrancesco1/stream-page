@@ -17,6 +17,7 @@ interface OpggGameCardProps {
     onHide: (matchId: string) => void;
     summonerName: string;
     rank: string | null;
+    leaguePoints: number | null;
 }
 
 export default function OpggGameCard({ 
@@ -29,6 +30,7 @@ export default function OpggGameCard({
     onHide,
     summonerName,
     rank,
+    leaguePoints,
 }: OpggGameCardProps) {
     const resultText = win ? "victory" : "defeat";
     const textClass = win ? "main-text" : "accent-text";
@@ -59,7 +61,7 @@ export default function OpggGameCard({
 
                 <hr />
                 <span className="flex items-center">
-                    <div className="alt-text truncate"> {rank.split(" ")[0]}- {summonerName}</div>
+                    <div className="alt-text truncate"> {rank?.split(" ")[0]}: {leaguePoints}lp - {summonerName}</div>
                 </span>
             </div>
             <button
