@@ -73,7 +73,7 @@ export default function MediaContainer({ onClose, onMouseDown }: MediaContainerP
                 <div className="px-1 py-1 w-full h-full overflow-y-auto max-h-[180px]">
                     {isLoading ? (
                         <div className="relative flex items-center justify-center h-full">
-                            <span className="main-text ">
+                            <span className="main-text cursor-loading">
                                 <img src="loading.gif"
                                     className="absolute bottom-0 right-0 h-10"
                                     alt="loading magical girl"
