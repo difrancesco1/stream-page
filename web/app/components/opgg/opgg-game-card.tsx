@@ -24,7 +24,9 @@ export default function OpggGameCard({
     deaths, 
     assists, 
     matchId, 
-    onHide 
+    onHide,
+    summonerName,
+    rank,
 }: OpggGameCardProps) {
     const resultText = win ? "victory" : "defeat";
     const textClass = win ? "main-text" : "accent-text";
@@ -47,6 +49,7 @@ export default function OpggGameCard({
             <div className="w-full h-full flex flex-col justify-center">
                 <span className="flex justify-between items-center">
                     <span className={`${textClass} !text-xs`}>{resultText}</span>
+                    <span className={`alt-text`}>{kills}/{deaths}/{assists}</span>
                     <button
                         onClick={() => onHide(matchId)}
                         className="pixel-borders pixel-btn-remove-sm mr-[1px] mb-[2px]"
@@ -55,7 +58,10 @@ export default function OpggGameCard({
                 </span>
 
                 <hr />
-                <span className={`alt-text`}>{kills}/{deaths}/{assists}</span>
+                <span className="flex justify-between items-center">
+                    <div className="alt-text">{summonerName}</div>
+                    <div className="alt-text">{rank}</div>
+                </span>
             </div>
 
         </div>

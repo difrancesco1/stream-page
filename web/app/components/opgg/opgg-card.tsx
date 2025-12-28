@@ -188,6 +188,8 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                                     assists={match.assists}
                                     matchId={match.match_id}
                                     onHide={handleHideGame}
+                                    summonerName={match.summonerName}
+                                    rank={match.rank}
                                 />
                             ))
                         )}
