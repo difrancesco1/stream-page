@@ -48,21 +48,22 @@ export default function OpggGameCard({
                     className="object-cover"
                 />
             </div>
-            <div className="w-full h-full flex flex-col justify-center">
+            <div className="w-full h-full flex flex-col justify-center -mt-[6px]">
                 <span className="flex justify-between items-center">
-                    <span className={`${textClass} !text-xs`}>{resultText}</span>
+                    <div>
+                    <span className={`${textClass} !text-[12px]`}>{resultText} </span>
                     <span className={`alt-text`}>{kills}/{deaths}/{assists}</span>
+                    </div>
                     <button
                         onClick={() => onHide(matchId)}
-                        className="pixel-borders pixel-btn-remove-sm mr-[1px] mb-[2px]"
+                        className="pixel-borders pixel-btn-remove-sm"
                     >x
                     </button>
                 </span>
 
                 <hr />
-                <span className="flex justify-between items-center">
-                    <div className="alt-text">{summonerName}</div>
-                    <div className="alt-text">{rank}</div>
+                <span className="flex items-center">
+                    <div className="alt-text truncate"> {rank.split(" ")[0]}- {summonerName.substring(0,12)}</div>
                 </span>
             </div>
 
