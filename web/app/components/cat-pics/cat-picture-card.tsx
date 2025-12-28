@@ -71,36 +71,35 @@ export default function CatPictureCard({ onImageDeleted }: CatPictureCardProps) 
     if (cats.length === 0) {
         return (
             <div className="flex items-center justify-center h-full p-4">
-                <p className="text-xs text-border">No cat pictures yet. Be the first to upload one!</p>
+                <p className="text-xs text-border">meow :(</p>
             </div>
         )
     }
 
     return (
         <div className="overflow-y-auto h-[calc(100% - 28px)] p-2">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
                 {cats.map((cat) => (
-                    <div key={cat.id} className="relative group">
-                        <div className="pixel-borders bg-background p-1">
-                            <div className="relative w-full h-32">
-                                <Image
-                                    src={`${API_URL}${cat.image_url}`}
-                                    alt={`Cat by ${cat.contributor_username}`}
-                                    fill
-                                    className="object-contain"
-                                    unoptimized
-                                />
-                            </div>
-                            <div className="flex justify-between items-center mt-1">
+                    <div key={cat.id} className="relative w-full h-25">
+                        <div className="absolute inset-0 pixel-borders w-full h-25 bg-background">
+                            <Image
+                                src={`${API_URL}${cat.image_url}`}
+                                alt={`Cat by ${cat.contributor_username}`}
+                                fill
+                                className="object-cover"
+                                unoptimized
+                            />
+                        </div>
+                        <div className="absolute pl-1 w-full leading-tight bg-background pixel-borders">
+                            <div className="grid-container">
                                 <p className="text-[10px] text-border truncate">
                                     {cat.contributor_username}
                                 </p>
                                 {canDelete(cat) && (
                                     <button
                                         onClick={() => handleDelete(cat.id)}
-                                        className="text-[10px] text-red-500 hover:text-red-700 px-1"
-                                        title="Delete"
-                                    >
+                                        className="pixel-btn-remove-sm text-border! hover:bg-background! hover:text-accent!"
+                                        title="Delete">
                                         x
                                     </button>
                                 )}

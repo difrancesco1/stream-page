@@ -39,7 +39,7 @@ export default function OppggCardFooter({
                         className="pixel-borders pixel-btn-white-sm"
                         title="Refresh"
                     >
-                        <span className={`text-xs font-bold leading-none ${isRefreshing ? 'animate-spin' : ''}`}>↻</span>
+                        <span className={`text-xs font-bold leading-none ${isRefreshing ? 'animate-spin' : ''}`}>@</span>
                     </button>
                 )}
             </div>
@@ -47,7 +47,7 @@ export default function OppggCardFooter({
                 <div className="flex items-center gap-1">
                     <div className="text-border">{displayTier}{rank ? ` ${rank}` : ""}</div>
                     {displayLp && (
-                        <div className="px-2 py-1 h-[90%] bg-background pixel-borders text-border flex items-center">
+                        <div className="pixel-borders pixel-btn-white hover:bg-background!">
                             <span>{displayLp}</span>
                         </div>
                     )}

@@ -348,10 +348,6 @@ hr {
   padding: 1px 1px;
 }
 
-.pixel-btn-white-sm:disabled{
-  opacity: 0;
-}
-
 .pixel-btn-white-sm:hover{
   background: var(--border);
   color: var(--foreground);
@@ -383,7 +379,7 @@ hr {
   justify-content: center;
   align-items: center;
   font-size: 8px;
-  padding: 0.1rem;
+  padding: 0 0.2rem;
   font-weight: bolder;
 }
 
@@ -423,6 +419,8 @@ hr {
     gap: 3px; /* Adds space between the columns */
     align-items: center; /* Vertically centers the elements */
 }
+
+
 
 input, textarea, select {
   outline: none !important;
