@@ -2,57 +2,50 @@
 
 import { API_URL } from "@/lib/api";
 
-export type OpggResult = {
+export type MediaCategory = "movie" | "tv_show" | "kdrama" | "anime" | "youtube";
+
+export type MediaResult = {
     success: boolean;
     message: string;
     error?: string;
 };
 
-export type RecentMatch = {
-    match_id: string;
-    champion_id: number;
-    champion_name: string;
-    win: boolean;
-    kills: number;
-    deaths: number;
-    assists: number;
-};
-
-export type OpggAccount = {
+export type MediaItem = {
     id: string;
-    puuid: string;
+    category: MediaCategory;
+    name: string;
+    info: string;
+    url: string;
     display_order: number;
-    game_name: string;
-    tag_line: string;
-    tier: string | null;
-    rank: string | null;
-    league_points: number | null;
-    wins: number | null;
-    losses: number | null;
-    recent_matches: RecentMatch[];
+    upvote_count: number;
+    user_has_upvoted: boolean;
 };
 
-export type GetOpggAccountsResult = {
+export type GetMediaListResult = {
     success: boolean;
-    accounts: OpggAccount[];
+    media: MediaItem[];
     error?: string;
 };
 
-export async function addOpggAccount(
+export async function addMedia(
     token: string,
-    summoner_name: string,
-    tagline: string
-): Promise<OpggResult> {
+    category: MediaCategory,
+    name: string,
+    info: string,
+    url: string
+): Promise<MediaResult> {
     try {
-        const response = await fetch(`${API_URL}/opgg/add_account`, {
+        const response = await fetch(`${API_URL}/media/add`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                summoner_name,
-                tagline,
+                category,
+                name,
+                info,
+                url,
             }),
         });
 
@@ -62,13 +55,13 @@ export async function addOpggAccount(
             return {
                 success: false,
                 message: "",
-                error: data.detail || data.message || "Failed to add account",
+                error: data.detail || data.message || "Failed to add media",
             };
         }
 
         return {
             success: true,
-            message: data.message || "Successfully added account",
+            message: data.message || "Successfully added media",
         };
     } catch (error) {
         return {
@@ -79,19 +72,19 @@ export async function addOpggAccount(
     }
 }
 
-export async function removeOpggAccount(
+export async function removeMedia(
     token: string,
-    account_id: string
-): Promise<OpggResult> {
+    media_id: string
+): Promise<MediaResult> {
     try {
-        const response = await fetch(`${API_URL}/opgg/remove_account`, {
+        const response = await fetch(`${API_URL}/media/remove`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                account_id,
+                media_id,
             }),
         });
 
@@ -101,13 +94,13 @@ export async function removeOpggAccount(
             return {
                 success: false,
                 message: "",
-                error: data.detail || data.message || "Failed to remove account",
+                error: data.detail || data.message || "Failed to remove media",
             };
         }
 
         return {
             success: true,
-            message: data.message || "Successfully removed account",
+            message: data.message || "Successfully removed media",
         };
     } catch (error) {
         return {
@@ -118,19 +111,65 @@ export async function removeOpggAccount(
     }
 }
 
-export async function sortOpggAccounts(
+export async function editMedia(
     token: string,
-    account_ids: string[]
-): Promise<OpggResult> {
+    media_id: string,
+    updates: {
+        category?: MediaCategory;
+        name?: string;
+        info?: string;
+        url?: string;
+    }
+): Promise<MediaResult> {
     try {
-        const response = await fetch(`${API_URL}/opgg/sort_accounts`, {
+        const response = await fetch(`${API_URL}/media/edit`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                media_id,
+                ...updates,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: "",
+                error: data.detail || data.message || "Failed to edit media",
+            };
+        }
+
+        return {
+            success: true,
+            message: data.message || "Successfully updated media",
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: "",
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function upvoteMedia(
+    token: string,
+    media_id: string
+): Promise<MediaResult> {
+    try {
+        const response = await fetch(`${API_URL}/media/upvote`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                account_ids,
+                media_id,
             }),
         });
 
@@ -140,13 +179,13 @@ export async function sortOpggAccounts(
             return {
                 success: false,
                 message: "",
-                error: data.detail || data.message || "Failed to sort accounts",
+                error: data.detail || data.message || "Failed to upvote media",
             };
         }
 
         return {
             success: true,
-            message: data.message || "Successfully sorted accounts",
+            message: data.message || "Successfully toggled upvote",
         };
     } catch (error) {
         return {
@@ -157,48 +196,15 @@ export async function sortOpggAccounts(
     }
 }
 
-export async function hideOpggGame(
-    token: string,
-    match_id: string
-): Promise<OpggResult> {
+export async function getMediaList(
+    category?: MediaCategory
+): Promise<GetMediaListResult> {
     try {
-        const response = await fetch(`${API_URL}/opgg/hide_game`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                match_id,
-            }),
-        });
+        const url = category
+            ? `${API_URL}/media/list?category=${category}`
+            : `${API_URL}/media/list`;
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            return {
-                success: false,
-                message: "",
-                error: data.detail || data.message || "Failed to hide game",
-            };
-        }
-
-        return {
-            success: true,
-            message: data.message || "Successfully hidden game",
-        };
-    } catch (error) {
-        return {
-            success: false,
-            message: "",
-            error: error instanceof Error ? error.message : "An unexpected error occurred",
-        };
-    }
-}
-
-export async function getOpggAccounts(): Promise<GetOpggAccountsResult> {
-    try {
-        const response = await fetch(`${API_URL}/opgg/accounts`, {
+        const response = await fetch(url, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -210,32 +216,38 @@ export async function getOpggAccounts(): Promise<GetOpggAccountsResult> {
         if (!response.ok) {
             return {
                 success: false,
-                accounts: [],
-                error: data.detail || data.message || "Failed to fetch accounts",
+                media: [],
+                error: data.detail || data.message || "Failed to fetch media",
             };
         }
 
         return {
             success: true,
-            accounts: data.accounts || [],
+            media: data.media || [],
         };
     } catch (error) {
         return {
             success: false,
-            accounts: [],
+            media: [],
             error: error instanceof Error ? error.message : "An unexpected error occurred",
         };
     }
 }
 
-export async function refreshOpggAccounts(token: string): Promise<OpggResult> {
+export async function sortMedia(
+    token: string,
+    media_ids: string[]
+): Promise<MediaResult> {
     try {
-        const response = await fetch(`${API_URL}/opgg/refresh`, {
+        const response = await fetch(`${API_URL}/media/sort`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
+            body: JSON.stringify({
+                media_ids,
+            }),
         });
 
         const data = await response.json();
@@ -244,13 +256,13 @@ export async function refreshOpggAccounts(token: string): Promise<OpggResult> {
             return {
                 success: false,
                 message: "",
-                error: data.detail || data.message || "Failed to refresh accounts",
+                error: data.detail || data.message || "Failed to sort media",
             };
         }
 
         return {
             success: true,
-            message: data.message || "Successfully refreshed accounts",
+            message: data.message || "Successfully sorted media",
         };
     } catch (error) {
         return {

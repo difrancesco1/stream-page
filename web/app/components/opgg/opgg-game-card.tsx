@@ -13,8 +13,8 @@ interface OpggGameCardProps {
     kills: number;
     deaths: number;
     assists: number;
-    matchIndex: number;
-    onRemove: (matchIndex: number) => void;
+    matchId: string;
+    onHide: (matchId: string) => void;
 }
 
 export default function OpggGameCard({ 
@@ -23,8 +23,8 @@ export default function OpggGameCard({
     kills, 
     deaths, 
     assists, 
-    matchIndex, 
-    onRemove 
+    matchId, 
+    onHide 
 }: OpggGameCardProps) {
     const resultText = win ? "victory" : "defeat";
     const textClass = win ? "main-text" : "accent-text";
@@ -50,7 +50,7 @@ export default function OpggGameCard({
                 <span className={`${textClass} text-xs`}>{kills}/{deaths}/{assists}</span>
             </div>
             <button
-                onClick={() => onRemove(matchIndex)}
+                onClick={() =>onHide(matchId)}
                 className="m-1 pixel-borders w-4 h-4 flex items-center justify-center bg-background text-accent 
                 hover:bg-accent hover:text-background transition-colors flex-shrink-0"
             >

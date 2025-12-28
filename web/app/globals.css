@@ -423,3 +423,20 @@ hr {
     gap: 3px; /* Adds space between the columns */
     align-items: center; /* Vertically centers the elements */
 }
+
+input, textarea, select {
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: none !important;
+  --tw-ring-offset-shadow: none !important;
+}
+
+input:focus, input:active, input:focus-visible,
+textarea:focus, textarea:active, textarea:focus-visible,
+select:focus, select:active, select:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: none !important;
+  --tw-ring-offset-shadow: none !important;
+  border-color: inherit !important;
+}

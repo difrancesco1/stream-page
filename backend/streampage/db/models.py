@@ -6,7 +6,9 @@ from sqlalchemy import LargeBinary
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, ARRAY, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from streampage.db.enums import Platform, SectionType
+from sqlalchemy import UniqueConstraint
+
+from streampage.db.enums import Platform, SectionType, MediaCategory
 
 
 class Base(DeclarativeBase):
@@ -179,8 +181,78 @@ class SummonerData(Base):
     losses: Mapped[int | None] = mapped_column(Integer, nullable=True)
     
     # Recent match history (stored as JSONB for efficient querying)
-    # Format: [{"champion_id": int, "champion_name": str, "win": bool}, ...]
+    # Format: [{"match_id": str, "champion_id": int, "champion_name": str, "win": bool, ...}, ...]
     recent_matches: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     
     # Cache metadata
     last_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class HiddenMatch(Base):
+    """Tracks matches that have been hidden by the page owner."""
+    __tablename__ = "hidden_match"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
+    match_id: Mapped[str] = mapped_column(String, index=True)  # Riot match ID (e.g., "NA1_123456789")
+
+
+class Media(Base):
+    """Media entries for movies, TV shows, kdramas, anime, and YouTube."""
+    __tablename__ = "media"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    category: Mapped[MediaCategory] = mapped_column(Enum(MediaCategory))
+    name: Mapped[str] = mapped_column(String(200))
+    info: Mapped[str] = mapped_column(String(500))
+    url: Mapped[str] = mapped_column(String(500))
+    display_order: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Relationship to upvotes
+    upvotes: Mapped[list["MediaUpvote"]] = relationship(
+        "MediaUpvote",
+        back_populates="media",
+        cascade="all, delete-orphan",
+    )
+
+
+class MediaUpvote(Base):
+    """Tracks which users have upvoted which media entries."""
+    __tablename__ = "media_upvote"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    media_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("media.id", ondelete="CASCADE"))
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"))
+
+    # Relationships
+    media: Mapped["Media"] = relationship("Media", back_populates="upvotes")
+
+    __table_args__ = (
+        UniqueConstraint("media_id", "user_id", name="uq_media_upvote_media_user"),
+    )
+
+
+class CatEntry(Base):
+    """Cat pictures uploaded by users."""
+    __tablename__ = "cat_entry"
+    
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    creator_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))  # Always rosie
+    contributor_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))  # Who uploaded
+    image_url: Mapped[str] = mapped_column(String(500))  # Relative path to image file
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    contributor: Mapped["User"] = relationship(
+        "User", 
+        foreign_keys=[contributor_id],
+        viewonly=True
+    )

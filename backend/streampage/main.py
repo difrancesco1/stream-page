@@ -1,8 +1,11 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from streampage.api.cat.cat import cat_router
+from streampage.api.media.media import media_router
 from streampage.api.opgg.opgg import opgg_router
 from streampage.api.riot.riot import riot_router
 from streampage.api.user.user import users_router
@@ -63,3 +66,8 @@ def db_health(db: Session = Depends(get_db)):
 app.include_router(users_router, prefix="/users")
 app.include_router(riot_router, prefix="/riot")
 app.include_router(opgg_router, prefix="/opgg")
+app.include_router(media_router, prefix="/media")
+app.include_router(cat_router, prefix="/cats")
+
+# Mount static files for uploads
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
