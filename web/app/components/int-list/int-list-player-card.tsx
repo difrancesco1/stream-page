@@ -77,7 +77,7 @@ export default function IntListPlayerCard({ entries, isLoading, error }: IntList
     if (isLoading) {
         return (
             <div className="relative flex items-center justify-center h-full">
-                <span className="main-text ">
+                <span className="main-text cursor-loading">
                     <img src="loading.gif"
                         className="absolute h-10"
                         alt="loading magical girl"
