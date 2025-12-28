@@ -33,14 +33,14 @@ export default function MediaItem({ id, name, info, url, upvoteCount, onUpvote }
                             href={url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="pixel-borders pixel-btn-border-sm cursor-pointer">
+                            className="pixel-borders pixel-btn-border-sm cursor-pointer opacity-80">
                             <span>url</span>
                         </a>
                     </div>
                     <div className="-mt-[4.5px]">
                         <button onClick={handleUpvote}
                             disabled={!token}
-                            className="pixel-borders pixel-btn-remove-sm ">
+                            className="pixel-borders pixel-btn-remove-sm">
                             <span>+</span>
                         </button>
                         <button className="pixel-borders pixel-btn-white-nohover">
