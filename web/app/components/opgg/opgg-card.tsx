@@ -124,7 +124,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
 
     const handleAddAccount = async () => {
         if (!token || !riotId) return;
-        
+        setIsLoading(true);
         const parts = riotId.split("#");
         if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
             setAddError("Please enter in format: Name#TAG");
@@ -143,6 +143,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
         } else {
             setAddError(result.error || "Failed to add account");
         }
+        setIsLoading(false);
     };
 
     const handleHideGame = async (matchId: string) => {
@@ -224,7 +225,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                                         onClick={handleAddAccount}
                                         className="pixel-borders pixel-btn-border"
                                     >
-                                        add
+                                        {isLoading ? "..." : "add"}
                                     </button>
                                     <button
                                         onClick={() => {

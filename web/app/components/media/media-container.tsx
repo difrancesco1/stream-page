@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import MediaFooter from "./media-footer"; 
 import MediaItem from "./media-item"; 
 import { getMediaList, type MediaItem as MediaItemType, type MediaCategory } from "@/app/api/media/actions";
+import { useAuth } from "@/app/context/auth-context";
 
 interface MediaContainerProps {
     onClose?: () => void;
@@ -25,18 +26,19 @@ const tabs: Tab[] = [
 ]
 
 export default function MediaContainer({ onClose, onMouseDown }: MediaContainerProps) {
+    const { token } = useAuth();
     const [activeTab, setActiveTab] = useState<Tab>(tabs[0]);
     const [mediaItems, setMediaItems] = useState<MediaItemType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchMedia = useCallback(async () => {
         setIsLoading(true);
-        const result = await getMediaList();
+        const result = await getMediaList(undefined, token ?? undefined);
         if (result.success) {
             setMediaItems(result.media);
         }
         setIsLoading(false);
-    }, []);
+    }, [token]);
 
     useEffect(() => {
         fetchMedia();
@@ -86,6 +88,7 @@ export default function MediaContainer({ onClose, onMouseDown }: MediaContainerP
                                 info={item.info}
                                 url={item.url}
                                 upvoteCount={item.upvote_count}
+                                upvoted={item.user_has_upvoted}
                                 onUpvote={fetchMedia}
                             />
                         ))
