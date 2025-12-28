@@ -55,7 +55,7 @@ export default function CatPictureCard({ onImageDeleted }: CatPictureCardProps) 
     if (loading) {
         return (
             <div className="flex items-center justify-center h-full p-4">
-                <p className="text-xs text-border">Loading cat pictures...</p>
+                <p className="text-xs text-border"></p>
             </div>
         )
     }
@@ -77,8 +77,8 @@ export default function CatPictureCard({ onImageDeleted }: CatPictureCardProps) 
     }
 
     return (
-        <div className="overflow-y-auto h-[calc(100% - 28px)] p-2">
-            <div className="grid grid-cols-3 gap-2">
+        <div className="overflow-y-auto h-[calc(100% - 28px)]">
+            <div className="grid grid-cols-3 gap-1">
                 {cats.map((cat) => (
                     <div key={cat.id} className="relative w-full h-25">
                         <div className="absolute inset-0 pixel-borders w-full h-25 bg-background">

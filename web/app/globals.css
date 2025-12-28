@@ -303,7 +303,7 @@ hr {
 }
 
 .pixel-btn-border:disabled{
-  opacity: 0;
+  opacity: 0.5;
 }
 
 .pixel-btn-border:hover{
@@ -321,7 +321,7 @@ hr {
 }
 
 .pixel-btn-border-sm:disabled{
-  opacity: 0;
+  opacity: 0.5;
 }
 
 .pixel-btn-border-sm:hover{
@@ -340,8 +340,17 @@ hr {
   padding: 0 .5rem;
 }
 
+.pixel-btn-white-nohover{
+  background: var(--background);
+  color: var(--border);
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  padding: 0 .5rem;
+}
+
 .pixel-btn-white:disabled{
-  opacity: 0;
+  opacity: 0.5;
 }
 
 .pixel-btn-white:hover{
@@ -350,6 +359,15 @@ hr {
 }
 
 .pixel-btn-white-sm{
+  background: var(--background);
+  color: var(--border);
+  justify-content: center;
+  align-items: center;
+  font-size: 5px;
+  padding: 1px 1px;
+}
+
+.pixel-btn-white-sm-nohover{
   background: var(--background);
   color: var(--border);
   justify-content: center;
@@ -375,7 +393,7 @@ hr {
 }
 
 .pixel-btn-remove:disabled{
-  opacity: 0;
+  opacity: 0.5;
 }
 
 .pixel-btn-remove:hover{
@@ -394,7 +412,7 @@ hr {
 }
 
 .pixel-btn-remove-sm:disabled{
-  opacity: 0;
+  opacity: 0.5;
 }
 
 .pixel-btn-remove-sm:hover{
@@ -414,11 +432,11 @@ hr {
 }
 
 .pixel-input:disabled{
-  opacity: 0%;
+  opacity: 0.5;
 }
 
 ::placeholder{
-  opacity: 50%;
+  opacity: 0.5;
 }
 
 /* grid */

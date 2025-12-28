@@ -29,7 +29,7 @@ export default function CatPictureContainer({onClose, onMouseDown}: CatPicturesC
                 onClose={onClose}
                 showTabs={false}
             >
-            <div key={refreshKey} className="px-1 py-1 w-full h-[calc(100%-24px)] overflow-y-auto">
+            <div key={refreshKey} className="px-1 py-1 w-full h-[calc(100%-24px)] overflow-y-auto border-t-2">
                 <CatPictureCard onImageDeleted={handleImageChange} />
             </div>
             <CatPicturesFooter onImageUploaded={handleImageChange} />
