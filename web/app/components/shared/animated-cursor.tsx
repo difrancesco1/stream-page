@@ -61,7 +61,7 @@ export function AnimatedCursor() {
         height: 48,
         pointerEvents: "none",
         zIndex: 99999,
-        transform: "translate(4px, -24px)",
+        transform: "translate(-2px, -24px)",
         opacity: isVisible ? 1 : 0,
         imageRendering: "pixelated",
       }}

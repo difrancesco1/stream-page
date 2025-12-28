@@ -293,12 +293,6 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                     <div className="px-1 py-1 w-full h-full overflow-y-auto">
                         {isLoading ? (
                             <div className="relative flex items-center justify-center h-full">
-                                <span className="main-text cursor-loading">
-                                    <img src="loading.gif"
-                                        className="absolute bottom-0 right-0 h-10"
-                                        alt="loading magical girl"
-                                    ></img>
-                                </span>
                             </div>
                         ) : showAddForm ? (
                             <div className="flex justify-center h-full flex-col px-5">
