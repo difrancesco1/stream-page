@@ -47,7 +47,6 @@ export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, o
                             className="absolute pixel-borders pixel-btn-remove-sm right-0">
                             <span>{upvoted ? "-" : "+"}</span>
                         </button>
-                        
                     </div>
                 </div>
                 <hr></hr>
