@@ -158,7 +158,7 @@ def hide_opgg_game(
 
 
 @opgg_router.get("/accounts")
-def get_opgg_accounts() -> OpggAccountsResponse:
+def get_opgg_accounts(include_hidden: bool = False) -> OpggAccountsResponse:
     """Get all OPGG accounts for the page."""
     with get_db_session() as session:
         # Find rosie (hardcoded page owner)
@@ -166,12 +166,14 @@ def get_opgg_accounts() -> OpggAccountsResponse:
         if not rosie_user:
             return OpggAccountsResponse(accounts=[])
 
-        # Get hidden match IDs for this owner
-        hidden_match_ids = set(
-            row.match_id for row in session.query(HiddenMatch.match_id).filter(
-                HiddenMatch.owner_id == rosie_user.id
-            ).all()
-        )
+        # Get hidden match IDs for this owner (only if we're filtering)
+        hidden_match_ids = set()
+        if not include_hidden:
+            hidden_match_ids = set(
+                row.match_id for row in session.query(HiddenMatch.match_id).filter(
+                    HiddenMatch.owner_id == rosie_user.id
+                ).all()
+            )
 
         # Get all entries ordered by display_order
         entries = session.query(OpggEntry).filter(
@@ -185,7 +187,7 @@ def get_opgg_accounts() -> OpggAccountsResponse:
             if not summoner_data:
                 continue
 
-            # Convert matches to response model, filtering out hidden matches
+            # Convert matches to response model, filtering out hidden matches unless include_hidden
             recent_matches = []
             if summoner_data.recent_matches:
                 recent_matches = [
@@ -199,7 +201,7 @@ def get_opgg_accounts() -> OpggAccountsResponse:
                         assists=match.get("assists", 0),
                     )
                     for match in summoner_data.recent_matches
-                    if match.get("match_id") not in hidden_match_ids
+                    if include_hidden or match.get("match_id") not in hidden_match_ids
                 ]
 
             accounts.append(

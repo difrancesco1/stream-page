@@ -65,7 +65,11 @@ export default function OpggGameCard({
                 </span>
             </div>
             <button
-                onClick={() => onHide(matchId)}
+                type="button"
+                onClick={(e) => {
+                    e.preventDefault();
+                    onHide(matchId);
+                }}
                 className="pixel-borders pixel-btn-remove-sm mx-1"
             >x
             </button>

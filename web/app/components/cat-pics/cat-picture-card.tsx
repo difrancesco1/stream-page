@@ -80,13 +80,14 @@ export default function CatPictureCard({ onImageDeleted }: CatPictureCardProps) 
         <div className="overflow-y-auto h-[calc(100% - 28px)]">
             <div className="grid grid-cols-3 gap-1">
                 {cats.map((cat) => (
-                    <div key={cat.id} className="relative w-full h-25">
-                        <div className="absolute inset-0 pixel-borders w-full h-25 bg-background">
+                    <div key={cat.id} className="relative w-full h-30 flex flex-col">
+                        <div className="absolute inset-0 pixel-borders w-full h-30 bg-background overflow-hidden flex items-center justify-center">
                             <Image
                                 src={`${API_URL}${cat.image_url}`}
                                 alt={`Cat by ${cat.contributor_username}`}
-                                fill
-                                className="object-cover"
+                                width={120}
+                                height={110}
+                                className="object-contain"
                                 unoptimized
                             />
                         </div>
@@ -97,7 +98,11 @@ export default function CatPictureCard({ onImageDeleted }: CatPictureCardProps) 
                                 </p>
                                 {canDelete(cat) && (
                                     <button
-                                        onClick={() => handleDelete(cat.id)}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleDelete(cat.id);
+                                        }}
                                         className="pixel-btn-remove-sm text-border! hover:bg-background! hover:text-accent!"
                                         title="Delete">
                                         x

@@ -196,9 +196,14 @@ export async function hideOpggGame(
     }
 }
 
-export async function getOpggAccounts(): Promise<GetOpggAccountsResult> {
+export async function getOpggAccounts(includeHidden: boolean = false): Promise<GetOpggAccountsResult> {
     try {
-        const response = await fetch(`${API_URL}/opgg/accounts`, {
+        const url = new URL(`${API_URL}/opgg/accounts`);
+        if (includeHidden) {
+            url.searchParams.set("include_hidden", "true");
+        }
+        
+        const response = await fetch(url.toString(), {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
