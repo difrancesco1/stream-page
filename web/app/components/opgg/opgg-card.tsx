@@ -246,7 +246,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                                 </div>
                             </div>
                         ) : accounts.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full">
+                            <div className="flex flex-col items-center justify-center h-full ">
                                 <span className="main-text text-xs">No accounts added</span>
                                 <button
                                     onClick={() => setShowAddForm(true)}
