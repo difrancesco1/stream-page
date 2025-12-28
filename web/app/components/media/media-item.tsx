@@ -9,10 +9,11 @@ interface MediaItemProps {
     info: string;
     url: string;
     upvoteCount: number;
+    upvoted?: boolean;
     onUpvote?: () => void;
 }
 
-export default function MediaItem({ id, name, info, url, upvoteCount, onUpvote }: MediaItemProps) {
+export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, onUpvote }: MediaItemProps) {
     const { token } = useAuth();
 
     const handleUpvote = async () => {
@@ -47,7 +48,7 @@ export default function MediaItem({ id, name, info, url, upvoteCount, onUpvote }
                             onClick={handleUpvote}
                             disabled={!token}
                             className="pixel-borders pixel-btn-remove-sm">
-                            <span className="text-[10px] font-bold leading-none">+1</span>
+                            <span className="text-[10px] font-bold leading-none">{upvoted ? "-1" : "+1"}</span>
                             <span className="text-[8px] leading-none">{upvoteCount}</span>
                         </button>
                     </div>

@@ -197,18 +197,24 @@ export async function upvoteMedia(
 }
 
 export async function getMediaList(
-    category?: MediaCategory
+    category?: MediaCategory,
+    token?: string
 ): Promise<GetMediaListResult> {
     try {
         const url = category
             ? `${API_URL}/media/list?category=${category}`
             : `${API_URL}/media/list`;
 
+        const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+        };
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+
         const response = await fetch(url, {
             method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers,
         });
 
         const data = await response.json();
