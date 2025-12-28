@@ -466,3 +466,9 @@ select:focus, select:active, select:focus-visible {
   --tw-ring-offset-shadow: none !important;
   border-color: inherit !important;
 }
+
+/* cursor stuff */
+
+.cursor-loading {
+  cursor: url('../public/loading.gif'), wait;
+}
