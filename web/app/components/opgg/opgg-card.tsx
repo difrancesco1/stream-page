@@ -17,10 +17,11 @@ import { useAuth } from "@/app/context/auth-context";
 
 interface FloatingEmoteProps {
     id: number;
+    imageSrc: string;
     onComplete: (id: number) => void;
 }
 
-function FloatingEmote({ id, onComplete }: FloatingEmoteProps) {
+function FloatingEmote({ id, imageSrc, onComplete }: FloatingEmoteProps) {
     useEffect(() => {
         const timer = setTimeout(() => {
             onComplete(id);
@@ -38,7 +39,7 @@ function FloatingEmote({ id, onComplete }: FloatingEmoteProps) {
             }}
         >
             <Image
-                src="/RosieGun.png"
+                src={imageSrc}
                 alt="Easter egg emote"
                 width={40}
                 height={40}
@@ -61,6 +62,11 @@ function FloatingEmote({ id, onComplete }: FloatingEmoteProps) {
             `}</style>
         </div>
     );
+}
+
+interface EmoteData {
+    id: number;
+    imageSrc: string;
 }
 
 // Rank comparison utilities
@@ -115,7 +121,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
     
     // Easter egg state
     const [showHiddenMatches, setShowHiddenMatches] = useState(false);
-    const [floatingEmotes, setFloatingEmotes] = useState<number[]>([]);
+    const [floatingEmotes, setFloatingEmotes] = useState<EmoteData[]>([]);
     const [emoteIdCounter, setEmoteIdCounter] = useState(0);
 
     const fetchAccounts = useCallback(async (includeHidden: boolean = false) => {
@@ -178,7 +184,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
     
     // Easter egg handlers
     const handleEmoteComplete = useCallback((id: number) => {
-        setFloatingEmotes(prev => prev.filter(emoteId => emoteId !== id));
+        setFloatingEmotes(prev => prev.filter(emote => emote.id !== id));
     }, []);
     
     const handleEasterEggTrigger = useCallback(() => {
@@ -187,10 +193,11 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
         setShowHiddenMatches(newShowHidden);
         fetchAccounts(newShowHidden);
         
-        // Spawn floating emote
-        const newId = emoteIdCounter;
+
+        const imageSrc = newShowHidden ? "/RosieGun.png" : "/rosSip.png";
+        const newEmote: EmoteData = { id: emoteIdCounter, imageSrc };
         setEmoteIdCounter(prev => prev + 1);
-        setFloatingEmotes(prev => [...prev, newId]);
+        setFloatingEmotes(prev => [...prev, newEmote]);
     }, [showHiddenMatches, emoteIdCounter, fetchAccounts]);
 
     const handleAddAccount = async () => {
@@ -361,8 +368,8 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                     />
                 </CardHeader>
                 {/* Floating emotes for easter egg */}
-                {floatingEmotes.map(id => (
-                    <FloatingEmote key={id} id={id} onComplete={handleEmoteComplete} />
+                {floatingEmotes.map(emote => (
+                    <FloatingEmote key={emote.id} id={emote.id} imageSrc={emote.imageSrc} onComplete={handleEmoteComplete} />
                 ))}
             </div>
         </>
