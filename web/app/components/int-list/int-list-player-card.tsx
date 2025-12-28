@@ -4,7 +4,7 @@ import Image from "next/image"
 import type { IntListEntry, RecentMatch } from "@/app/api/int-list/actions"
 
 // Data Dragon CDN for champion icons
-const DDRAGON_VERSION = "14.24.1"
+const DDRAGON_VERSION = "15.24.1"
 const getChampionIconUrl = (championName: string) => 
     `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${championName}.png`
 
