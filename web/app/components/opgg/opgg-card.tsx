@@ -188,6 +188,13 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
         return null;
     }, [isAllTab, accounts]);
 
+    const displayTitle = useMemo(() => {
+        if (isAllTab || !currentAccount) {
+            return "opgg";
+        }
+        return currentAccount.game_name;
+    }, [isAllTab, currentAccount]);
+
     return (
         <>
             <div 
@@ -195,7 +202,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                 onMouseDown={onMouseDown}
             >
                 <CardHeader
-                    title="opgg"
+                    title={displayTitle}
                     exitbtn={true}
                     onClose={onClose}
                     showTabs={tabs.length > 0}

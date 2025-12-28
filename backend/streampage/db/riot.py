@@ -1,18 +1,17 @@
+from __future__ import annotations
+
 import httpx
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
 from urllib.parse import quote
 
 from sqlalchemy.orm import Session
 
 from streampage.config import RIOT_API_KEY
-
+from streampage.db.models import SummonerData
 
 RIOT_ACCOUNT_API_BASE = "https://americas.api.riotgames.com"
 RIOT_NA_API_BASE = "https://na1.api.riotgames.com"
-
-# Cache duration - how long before we refresh data from Riot API
-CACHE_DURATION_MINUTES = 30
 
 
 def get_puuid(game_name: str, tag_line: str) -> str:
@@ -139,17 +138,16 @@ def get_ranked_data_by_puuid(puuid: str) -> Optional[dict]:
         return None
 
 
-def fetch_and_cache_summoner_data(
+def fetch_and_store_summoner_data(
     session: Session,
     puuid: str,
     game_name: str,
     tag_line: str,
-) -> "SummonerData":
-    """Fetch fresh data from Riot API and cache it in the database.
+) -> SummonerData:
+    """Fetch data from Riot API and store it in the database.
     
     Returns the created/updated SummonerData object.
     """
-    from streampage.db.models import SummonerData
     
     # Fetch ranked data
     ranked_data = get_ranked_data_by_puuid(puuid)
@@ -188,38 +186,3 @@ def fetch_and_cache_summoner_data(
         )
         session.add(summoner_data)
         return summoner_data
-
-
-def get_cached_summoner_data(
-    session: Session,
-    puuid: str,
-    game_name: str,
-    tag_line: str,
-    force_refresh: bool = False,
-) -> "SummonerData":
-    """Get summoner data from cache, fetching from Riot API if needed.
-    
-    Args:
-        session: Database session
-        puuid: The summoner's PUUID
-        game_name: The summoner's game name (for caching)
-        tag_line: The summoner's tag line (for caching)
-        force_refresh: If True, always fetch fresh data from Riot API
-    
-    Returns:
-        SummonerData object with cached (or freshly fetched) data
-    """
-    from streampage.db.models import SummonerData
-    
-    if not force_refresh:
-        # Check if we have cached data that's still fresh
-        cached = session.query(SummonerData).filter(SummonerData.puuid == puuid).first()
-        
-        if cached:
-            cache_age = datetime.utcnow() - cached.last_updated
-            if cache_age < timedelta(minutes=CACHE_DURATION_MINUTES):
-                # Cache is still valid, return it
-                return cached
-    
-    # Cache miss or expired - fetch fresh data
-    return fetch_and_cache_summoner_data(session, puuid, game_name, tag_line)

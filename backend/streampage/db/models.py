@@ -130,7 +130,7 @@ class IntListEntry(Base):
     user_reason: Mapped[str]
     rank_when_added: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
-    # Relationship to cached summoner data
+    # Relationship to summoner data
     summoner_data: Mapped["SummonerData"] = relationship(
         "SummonerData",
         foreign_keys="[IntListEntry.puuid]",
@@ -152,7 +152,7 @@ class OpggEntry(Base):
     puuid: Mapped[str] = mapped_column(String, unique=True)
     display_order: Mapped[int] = mapped_column(Integer, default=0)
 
-    # Relationship to cached summoner data
+    # Relationship to summoner data
     summoner_data: Mapped["SummonerData"] = relationship(
         "SummonerData",
         foreign_keys="[OpggEntry.puuid]",
@@ -163,7 +163,7 @@ class OpggEntry(Base):
 
 
 class SummonerData(Base):
-    """Cached Riot API data for a summoner, keyed by PUUID."""
+    """Stored Riot API data for a summoner, keyed by PUUID."""
     __tablename__ = "summoner_data"
 
     # Primary key - the unique Riot PUUID
@@ -184,7 +184,6 @@ class SummonerData(Base):
     # Format: [{"match_id": str, "champion_id": int, "champion_name": str, "win": bool, ...}, ...]
     recent_matches: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     
-    # Cache metadata
     last_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 

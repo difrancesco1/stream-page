@@ -13,7 +13,7 @@ from streampage.api.opgg.models import (
 )
 from streampage.db.engine import get_db_session
 from streampage.db.models import OpggEntry, User, SummonerData, HiddenMatch
-from streampage.db.riot import get_puuid, get_cached_summoner_data, fetch_and_cache_summoner_data
+from streampage.db.riot import get_puuid, fetch_and_store_summoner_data
 
 
 opgg_router = APIRouter()
@@ -41,13 +41,12 @@ def add_opgg_account(
         if existing:
             raise HTTPException(status_code=400, detail="Account already added")
 
-        # Fetch and cache summoner data
-        get_cached_summoner_data(
+        # Fetch and store summoner data
+        fetch_and_store_summoner_data(
             session,
             summoners_puuid,
             request.summoner_name,
             request.tagline,
-            force_refresh=True,
         )
 
         # Get max display_order to add at the end
@@ -181,7 +180,7 @@ def get_opgg_accounts() -> OpggAccountsResponse:
 
         accounts = []
         for entry in entries:
-            # Get cached summoner data
+            # Get stored summoner data
             summoner_data = entry.summoner_data
             if not summoner_data:
                 continue
@@ -244,7 +243,7 @@ def refresh_opgg_accounts(
             summoner_data = entry.summoner_data
             if summoner_data:
                 try:
-                    fetch_and_cache_summoner_data(
+                    fetch_and_store_summoner_data(
                         session,
                         entry.puuid,
                         summoner_data.game_name,

@@ -39,7 +39,7 @@ export default function OppggCardFooter({
                         className="pixel-borders pixel-btn-white-sm"
                         title="Refresh"
                     >
-                        <span className={`text-xs font-bold leading-none ${isRefreshing ? 'animate-spin' : ''}`}>@</span>
+                        <span className={`text-xs font-bold leading-none inline-block ${isRefreshing ? 'animate-spin' : ''}`}>@</span>
                     </button>
                 )}
             </div>

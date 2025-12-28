@@ -13,8 +13,8 @@ from streampage.api.riot.models import (
     ResponseMessage,
 )
 from streampage.db.engine import get_db_session
-from streampage.db.models import IntListEntry, User
-from streampage.db.riot import get_puuid, get_cached_summoner_data
+from streampage.db.models import IntListEntry, SummonerData, User
+from streampage.db.riot import get_puuid, fetch_and_store_summoner_data
 
 
 riot_router = APIRouter()
@@ -37,16 +37,15 @@ def add_to_int_list(
         if not summoners_puuid:
             return ResponseMessage(message="Invalid summoner name or tagline")
 
-        # Fetch and cache summoner data (this will also give us the rank)
-        summoner_data = get_cached_summoner_data(
+        # Fetch and store summoner data (this will also give us the rank)
+        summoner_data = fetch_and_store_summoner_data(
             session,
             summoners_puuid,
             add_to_int_list_request.summoner_name,
             add_to_int_list_request.tagline,
-            force_refresh=True,  # Always get fresh data when adding
         )
         
-        # Format rank_when_added from cached data
+        # Format rank_when_added from fetched data
         rank_when_added = None
         if summoner_data.tier:
             rank_when_added = f"{summoner_data.tier} {summoner_data.rank or ''} {summoner_data.league_points or 0}LP"
@@ -72,8 +71,7 @@ def get_int_list(
 ) -> IntListResponse:
     """Get int list entries for rosie's page, optionally filtered by contributor.
     
-    Uses cached summoner data from the database instead of live API calls.
-    Data is refreshed automatically when cache expires (30 min by default).
+    Displays stored summoner data from the database. No automatic refresh.
     """
     with get_db_session() as session:
         # Find rosie (hardcoded page owner)
@@ -94,35 +92,30 @@ def get_int_list(
         
         entries = []
         for entry, contributor_user in results:
-            # Get cached summoner data (will fetch from API if cache expired)
-            summoner_data = get_cached_summoner_data(
-                session,
-                entry.puuid,
-                entry.summoner_name,
-                entry.summoner_tag,
-            )
+            # Get stored summoner data
+            summoner_data = session.query(SummonerData).filter(SummonerData.puuid == entry.puuid).first()
             
-            # Format current rank from cached data
-            current_rank = None
-            if summoner_data.tier:
-                current_rank = f"{summoner_data.tier} {summoner_data.rank or ''} {summoner_data.league_points or 0}LP"
-            else:
-                current_rank = "UNRANKED"
-            
-            # Convert cached match data to RecentMatch models
+            # Format current rank from stored data
+            current_rank = "UNRANKED"
             recent_matches = []
-            if summoner_data.recent_matches:
-                recent_matches = [
-                    RecentMatch(
-                        champion_id=match.get("champion_id", 0),
-                        champion_name=match.get("champion_name", "Unknown"),
-                        win=match.get("win", False),
-                        kills=match.get("kills", 0),
-                        deaths=match.get("deaths", 0),
-                        assists=match.get("assists", 0),
-                    )
-                    for match in summoner_data.recent_matches
-                ]
+            
+            if summoner_data:
+                if summoner_data.tier:
+                    current_rank = f"{summoner_data.tier} {summoner_data.rank or ''} {summoner_data.league_points or 0}LP"
+                
+                # Convert stored match data to RecentMatch models
+                if summoner_data.recent_matches:
+                    recent_matches = [
+                        RecentMatch(
+                            champion_id=match.get("champion_id", 0),
+                            champion_name=match.get("champion_name", "Unknown"),
+                            win=match.get("win", False),
+                            kills=match.get("kills", 0),
+                            deaths=match.get("deaths", 0),
+                            assists=match.get("assists", 0),
+                        )
+                        for match in summoner_data.recent_matches
+                    ]
             
             entries.append(
                 IntListEntryResponse(
@@ -136,9 +129,6 @@ def get_int_list(
                     recent_matches=recent_matches,
                 )
             )
-        
-        # Commit any new cache entries that were created
-        session.commit()
         
         return IntListResponse(entries=entries)
 
@@ -170,3 +160,25 @@ def get_int_list_contributors() -> IntListContributorsResponse:
         ]
         
         return IntListContributorsResponse(contributors=contributors)
+
+
+@riot_router.post("/int_list/{entry_id}/refresh")
+def refresh_int_list_entry(
+    entry_id: str,
+    user=Depends(get_current_user),
+) -> ResponseMessage:
+    """Manually refresh summoner data for an int list entry."""
+    with get_db_session() as session:
+        entry = session.query(IntListEntry).filter(IntListEntry.id == entry_id).first()
+        if not entry:
+            return ResponseMessage(message="Entry not found")
+        
+        fetch_and_store_summoner_data(
+            session,
+            entry.puuid,
+            entry.summoner_name,
+            entry.summoner_tag,
+        )
+        session.commit()
+        
+        return ResponseMessage(message="Summoner data refreshed")
