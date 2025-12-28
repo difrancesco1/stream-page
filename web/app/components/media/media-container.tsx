@@ -75,7 +75,7 @@ export default function MediaContainer({ onClose, onMouseDown }: MediaContainerP
                         <div className="relative flex items-center justify-center h-full">
                             <span className="main-text ">
                                 <img src="loading.gif"
-                                    className="absolute bottom-0 right-0 h-15"
+                                    className="absolute bottom-0 right-0 h-10"
                                     alt="loading magical girl"
                                 ></img>
                             </span>
