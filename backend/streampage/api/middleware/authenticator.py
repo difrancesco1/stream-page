@@ -69,3 +69,30 @@ def get_current_user(token: str = Depends(OAUTH2_SCHEME)) -> User:
         except Exception as e:
             logger.error(f"Database error in get_current_user: {str(e)}")
             raise HTTPException(status_code=403, detail="Database error")
+
+
+def get_optional_current_user(token: str | None = Depends(OAUTH2_SCHEME)) -> User | None:
+    """Get the current user if authenticated, otherwise return None."""
+    if not token:
+        return None
+    
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, Exception):
+        return None
+
+    username = payload.get("username")
+    if not isinstance(username, str) or username is None:
+        return None
+
+    with get_db_session() as db:
+        try:
+            user = (
+                db.query(User)
+                .join(User.logins)
+                .filter(User.username == username)
+                .first()
+            )
+            return user
+        except Exception:
+            return None

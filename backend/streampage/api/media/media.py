@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 
-from streampage.api.middleware.authenticator import get_current_user
+from streampage.api.middleware.authenticator import get_current_user, get_optional_current_user
 from streampage.api.media.models import (
     AddMediaRequest,
     RemoveMediaRequest,
@@ -137,6 +137,7 @@ def upvote_media(
 @media_router.get("/list")
 def get_media_list(
     category: Optional[str] = None,
+    user: Optional[User] = Depends(get_optional_current_user),
 ) -> MediaListResponse:
     """Get all media entries, optionally filtered by category."""
     with get_db_session() as session:
@@ -147,10 +148,20 @@ def get_media_list(
         
         entries = query.order_by(Media.display_order).all()
 
+        # Get the set of media IDs the current user has upvoted
+        user_upvoted_media_ids = set()
+        if user:
+            user_upvotes = session.query(MediaUpvote.media_id).filter(
+                MediaUpvote.user_id == user.id
+            ).all()
+            user_upvoted_media_ids = {upvote.media_id for upvote in user_upvotes}
+
         media_list = []
         for entry in entries:
             # Count upvotes
             upvote_count = len(entry.upvotes)
+            # Check if current user has upvoted this media
+            has_upvoted = entry.id in user_upvoted_media_ids
 
             media_list.append(
                 MediaResponse(
@@ -161,7 +172,7 @@ def get_media_list(
                     url=entry.url,
                     display_order=entry.display_order,
                     upvote_count=upvote_count,
-                    user_has_upvoted=False,
+                    user_has_upvoted=has_upvoted,
                 )
             )
 
