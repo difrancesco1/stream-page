@@ -26,6 +26,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                 fill
                                 className="rounded-sm object-cover"
                             />
+                            <a className="absolute alt-text bottom-0 right-0 mx-1" target="_blank" href="https://x.com/fourdee2">@fourdee</a>
                         </div>
                     </div>
                     
