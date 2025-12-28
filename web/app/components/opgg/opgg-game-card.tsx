@@ -35,7 +35,7 @@ export default function OpggGameCard({
     const borderClass = win ? "border-blue-400" : "border-accent";
 
     return (
-        <div className="flex w-full h-[15%] pixel-borders my-1 items-center">
+        <div className="flex w-full h-[15%] pixel-borders my-1 items-center overflow-y-hidden">
             <div 
                 className={`relative w-8 h-8 mx-1 rounded-sm overflow-hidden border-2 ${borderClass} flex-shrink-0`}
                 title={championName}
@@ -48,24 +48,25 @@ export default function OpggGameCard({
                     className="object-cover"
                 />
             </div>
-            <div className="w-full h-full flex flex-col justify-center -mt-[6px]">
+            <div className="w-full h-full flex flex-col justify-center -mt-[5px] overflow-y-hidden">
                 <span className="flex justify-between items-center">
                     <div>
                     <span className={`${textClass} !text-[12px]`}>{resultText} </span>
                     <span className={`alt-text`}>{kills}/{deaths}/{assists}</span>
                     </div>
-                    <button
-                        onClick={() => onHide(matchId)}
-                        className="pixel-borders pixel-btn-remove-sm"
-                    >x
-                    </button>
+                    
                 </span>
 
                 <hr />
                 <span className="flex items-center">
-                    <div className="alt-text truncate"> {rank.split(" ")[0]}- {summonerName.substring(0,12)}</div>
+                    <div className="alt-text truncate"> {rank.split(" ")[0]}- {summonerName}</div>
                 </span>
             </div>
+            <button
+                onClick={() => onHide(matchId)}
+                className="pixel-borders pixel-btn-remove-sm mx-1"
+            >x
+            </button>
 
         </div>
     )
