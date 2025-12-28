@@ -76,8 +76,13 @@ interface IntListPlayerCardProps {
 export default function IntListPlayerCard({ entries, isLoading, error }: IntListPlayerCardProps) {
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-full">
-                <span className="main-text text-border/75">loading...</span>
+            <div className="relative flex items-center justify-center h-full">
+                <span className="main-text ">
+                    <img src="loading.gif"
+                        className="absolute bottom-0 right-0 h-10"
+                        alt="loading magical girl"
+                    ></img>
+                </span>
             </div>
         );
     }

@@ -61,7 +61,13 @@ export default function OpggGameCard({
 
                 <hr />
                 <span className="flex items-center">
-                    <div className="alt-text truncate"> {rank?.split(" ")[0]}: {leaguePoints}lp - {summonerName}</div>
+                    <div className="alt-text truncate"> 
+                        {rank.split("")[0]}
+                        {rank.split("").slice(-2).join("") == " I" ? "1 " : ""}
+                        {rank.split("").slice(-3).join("") == " II" ? "2 " : ""}
+                        {rank.split("").slice(-3).join("") == "III" ? "3 " : ""}
+                        {rank.split("").slice(-2).join("") == "IV" ? "4 " : ""}
+                        {leaguePoints}lp - {summonerName}</div>
                 </span>
             </div>
             <button
