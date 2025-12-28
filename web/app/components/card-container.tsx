@@ -183,7 +183,7 @@ export default function CardContainer() {
             className="pixel-btn text-xs flex items-center gap-2 hover:animate-pulse"
             onClick={logout}
           >
-            logout
+            x
           </button>
         ) : (
           <button 
