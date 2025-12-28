@@ -34,20 +34,20 @@ export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, o
                             href={url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="pixel-borders pixel-btn-border-sm cursor-pointer opacity-80">
+                            className="absolute top-[33%] pixel-borders pixel-btn-white-sm cursor-pointer opacity-80">
                             <span>url</span>
                         </a>
                     </div>
-                    <div className="-mt-[4.5px]">
-                        <button onClick={handleUpvote}
-                            disabled={!token}
-                            className="pixel-borders pixel-btn-remove-sm">
-                            <span className="text-[10px] font-bold leading-none">{upvoted ? "-1" : "+1"}</span>
-                            <span className="text-[8px] leading-none">{upvoteCount}</span>
-                        </button>
-                        <button className="pixel-borders pixel-btn-white-nohover">
+                    <div className="-mt-[5px]">
+                        <button className="relative pixel-borders pixel-btn-white-nohover top-1">
                             <span>{upvoteCount}</span>
                         </button>
+                        <button onClick={handleUpvote}
+                            disabled={!token}
+                            className="absolute pixel-borders pixel-btn-remove-sm right-0">
+                            <span>{upvoted ? "-" : "+"}</span>
+                        </button>
+                        
                     </div>
                 </div>
                 <hr></hr>
