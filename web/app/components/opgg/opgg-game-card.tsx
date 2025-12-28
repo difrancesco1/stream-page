@@ -15,6 +15,8 @@ interface OpggGameCardProps {
     assists: number;
     matchId: string;
     onHide: (matchId: string) => void;
+    summonerName: string;
+    rank: string | null;
 }
 
 export default function OpggGameCard({ 
@@ -24,7 +26,9 @@ export default function OpggGameCard({
     deaths, 
     assists, 
     matchId, 
-    onHide 
+    onHide,
+    summonerName,
+    rank,
 }: OpggGameCardProps) {
     const resultText = win ? "victory" : "defeat";
     const textClass = win ? "main-text" : "accent-text";

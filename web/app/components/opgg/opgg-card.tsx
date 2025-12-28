@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import CardHeader from "../shared/card-header"
 import OppggCardFooter from "./opgg-card-footer";
 import OpggGameCard from "./opgg-game-card";
@@ -14,6 +14,34 @@ import {
 } from "@/app/api/opgg/actions";
 import { useAuth } from "@/app/context/auth-context";
 
+// Rank comparison utilities
+const TIER_ORDER = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
+const RANK_ORDER = ['IV', 'III', 'II', 'I'];
+
+function getRankScore(tier: string | null, rank: string | null, lp: number | null): number {
+    if (!tier) return -1;
+    const tierIndex = TIER_ORDER.indexOf(tier.toUpperCase());
+    if (tierIndex === -1) return -1;
+    
+    // Master+ tiers don't have rank divisions
+    const isMasterPlus = tierIndex >= TIER_ORDER.indexOf('MASTER');
+    const rankIndex = isMasterPlus ? 0 : (rank ? RANK_ORDER.indexOf(rank.toUpperCase()) : 0);
+    const lpValue = lp ?? 0;
+    
+    // Score: tier * 1000 + rank * 100 + lp
+    return tierIndex * 1000 + rankIndex * 100 + lpValue;
+}
+
+function getHighestRankAccount(accounts: OpggAccount[]): OpggAccount | null {
+    if (accounts.length === 0) return null;
+    
+    return accounts.reduce((highest, current) => {
+        const highestScore = getRankScore(highest.tier, highest.rank, highest.league_points);
+        const currentScore = getRankScore(current.tier, current.rank, current.league_points);
+        return currentScore > highestScore ? current : highest;
+    }, accounts[0]);
+}
+
 interface OpggCardProps {
     onClose?: () => void;
     onMouseDown?: () => void;
@@ -22,6 +50,7 @@ interface OpggCardProps {
 interface Tab {
     title: string;
     account?: OpggAccount;
+    isAllTab?: boolean;
 }
 
 export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
@@ -40,24 +69,34 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
         const result = await getOpggAccounts();
         if (result.success) {
             setAccounts(result.accounts);
-            // Create tabs from accounts
+            // Create tabs from accounts with "All" tab first
             const accountTabs: Tab[] = result.accounts.map((account) => ({
                 title: account.game_name,
                 account,
             }));
-            setTabs(accountTabs);
-            // Set first tab as active if we have accounts
-            if (accountTabs.length > 0 && !activeTab) {
-                setActiveTab(accountTabs[0]);
+            
+            // Add "All" tab at the beginning if there are accounts
+            const allTabs: Tab[] = accountTabs.length > 0 
+                ? [{ title: "All", isAllTab: true }, ...accountTabs]
+                : accountTabs;
+            
+            setTabs(allTabs);
+            // Set "All" tab as active if we have accounts
+            if (allTabs.length > 0 && !activeTab) {
+                setActiveTab(allTabs[0]);
             } else if (activeTab) {
                 // Try to keep the same tab selected after refresh
-                const currentTab = accountTabs.find(t => t.account?.id === activeTab.account?.id);
-                if (currentTab) {
-                    setActiveTab(currentTab);
-                } else if (accountTabs.length > 0) {
-                    setActiveTab(accountTabs[0]);
+                if (activeTab.isAllTab) {
+                    setActiveTab(allTabs[0]);
                 } else {
-                    setActiveTab(null);
+                    const currentTab = allTabs.find(t => t.account?.id === activeTab.account?.id);
+                    if (currentTab) {
+                        setActiveTab(currentTab);
+                    } else if (allTabs.length > 0) {
+                        setActiveTab(allTabs[0]);
+                    } else {
+                        setActiveTab(null);
+                    }
                 }
             }
         }
@@ -114,8 +153,39 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
         }
     };
 
+    const isAllTab = activeTab?.isAllTab ?? false;
     const currentAccount = activeTab?.account;
-    const recentMatches: RecentMatch[] = currentAccount?.recent_matches || [];
+    
+    const recentMatches: (RecentMatch & { summonerName: string; rank: string | null })[] = useMemo(() => {
+        if (isAllTab) {
+            const allMatches = accounts.flatMap(account => 
+                account.recent_matches.map(match => ({
+                    ...match,
+                    summonerName: account.game_name,
+                    rank: account.tier && account.rank ? `${account.tier} ${account.rank}` : account.tier,
+                }))
+            );
+            const sorted = allMatches.sort((a, b) => {
+                const aNum = parseInt(a.match_id.split('_')[1] || '0', 10);
+                const bNum = parseInt(b.match_id.split('_')[1] || '0', 10);
+                return bNum - aNum;
+            });
+            return sorted.slice(0, 20);
+        }
+        return (currentAccount?.recent_matches || []).map(match => ({
+            ...match,
+            summonerName: currentAccount?.game_name || '',
+            rank: currentAccount?.tier && currentAccount?.rank ? `${currentAccount.tier} ${currentAccount.rank}` : currentAccount?.tier || null,
+        }));
+    }, [isAllTab, accounts, currentAccount]);
+    
+    // Get highest rank account for "All" tab footer
+    const highestRankAccount = useMemo(() => {
+        if (isAllTab) {
+            return getHighestRankAccount(accounts);
+        }
+        return null;
+    }, [isAllTab, accounts]);
 
     return (
         <>
@@ -188,14 +258,16 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                                     assists={match.assists}
                                     matchId={match.match_id}
                                     onHide={handleHideGame}
+                                    summonerName={match.summonerName}
+                                    rank={match.rank}
                                 />
                             ))
                         )}
                     </div>
                     <OppggCardFooter
-                        tier={currentAccount?.tier}
-                        rank={currentAccount?.rank}
-                        leaguePoints={currentAccount?.league_points}
+                        tier={isAllTab ? highestRankAccount?.tier : currentAccount?.tier}
+                        rank={isAllTab ? highestRankAccount?.rank : currentAccount?.rank}
+                        leaguePoints={isAllTab ? highestRankAccount?.league_points : currentAccount?.league_points}
                         onAddAccount={() => setShowAddForm(true)}
                         onRefresh={handleRefresh}
                         isRefreshing={isRefreshing}
