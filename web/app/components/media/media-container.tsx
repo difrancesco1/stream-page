@@ -17,11 +17,11 @@ interface Tab {
 }
 
 const tabs: Tab[] = [
-    { title: "movie", category: "movie" },
+    { title: "movies", category: "movie" },
     { title: "tv shows", category: "tv_show" },
     { title: "kdrama", category: "kdrama" },
     { title: "anime", category: "anime" },
-    { title: "youtube", category: "youtube" },
+    { title: "youtubers", category: "youtube" },
 ]
 
 export default function MediaContainer({ onClose, onMouseDown }: MediaContainerProps) {
