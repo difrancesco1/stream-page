@@ -236,3 +236,23 @@ class MediaUpvote(Base):
     __table_args__ = (
         UniqueConstraint("media_id", "user_id", name="uq_media_upvote_media_user"),
     )
+
+
+class CatEntry(Base):
+    """Cat pictures uploaded by users."""
+    __tablename__ = "cat_entry"
+    
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    creator_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))  # Always rosie
+    contributor_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))  # Who uploaded
+    image_url: Mapped[str] = mapped_column(String(500))  # Relative path to image file
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    contributor: Mapped["User"] = relationship(
+        "User", 
+        foreign_keys=[contributor_id],
+        viewonly=True
+    )
