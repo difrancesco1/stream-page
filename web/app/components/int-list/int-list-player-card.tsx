@@ -112,7 +112,7 @@ export default function IntListPlayerCard({ entries, isLoading, error }: IntList
                                 <ChampionIcon key={index} match={match} />
                             ))}
                             {(!entry.recent_matches || entry.recent_matches.length === 0) && (
-                                <span className="main-text text-[10px] text-border/50">no recent games</span>
+                                <span className="main-text text-[10px] alt-text">no recent games</span>
                             )}
                         </div>
                     </div>
@@ -121,7 +121,7 @@ export default function IntListPlayerCard({ entries, isLoading, error }: IntList
                     <hr></hr>
                     
                     {/* Bottom row: rank progression :: reason */}
-                    <div className="flex justify-between items-center text-border/50">
+                    <div className="flex justify-between items-center alt-text">
                         <div className="text-[8px] text-spacing">
                             <span>
                                 {formatRank(entry.rank_when_added)}

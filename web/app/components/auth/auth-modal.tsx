@@ -101,7 +101,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
                         setActiveTab={handleTabSwitch}
                     >
                         {/* Form */}
-                        <form onSubmit={handleSubmit} className="p-3 space-y-3">
+                        <form onSubmit={handleSubmit} className="p-3">
                             {error && (
                                 <div className="text-[10px] text-red-400 bg-red-400/10 px-2 py-1 pixel-borders">
                                     {error}
@@ -115,9 +115,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     disabled={isLoading}
-                                    className="w-full px-2 py-1 text-xs bg-background pixel-borders text-border 
-                                        focus:border-accent placeholder:text-border/50 disabled:opacity-50
-                                        outline-none"
+                                    className="w-full pixel-borders pixel-input"
                                     placeholder="enter username"
                                     autoComplete="username"
                                 />
@@ -130,9 +128,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     disabled={isLoading}
-                                    className="w-full px-2 py-1 text-xs bg-background pixel-borders text-border 
-                                        focus:border-accent placeholder:text-border/50 disabled:opacity-50
-                                        outline-none"
+                                    className="w-full pixel-borders pixel-input"
                                     placeholder="enter password"
                                     autoComplete={isLoginMode ? "current-password" : "new-password"}
                                 />
@@ -146,22 +142,21 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         disabled={isLoading}
-                                        className="w-full px-2 py-1 text-xs bg-background pixel-borders text-border 
-                                            focus:border-accent placeholder:text-border/50 disabled:opacity-50
-                                            outline-none"
+                                        className="w-full pixel-borders pixel-input"
                                         placeholder="confirm password"
                                         autoComplete="new-password"
                                     />
                                 </div>
                             )}
-
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full pixel-btn text-xs py-1 disabled:opacity-50"
-                            >
-                                {isLoading ? "..." : isLoginMode ? "login" : "register"}
-                            </button>
+                            <div className="flex justify-center">
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="pixel-borders pixel-btn-border mt-2"
+                                >
+                                    {isLoading ? "..." : isLoginMode ? "login" : "register"}
+                                </button>
+                            </div>
                         </form>
                     </CardHeader>
                 </div>

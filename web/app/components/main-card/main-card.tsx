@@ -13,7 +13,7 @@ interface MainCardProps {
 export default function MainCard({ onOpenCard, onMouseDown }: MainCardProps) {
   return (
     <div 
-      className="wrapper pixel-borders pixel-card w-full max-w-[350px] h-auto min-h-[237px] aspect-[5/3] bg-foreground"
+      className="relative wrapper pixel-borders pixel-card w-full max-w-[350px] h-auto min-h-[237px] aspect-[5/3] bg-foreground"
       onMouseDown={onMouseDown}
     >
       <CardHeader title="about" exitbtn={false} showTabs={false}>

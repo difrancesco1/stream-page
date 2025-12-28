@@ -130,48 +130,48 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                                 <span className="main-text">Loading...</span>
                             </div>
                         ) : showAddForm ? (
-                            <div className="flex flex-col gap-2 p-2">
+                            <div className="flex justify-center h-full flex-col px-5">
                                 <input
                                     type="text"
                                     placeholder="Summoner Name"
                                     value={summonerName}
                                     onChange={(e) => setSummonerName(e.target.value)}
-                                    className="pixel-borders px-2 py-1 text-xs bg-background text-border"
+                                    className=" pixel-borders pixel-input"
                                 />
                                 <input
                                     type="text"
                                     placeholder="Tag (e.g. NA1)"
                                     value={tagline}
                                     onChange={(e) => setTagline(e.target.value)}
-                                    className="pixel-borders px-2 py-1 text-xs bg-background text-border"
+                                    className=" pixel-borders pixel-input"
                                 />
                                 {addError && (
                                     <span className="text-accent text-xs">{addError}</span>
                                 )}
-                                <div className="flex gap-1">
+                                <div className="flex justify-center gap-1 py-1">
                                     <button
                                         onClick={handleAddAccount}
-                                        className="pixel-borders px-2 py-1 text-xs bg-border text-background hover:bg-accent"
+                                        className="pixel-borders pixel-btn-border"
                                     >
-                                        Add
+                                        add
                                     </button>
                                     <button
                                         onClick={() => {
                                             setShowAddForm(false);
                                             setAddError(null);
                                         }}
-                                        className="pixel-borders px-2 py-1 text-xs bg-background text-border hover:bg-accent hover:text-background"
+                                        className="pixel-borders pixel-btn-remove"
                                     >
-                                        Cancel
+                                        cancel
                                     </button>
                                 </div>
                             </div>
                         ) : accounts.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full gap-2">
+                            <div className="flex flex-col items-center justify-center h-full">
                                 <span className="main-text text-xs">No accounts added</span>
                                 <button
                                     onClick={() => setShowAddForm(true)}
-                                    className="pixel-borders px-2 py-1 text-xs bg-border text-background hover:bg-accent"
+                                    className="pixel-borders pixel-btn-border my-1"
                                 >
                                     + Add Account
                                 </button>

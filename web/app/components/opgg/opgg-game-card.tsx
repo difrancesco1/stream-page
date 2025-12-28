@@ -51,7 +51,8 @@ export default function OpggGameCard({
             </div>
             <button
                 onClick={() => onRemove(matchIndex)}
-                className="m-1 pixel-borders w-4 h-4 flex items-center justify-center bg-background text-accent hover:bg-accent hover:text-background transition-colors flex-shrink-0"
+                className="m-1 pixel-borders w-4 h-4 flex items-center justify-center bg-background text-accent 
+                hover:bg-accent hover:text-background transition-colors flex-shrink-0"
             >
                 <span className="text-xs font-bold leading-none">x</span>
             </button>
