@@ -42,7 +42,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
             setAccounts(result.accounts);
             // Create tabs from accounts
             const accountTabs: Tab[] = result.accounts.map((account) => ({
-                title: account.game_name,
+                title: account.game_name.substring(0,3),
                 account,
             }));
             setTabs(accountTabs);
