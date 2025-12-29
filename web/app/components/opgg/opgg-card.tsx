@@ -241,6 +241,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
     const parts = riotId.split("#");
     if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
       setAddError("Please enter in format: Name#TAG");
+      setIsLoading(false);
       return;
     }
 
@@ -258,6 +259,18 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
     }
     setIsLoading(false);
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !isLoading && isRiotIdValid) {
+      handleAddAccount();
+    }
+  };
+
+  const isRiotIdValid = (() => {
+    if (!riotId.trim()) return false;
+    const parts = riotId.split("#");
+    return parts.length === 2 && parts[0].trim() && parts[1].trim();
+  })();
 
   const handleHideGame = async (matchId: string) => {
     if (!token) return;
@@ -357,6 +370,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                   placeholder="Name#TAG"
                   value={riotId}
                   onChange={(e) => setRiotId(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   className=" pixel-borders pixel-input"
                 />
                 {addError && (
@@ -365,7 +379,8 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                 <div className="flex justify-center gap-1 py-1">
                   <button
                     onClick={handleAddAccount}
-                    className="pixel-borders pixel-btn-border"
+                    disabled={isLoading || !isRiotIdValid}
+                    className="pixel-borders pixel-btn-border disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? "..." : "add"}
                   </button>
@@ -376,7 +391,8 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                       setShowAddForm(false);
                       setAddError(null);
                     }}
-                    className="pixel-borders pixel-btn-remove"
+                    disabled={isLoading}
+                    className="pixel-borders pixel-btn-remove disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     cancel
                   </button>
@@ -421,6 +437,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
             onAddAccount={() => setShowAddForm(true)}
             onRefresh={handleRefresh}
             isRefreshing={isRefreshing}
+            isLoading={isLoading}
             hasAccounts={accounts.length > 0}
             onEasterEggTrigger={handleEasterEggTrigger}
             onLpClick={handleLpClick}

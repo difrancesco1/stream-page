@@ -9,6 +9,7 @@ interface OppggCardFooterProps {
   onAddAccount: () => void;
   onRefresh: () => void;
   isRefreshing: boolean;
+  isLoading: boolean;
   hasAccounts: boolean;
   onEasterEggTrigger?: () => void;
   onLpClick?: () => void;
@@ -21,6 +22,7 @@ export default function OppggCardFooter({
   onAddAccount,
   onRefresh,
   isRefreshing,
+  isLoading,
   hasAccounts,
   onEasterEggTrigger,
   onLpClick,
@@ -56,7 +58,8 @@ export default function OppggCardFooter({
       <div className="flex items-center gap-1">
         <button
           onClick={onAddAccount}
-          className="pixel-borders pixel-btn-white-sm"
+          disabled={isLoading}
+          className="pixel-borders pixel-btn-white-sm disabled:opacity-50 disabled:cursor-not-allowed"
           title="Add Account"
         >
           <span className="text-xs font-bold leading-none">+</span>
@@ -64,8 +67,8 @@ export default function OppggCardFooter({
         {hasAccounts && (
           <button
             onClick={onRefresh}
-            disabled={isRefreshing}
-            className="pixel-borders pixel-btn-white-sm"
+            disabled={isRefreshing || isLoading}
+            className="pixel-borders pixel-btn-white-sm disabled:opacity-50 disabled:cursor-not-allowed"
             title="Refresh"
           >
             <span
