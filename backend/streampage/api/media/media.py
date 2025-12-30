@@ -1,11 +1,13 @@
 from typing import Optional
+import uuid
 from fastapi import APIRouter, Depends, HTTPException
 
-from streampage.api.middleware.authenticator import get_current_user, get_optional_current_user
+from streampage.api.middleware.authenticator import get_current_user, get_optional_current_user, require_creator
 from streampage.api.media.models import (
     AddMediaRequest,
     RemoveMediaRequest,
     EditMediaRequest,
+    UpdateMediaRequest,
     UpvoteMediaRequest,
     SortMediaRequest,
     ResponseMessage,
@@ -197,4 +199,54 @@ def sort_media(
         session.commit()
 
         return ResponseMessage(message="Successfully sorted media")
+
+
+@media_router.patch("/{media_id}")
+def update_media(
+    media_id: str,
+    request: UpdateMediaRequest,
+    user=Depends(require_creator),
+) -> ResponseMessage:
+    """Update a media entry's name and/or info. Only creator can update."""
+    with get_db_session() as session:
+        try:
+            media_uuid = uuid.UUID(media_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid media ID format")
+        
+        entry = session.query(Media).filter(Media.id == media_uuid).first()
+        if not entry:
+            raise HTTPException(status_code=404, detail="Media not found")
+        
+        # Update only provided fields
+        if request.name is not None:
+            entry.name = request.name
+        if request.info is not None:
+            entry.info = request.info
+        
+        session.commit()
+        
+        return ResponseMessage(message="Successfully updated media")
+
+
+@media_router.delete("/{media_id}")
+def delete_media(
+    media_id: str,
+    user=Depends(require_creator),
+) -> ResponseMessage:
+    """Delete a media entry. Only creator can delete."""
+    with get_db_session() as session:
+        try:
+            media_uuid = uuid.UUID(media_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid media ID format")
+        
+        entry = session.query(Media).filter(Media.id == media_uuid).first()
+        if not entry:
+            raise HTTPException(status_code=404, detail="Media not found")
+        
+        session.delete(entry)
+        session.commit()
+        
+        return ResponseMessage(message="Successfully deleted media")
 

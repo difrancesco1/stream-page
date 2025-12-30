@@ -4,8 +4,10 @@ import CardHeader from "../shared/card-header";
 import { useState, useEffect, useCallback } from "react";
 import MediaFooter from "./media-footer"; 
 import MediaItem from "./media-item"; 
+import EditMediaModal from "./edit-media-modal";
 import { getMediaList, type MediaItem as MediaItemType, type MediaCategory } from "@/app/api/media/actions";
 import { useAuth } from "@/app/context/auth-context";
+import { useEditMode } from "@/app/context/edit-mode-context";
 
 interface MediaContainerProps {
     onClose?: () => void;
@@ -27,9 +29,11 @@ const tabs: Tab[] = [
 
 export default function MediaContainer({ onClose, onMouseDown }: MediaContainerProps) {
     const { token } = useAuth();
+    const { isEditMode } = useEditMode();
     const [activeTab, setActiveTab] = useState<Tab>(tabs[0]);
     const [mediaItems, setMediaItems] = useState<MediaItemType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [editingItem, setEditingItem] = useState<MediaItemType | null>(null);
 
     const fetchMedia = useCallback(async () => {
         setIsLoading(true);
@@ -57,47 +61,59 @@ export default function MediaContainer({ onClose, onMouseDown }: MediaContainerP
     );
 
     return (
-        <div 
-            className="relative wrapper pixel-borders pixel-card w-full max-w-[400px] h-auto min-h-[280px] aspect-[5/3] bg-foreground"
-            onMouseDown={onMouseDown}
-        >
-            <CardHeader
-                title="movies and more"
-                exitbtn={true}
-                onClose={onClose}
-                showTabs={true}
-                tabs={tabs}
-                activeTab={activeTab}
-                setActiveTab={handleSetActiveTab}
+        <>
+            <div 
+                className="relative wrapper pixel-borders pixel-card w-full max-w-[400px] h-auto min-h-[280px] aspect-[5/3] bg-foreground"
+                onMouseDown={onMouseDown}
             >
-                <div className="px-1 py-1 w-full h-full overflow-y-auto max-h-[180px]">
-                    {isLoading ? (
-                        <div className="relative flex items-center justify-center h-full">
-                        </div>
-                    ) : filteredMedia.length === 0 ? (
-                        <div className="flex items-center justify-center h-full">
-                            <span className="main-text text-xs opacity-50">No {activeTab.title} added yet</span>
-                        </div>
-                    ) : (
-                        filteredMedia.map((item) => (
-                            <MediaItem
-                                key={item.id}
-                                id={item.id}
-                                name={item.name}
-                                info={item.info}
-                                url={item.url}
-                                upvoteCount={item.upvote_count}
-                                upvoted={item.user_has_upvoted}
-                                onUpvote={fetchMedia}
-                            />
-                        ))
-                    )}
-                </div>
-                <MediaFooter 
-                    category={activeTab.category} 
-                    onMediaAdded={fetchMedia}
+                <CardHeader
+                    title="movies and more"
+                    exitbtn={true}
+                    onClose={onClose}
+                    showTabs={true}
+                    tabs={tabs}
+                    activeTab={activeTab}
+                    setActiveTab={handleSetActiveTab}
+                >
+                    <div className="px-1 py-1 w-full h-full overflow-y-auto max-h-[180px]">
+                        {isLoading ? (
+                            <div className="relative flex items-center justify-center h-full">
+                            </div>
+                        ) : filteredMedia.length === 0 ? (
+                            <div className="flex items-center justify-center h-full">
+                                <span className="main-text text-xs opacity-50">No {activeTab.title} added yet</span>
+                            </div>
+                        ) : (
+                            filteredMedia.map((item) => (
+                                <MediaItem
+                                    key={item.id}
+                                    id={item.id}
+                                    name={item.name}
+                                    info={item.info}
+                                    url={item.url}
+                                    upvoteCount={item.upvote_count}
+                                    upvoted={item.user_has_upvoted}
+                                    onUpvote={fetchMedia}
+                                    onClick={isEditMode ? () => setEditingItem(item) : undefined}
+                                />
+                            ))
+                        )}
+                    </div>
+                    <MediaFooter 
+                        category={activeTab.category} 
+                        onMediaAdded={fetchMedia}
+                    />
+                </CardHeader>
+            </div>
+            
+            {editingItem && (
+                <EditMediaModal
+                    open={!!editingItem}
+                    onOpenChange={(open) => !open && setEditingItem(null)}
+                    item={editingItem}
+                    onSuccess={fetchMedia}
                 />
-            </CardHeader>
-        </div>
+            )}
+        </>
     )
 }

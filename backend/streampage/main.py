@@ -9,6 +9,7 @@ from streampage.api.media.media import media_router
 from streampage.api.opgg.opgg import opgg_router
 from streampage.api.riot.riot import riot_router
 from streampage.api.user.user import users_router
+from streampage.api.page.page import page_router
 from streampage.config import FRONTEND_URL, IS_RAILWAY
 from streampage.db.engine import get_db
 
@@ -68,6 +69,7 @@ app.include_router(riot_router, prefix="/riot")
 app.include_router(opgg_router, prefix="/opgg")
 app.include_router(media_router, prefix="/media")
 app.include_router(cat_router, prefix="/cats")
+app.include_router(page_router, prefix="/page")
 
 # Mount static files for uploads
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")

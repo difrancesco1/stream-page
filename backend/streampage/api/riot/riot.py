@@ -1,8 +1,9 @@
 from typing import Optional
+import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
-from streampage.api.middleware.authenticator import get_current_user
+from streampage.api.middleware.authenticator import get_current_user, require_creator
 from streampage.api.riot.models import (
     AddToIntListRequest,
     IntListContributor,
@@ -11,6 +12,7 @@ from streampage.api.riot.models import (
     IntListResponse,
     RecentMatch,
     ResponseMessage,
+    UpdateIntListEntryRequest,
 )
 from streampage.db.engine import get_db_session
 from streampage.db.models import IntListEntry, SummonerData, User
@@ -182,3 +184,48 @@ def refresh_int_list_entry(
         session.commit()
         
         return ResponseMessage(message="Summoner data refreshed")
+
+
+@riot_router.patch("/int_list/{entry_id}")
+def update_int_list_entry(
+    entry_id: str,
+    request: UpdateIntListEntryRequest,
+    user=Depends(require_creator),
+) -> ResponseMessage:
+    """Update the reason for an int list entry. Only creator can update."""
+    with get_db_session() as session:
+        try:
+            entry_uuid = uuid.UUID(entry_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid entry ID format")
+        
+        entry = session.query(IntListEntry).filter(IntListEntry.id == entry_uuid).first()
+        if not entry:
+            raise HTTPException(status_code=404, detail="Entry not found")
+        
+        entry.user_reason = request.user_reason
+        session.commit()
+        
+        return ResponseMessage(message="Entry updated successfully")
+
+
+@riot_router.delete("/int_list/{entry_id}")
+def delete_int_list_entry(
+    entry_id: str,
+    user=Depends(require_creator),
+) -> ResponseMessage:
+    """Delete an int list entry. Only creator can delete."""
+    with get_db_session() as session:
+        try:
+            entry_uuid = uuid.UUID(entry_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid entry ID format")
+        
+        entry = session.query(IntListEntry).filter(IntListEntry.id == entry_uuid).first()
+        if not entry:
+            raise HTTPException(status_code=404, detail="Entry not found")
+        
+        session.delete(entry)
+        session.commit()
+        
+        return ResponseMessage(message="Entry deleted successfully")

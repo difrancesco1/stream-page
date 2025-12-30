@@ -5,6 +5,7 @@ import Image from "next/image";
 import CardHeader from "../shared/card-header";
 import OppggCardFooter from "./opgg-card-footer";
 import OpggGameCard from "./opgg-game-card";
+import ManageOpggModal from "./manage-opgg-modal";
 import {
   getOpggAccounts,
   addOpggAccount,
@@ -14,6 +15,7 @@ import {
   type RecentMatch,
 } from "@/app/api/opgg/actions";
 import { useAuth } from "@/app/context/auth-context";
+import { useEditMode } from "@/app/context/edit-mode-context";
 
 interface FloatingEmoteProps {
   id: number;
@@ -137,6 +139,7 @@ interface Tab {
 
 export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
   const { token } = useAuth();
+  const { isEditMode } = useEditMode();
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTab, setActiveTab] = useState<Tab | null>(null);
   const [accounts, setAccounts] = useState<OpggAccount[]>([]);
@@ -145,6 +148,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [riotId, setRiotId] = useState("");
   const [addError, setAddError] = useState<string | null>(null);
+  const [showManageModal, setShowManageModal] = useState(false);
 
   // Easter egg state
   const [showHiddenMatches, setShowHiddenMatches] = useState(false);
@@ -361,6 +365,16 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
           setActiveTab={handleSetActiveTab}
         >
           <div className="px-1 py-1 w-full h-full overflow-y-auto">
+            {isEditMode && accounts.length > 0 && (
+              <div className="px-1 mb-2">
+                <button
+                  onClick={() => setShowManageModal(true)}
+                  className="w-full pixel-btn text-xs bg-accent text-foreground hover:animate-pulse"
+                >
+                  Manage Accounts
+                </button>
+              </div>
+            )}
             {isLoading ? (
               <div className="relative flex items-center justify-center h-full"></div>
             ) : showAddForm ? (
@@ -453,6 +467,18 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
           />
         ))}
       </div>
+
+      {/* Manage OPGG Modal */}
+      {showManageModal && (
+        <ManageOpggModal
+          open={showManageModal}
+          onOpenChange={setShowManageModal}
+          accounts={accounts}
+          onSuccess={() => {
+            fetchAccounts(showHiddenMatches); // Just refresh, don't close
+          }}
+        />
+      )}
     </>
   );
 }

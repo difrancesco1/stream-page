@@ -20,6 +20,14 @@ class HideOpggGameRequest(BaseModel):
     match_id: str
 
 
+class UnhideOpggGameRequest(BaseModel):
+    match_id: str
+
+
+class UnhideAllGamesRequest(BaseModel):
+    account_id: Optional[str] = None  # If None, unhide all games globally
+
+
 class ResponseMessage(BaseModel):
     message: str
 

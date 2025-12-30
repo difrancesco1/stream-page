@@ -96,3 +96,23 @@ def get_optional_current_user(token: str | None = Depends(OAUTH2_SCHEME)) -> Use
             return user
         except Exception:
             return None
+
+
+def require_creator(user: User = Depends(get_current_user)) -> User:
+    """Require that the current user is the creator (rosie).
+    
+    Args:
+        user: The authenticated user from get_current_user
+        
+    Returns:
+        The user if they are the creator
+        
+    Raises:
+        HTTPException: 403 if the user is not the creator
+    """
+    if user.username.lower() != "rosie":
+        raise HTTPException(
+            status_code=403, 
+            detail="Only the page creator can perform this action"
+        )
+    return user

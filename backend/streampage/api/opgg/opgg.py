@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
+import uuid
 
-from streampage.api.middleware.authenticator import get_current_user
+from streampage.api.middleware.authenticator import get_current_user, require_creator
 from streampage.api.opgg.models import (
     AddOpggAccountRequest,
     RemoveOpggAccountRequest,
     SortOpggAccountsRequest,
     HideOpggGameRequest,
+    UnhideOpggGameRequest,
+    UnhideAllGamesRequest,
     ResponseMessage,
     RecentMatch,
     OpggAccountResponse,
@@ -259,4 +262,100 @@ def refresh_opgg_accounts(
         session.commit()
 
         return ResponseMessage(message=f"Successfully refreshed {refreshed_count} accounts")
+
+
+@opgg_router.post("/unhide_game")
+def unhide_opgg_game(
+    request: UnhideOpggGameRequest,
+    user=Depends(require_creator),
+) -> ResponseMessage:
+    """Unhide a specific game. Only creator can unhide."""
+    with get_db_session() as session:
+        # Find rosie
+        rosie_user = session.query(User).filter(User.username == "rosie").first()
+        if not rosie_user:
+            raise HTTPException(status_code=404, detail="Page owner not found")
+        
+        # Find and delete the hidden match record
+        hidden = session.query(HiddenMatch).filter(
+            HiddenMatch.owner_id == rosie_user.id,
+            HiddenMatch.match_id == request.match_id
+        ).first()
+        
+        if not hidden:
+            raise HTTPException(status_code=404, detail="Hidden game not found")
+        
+        session.delete(hidden)
+        session.commit()
+        
+        return ResponseMessage(message="Successfully unhid game")
+
+
+@opgg_router.post("/unhide_all_games")
+def unhide_all_opgg_games(
+    request: UnhideAllGamesRequest,
+    user=Depends(require_creator),
+) -> ResponseMessage:
+    """Unhide all games, optionally for a specific account. Only creator can unhide."""
+    with get_db_session() as session:
+        # Find rosie
+        rosie_user = session.query(User).filter(User.username == "rosie").first()
+        if not rosie_user:
+            raise HTTPException(status_code=404, detail="Page owner not found")
+        
+        # Base query for hidden matches
+        query = session.query(HiddenMatch).filter(HiddenMatch.owner_id == rosie_user.id)
+        
+        # If account_id specified, filter by that account's matches
+        if request.account_id:
+            try:
+                account_uuid = uuid.UUID(request.account_id)
+                account = session.query(OpggEntry).filter(OpggEntry.id == account_uuid).first()
+                if not account:
+                    raise HTTPException(status_code=404, detail="Account not found")
+                
+                # Get all match IDs for this account from summoner data
+                summoner_data = account.summoner_data
+                if summoner_data and summoner_data.recent_matches:
+                    match_ids = [match.get("match_id") for match in summoner_data.recent_matches]
+                    query = query.filter(HiddenMatch.match_id.in_(match_ids))
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid account ID format")
+        
+        # Delete all matching hidden records
+        count = query.delete(synchronize_session=False)
+        session.commit()
+        
+        return ResponseMessage(message=f"Successfully unhid {count} games")
+
+
+@opgg_router.put("/reorder_accounts")
+def reorder_opgg_accounts(
+    request: SortOpggAccountsRequest,
+    user=Depends(require_creator),
+) -> ResponseMessage:
+    """Reorder OPGG accounts. Only creator can reorder."""
+    with get_db_session() as session:
+        # Find rosie
+        rosie_user = session.query(User).filter(User.username == "rosie").first()
+        if not rosie_user:
+            raise HTTPException(status_code=404, detail="Page owner not found")
+        
+        # Update display_order for each account
+        for index, account_id in enumerate(request.account_ids):
+            try:
+                account_uuid = uuid.UUID(account_id)
+                account = session.query(OpggEntry).filter(
+                    OpggEntry.id == account_uuid,
+                    OpggEntry.owner_id == rosie_user.id
+                ).first()
+                
+                if account:
+                    account.display_order = index
+            except ValueError:
+                continue  # Skip invalid UUIDs
+        
+        session.commit()
+        
+        return ResponseMessage(message="Successfully reordered accounts")
 

@@ -3,6 +3,8 @@ import { useState, useCallback, useEffect } from "react";
 import CardHeader from "../shared/card-header";
 import IntListPlayerCard from "./int-list-player-card";
 import IntListFooter from "./int-list-footer";
+import EditIntListModal from "./edit-int-list-modal";
+import { useEditMode } from "@/app/context/edit-mode-context";
 import {
   getIntListEntries,
   getIntListContributors,
@@ -27,6 +29,8 @@ export default function IntListCard({ onClose, onMouseDown }: IntListCardProps) 
   const [entries, setEntries] = useState<IntListEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isEditMode } = useEditMode();
+  const [editingEntry, setEditingEntry] = useState<IntListEntry | null>(null);
 
   useEffect(() => {
     const fetchContributors = async () => {
@@ -120,10 +124,19 @@ export default function IntListCard({ onClose, onMouseDown }: IntListCardProps) 
             entries={entries}
             isLoading={isLoading}
             error={error}
+            onEntryClick={isEditMode ? (entry) => setEditingEntry(entry) : undefined}
           />
         </div>
         <IntListFooter onEntryAdded={handleEntryAdded} />
       </CardHeader>
+      {editingEntry && (
+        <EditIntListModal
+          open={!!editingEntry}
+          onOpenChange={(open) => !open && setEditingEntry(null)}
+          entry={editingEntry}
+          onSuccess={handleEntryAdded}
+        />
+      )}
     </div>
   );
 }

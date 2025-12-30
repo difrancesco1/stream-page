@@ -279,3 +279,77 @@ export async function sortMedia(
     }
 }
 
+export async function updateMediaItem(
+    token: string,
+    mediaId: string,
+    data: { name?: string; info?: string }
+): Promise<MediaResult> {
+    try {
+        const response = await fetch(`${API_URL}/media/${mediaId}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: "",
+                error: result.detail || result.message || "Failed to update media",
+            };
+        }
+
+        return {
+            success: true,
+            message: result.message || "Successfully updated media",
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: "",
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function deleteMediaItem(
+    token: string,
+    mediaId: string
+): Promise<MediaResult> {
+    try {
+        const response = await fetch(`${API_URL}/media/${mediaId}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: "",
+                error: result.detail || result.message || "Failed to delete media",
+            };
+        }
+
+        return {
+            success: true,
+            message: result.message || "Successfully deleted media",
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: "",
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
