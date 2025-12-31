@@ -43,3 +43,7 @@ class IntListContributor(BaseModel):
 
 class IntListContributorsResponse(BaseModel):
     contributors: list[IntListContributor]
+
+
+class UpdateIntListEntryRequest(BaseModel):
+    user_reason: str

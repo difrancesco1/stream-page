@@ -255,3 +255,16 @@ class CatEntry(Base):
         foreign_keys=[contributor_id],
         viewonly=True
     )
+
+
+class PageConfig(Base):
+    """Configuration for the page (background, theme, etc.)."""
+    __tablename__ = "page_config"
+    
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"), unique=True)
+    background_image: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

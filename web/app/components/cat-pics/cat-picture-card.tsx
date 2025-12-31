@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "@/app/context/auth-context"
 import { fetchCatImages, deleteCatImage, type CatImage } from "@/app/api/cat/actions"
-import { API_URL } from "@/lib/api"
+import { getImageUrl } from "@/lib/api"
 import Image from "next/image"
 
 interface CatPictureCardProps {
@@ -83,7 +83,7 @@ export default function CatPictureCard({ onImageDeleted }: CatPictureCardProps) 
                     <div key={cat.id} className="relative w-full h-30 flex flex-col">
                         <div className="absolute inset-0 pixel-borders w-full h-30 bg-background overflow-hidden flex items-center justify-center">
                             <Image
-                                src={`${API_URL}${cat.image_url}`}
+                                src={getImageUrl(cat.image_url)}
                                 alt={`Cat by ${cat.contributor_username}`}
                                 width={120}
                                 height={110}

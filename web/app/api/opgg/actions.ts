@@ -266,3 +266,151 @@ export async function refreshOpggAccounts(token: string): Promise<OpggResult> {
     }
 }
 
+export async function unhideOpggGame(
+    token: string,
+    matchId: string
+): Promise<OpggResult> {
+    try {
+        const response = await fetch(`${API_URL}/opgg/unhide_game`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ match_id: matchId }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: "",
+                error: data.detail || data.message || "Failed to unhide game",
+            };
+        }
+
+        return {
+            success: true,
+            message: data.message || "Successfully unhid game",
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: "",
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function unhideAllOpggGames(
+    token: string,
+    accountId?: string
+): Promise<OpggResult> {
+    try {
+        const response = await fetch(`${API_URL}/opgg/unhide_all_games`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ account_id: accountId || null }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: "",
+                error: data.detail || data.message || "Failed to unhide games",
+            };
+        }
+
+        return {
+            success: true,
+            message: data.message || "Successfully unhid all games",
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: "",
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function deleteOpggAccount(
+    token: string,
+    accountId: string
+): Promise<OpggResult> {
+    try {
+        const response = await fetch(`${API_URL}/opgg/remove_account`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ account_id: accountId }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: "",
+                error: data.detail || data.message || "Failed to delete account",
+            };
+        }
+
+        return {
+            success: true,
+            message: data.message || "Successfully deleted account",
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: "",
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function reorderOpggAccounts(
+    token: string,
+    accountIds: string[]
+): Promise<OpggResult> {
+    try {
+        const response = await fetch(`${API_URL}/opgg/reorder_accounts`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ account_ids: accountIds }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: "",
+                error: data.detail || data.message || "Failed to reorder accounts",
+            };
+        }
+
+        return {
+            success: true,
+            message: data.message || "Successfully reordered accounts",
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: "",
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+

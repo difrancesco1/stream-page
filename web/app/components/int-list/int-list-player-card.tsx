@@ -71,9 +71,10 @@ interface IntListPlayerCardProps {
     entries: IntListEntry[];
     isLoading: boolean;
     error: string | null;
+    onEntryClick?: (entry: IntListEntry) => void;
 }
 
-export default function IntListPlayerCard({ entries, isLoading, error }: IntListPlayerCardProps) {
+export default function IntListPlayerCard({ entries, isLoading, error, onEntryClick }: IntListPlayerCardProps) {
     if (isLoading) {
         return (
             <div className="relative flex items-center justify-center h-full">
@@ -106,7 +107,11 @@ export default function IntListPlayerCard({ entries, isLoading, error }: IntList
     return (
         <div className="flex flex-col gap-1">
             {entries.map((entry) => (
-                <div key={entry.id} className="flex flex-col w-full pixel-borders px-1">
+                <div 
+                    key={entry.id} 
+                    className={`flex flex-col w-full pixel-borders px-1 ${onEntryClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
+                    onClick={() => onEntryClick?.(entry)}
+                >
                     {/* Top row: summoner#tag :: champion icons */}
                     <div className="flex justify-between items-center gap-1 flex-wrap">
                         <span className="main-text text-xs font-bold">

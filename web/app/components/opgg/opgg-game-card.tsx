@@ -14,7 +14,7 @@ interface OpggGameCardProps {
     deaths: number;
     assists: number;
     matchId: string;
-    onHide: (matchId: string) => void;
+    onHide?: (matchId: string) => void;
     summonerName: string;
     rank: string | null;
     leaguePoints: number | null;
@@ -62,24 +62,32 @@ export default function OpggGameCard({
                 <hr />
                 <span className="flex items-center">
                     <div className="alt-text truncate"> 
-                        {rank.split("")[0]}
-                        {rank.split("").slice(-2).join("") == " I" ? "1 " : ""}
-                        {rank.split("").slice(-3).join("") == " II" ? "2 " : ""}
-                        {rank.split("").slice(-3).join("") == "III" ? "3 " : ""}
-                        {rank.split("").slice(-2).join("") == "IV" ? "4 " : ""}
-                        {leaguePoints}lp - {summonerName}</div>
+                        {rank ? (
+                            <>
+                                {rank.split("")[0]}
+                                {rank.split("").slice(-2).join("") == " I" ? "1 " : ""}
+                                {rank.split("").slice(-3).join("") == " II" ? "2 " : ""}
+                                {rank.split("").slice(-3).join("") == "III" ? "3 " : ""}
+                                {rank.split("").slice(-2).join("") == "IV" ? "4 " : ""}
+                            </>
+                        ) : (
+                            "Unranked "
+                        )}
+                        {leaguePoints ?? 0}lp - {summonerName}
+                    </div>
                 </span>
             </div>
-            <button
-                type="button"
-                onClick={(e) => {
-                    e.preventDefault();
-                    onHide(matchId);
-                }}
-                className="pixel-borders pixel-btn-remove-sm mx-1"
-            >x
-            </button>
-
+            {onHide && (
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        onHide(matchId);
+                    }}
+                    className="pixel-borders pixel-btn-remove-sm mx-1"
+                >x
+                </button>
+            )}
         </div>
     )
 }

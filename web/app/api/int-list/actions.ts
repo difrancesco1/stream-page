@@ -157,3 +157,77 @@ export async function getIntListContributors(): Promise<GetContributorsResult> {
         };
     }
 }
+
+export async function updateIntListEntry(
+    token: string,
+    entryId: string,
+    userReason: string
+): Promise<IntListResult> {
+    try {
+        const response = await fetch(`${API_URL}/riot/int_list/${entryId}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ user_reason: userReason }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: "",
+                error: data.detail || data.message || "Failed to update entry",
+            };
+        }
+
+        return {
+            success: true,
+            message: data.message || "Entry updated successfully",
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: "",
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function deleteIntListEntry(
+    token: string,
+    entryId: string
+): Promise<IntListResult> {
+    try {
+        const response = await fetch(`${API_URL}/riot/int_list/${entryId}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                message: "",
+                error: data.detail || data.message || "Failed to delete entry",
+            };
+        }
+
+        return {
+            success: true,
+            message: data.message || "Entry deleted successfully",
+        };
+    } catch (error) {
+        return {
+            success: false,
+            message: "",
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}

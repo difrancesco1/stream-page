@@ -9,6 +9,7 @@ import CatPictureContainer from "./cat-pics/cat-picture-container";
 import MediaContainer from "./media/media-container";
 import Image from "next/image";
 import { useAuth } from "@/app/context/auth-context";
+import { useEditMode } from "@/app/context/edit-mode-context";
 import AuthModal from "./auth/auth-modal";
 
 type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures";
@@ -74,6 +75,7 @@ export default function CardContainer() {
 
   const { isAuthenticated, user, logout } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const { isEditMode, toggleEditMode, canEdit } = useEditMode();
 
   const bringToFront = useCallback((cardId: CardId) => {
     zIndexCounterRef.current += 1;
@@ -179,12 +181,23 @@ export default function CardContainer() {
 
       <div className="absolute top-4 right-4 z-[9999]">
         {isAuthenticated ? (
-          <button 
-            className="pixel-btn text-xs flex items-center gap-2 hover:animate-pulse"
-            onClick={logout}
-          >
-            x
-          </button>
+          <div className="flex gap-2">
+            {canEdit && (
+              <button 
+                className={`pixel-btn text-xs flex items-center gap-2 hover:animate-pulse ${isEditMode ? 'bg-accent text-foreground' : ''}`}
+                onClick={toggleEditMode}
+                title={isEditMode ? "Exit Edit Mode" : "Enter Edit Mode"}
+              >
+                {isEditMode ? "✓ edit" : "edit"}
+              </button>
+            )}
+            <button 
+              className="pixel-btn text-xs flex items-center gap-2 hover:animate-pulse"
+              onClick={logout}
+            >
+              x
+            </button>
+          </div>
         ) : (
           <button 
             className="pixel-btn text-xs hover:animate-pulse"

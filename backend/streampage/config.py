@@ -18,5 +18,6 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 SECRET_KEY: Final[str] = os.getenv("SECRET_KEY", "2cb48b02c2191d966bad7116")
 ALGORITHM: Final[str] = os.getenv("ALGORITHM", "HS256")
 OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="users/login")
+OAUTH2_SCHEME_OPTIONAL = OAuth2PasswordBearer(tokenUrl="users/login", auto_error=False)
 
-RIOT_API_KEY: Final[str] = os.getenv("RIOT_API_KEY", "RGAPI-832357da-7c86-4ccd-9aea-0c400b718a5c")
+RIOT_API_KEY: Final[str] = os.getenv("RIOT_API_KEY", "RGAPI-6abca425-c53a-4059-ba3b-62dde8648ceb")
