@@ -34,21 +34,37 @@ export async function uploadCatImage(
             body: formData,
         });
 
-        const data = await response.json();
-
+        // Check if response is ok before trying to parse JSON
         if (!response.ok) {
+            // Try to get error details from response
+            let errorMessage = `Server error: ${response.status}`;
+            try {
+                const data = await response.json();
+                errorMessage = data.detail || data.message || errorMessage;
+            } catch {
+                // If JSON parsing fails, try to get text
+                try {
+                    const text = await response.text();
+                    if (text) errorMessage = text;
+                } catch {
+                    // Ignore
+                }
+            }
             return {
                 success: false,
                 message: "",
-                error: data.detail || data.message || "Failed to upload image",
+                error: errorMessage,
             };
         }
+
+        const data = await response.json();
 
         return {
             success: true,
             message: data.message || "Successfully uploaded cat image",
         };
     } catch (error) {
+        console.error("uploadCatImage error:", error);
         return {
             success: false,
             message: "",

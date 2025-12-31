@@ -7,7 +7,7 @@ class Platform(PyEnum):
     YOUTUBE = "youtube"
     DISCORD = "discord"
     TIKTOK = "tiktok"
-    HIGHLIGHT = "highlight"
+    VGEN = "vgen"
 
 
 class SectionType(PyEnum):

@@ -14,7 +14,7 @@ interface OpggGameCardProps {
     deaths: number;
     assists: number;
     matchId: string;
-    onHide: (matchId: string) => void;
+    onHide?: (matchId: string) => void;
     summonerName: string;
     rank: string | null;
     leaguePoints: number | null;
@@ -77,16 +77,17 @@ export default function OpggGameCard({
                     </div>
                 </span>
             </div>
-            <button
-                type="button"
-                onClick={(e) => {
-                    e.preventDefault();
-                    onHide(matchId);
-                }}
-                className="pixel-borders pixel-btn-remove-sm mx-1"
-            >x
-            </button>
-
+            {onHide && (
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        onHide(matchId);
+                    }}
+                    className="pixel-borders pixel-btn-remove-sm mx-1"
+                >x
+                </button>
+            )}
         </div>
     )
 }

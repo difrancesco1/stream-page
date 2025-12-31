@@ -1,6 +1,7 @@
 "use client"
 import Image from "next/image"
 import { useProfile } from "@/app/context/profile-context";
+import { getImageUrl, isBackendImage } from "@/lib/api";
 
 type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures";
 
@@ -42,7 +43,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
     const { profile, isLoading } = useProfile();
     
     const biography = profile?.biography || [];
-    const featuredImage = profile?.featured_image || "/wide-rose.png";
+    const featuredImage = getImageUrl(profile?.featured_image) || "/wide-rose.png";
     const twitterHandle = extractTwitterHandle(profile?.social_links || null);
     
     return (
@@ -62,12 +63,13 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                 <div className="justify-start">
                     <div className="flex py-1 border-t-2 px-1 ">
                         <div className="relative w-full aspect-video ">
-                            <Image
-                                src={featuredImage}
-                                alt="Featured"
-                                fill
-                                className="rounded-sm object-cover"
-                            />
+<Image
+                                                src={featuredImage}
+                                                alt="Featured"
+                                                fill
+                                                className="rounded-sm object-cover"
+                                                unoptimized={isBackendImage(profile?.featured_image)}
+                                            />
                             {twitterHandle && (
                                 <a 
                                     className="absolute alt-text bottom-0 right-0 mx-1" 

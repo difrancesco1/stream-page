@@ -32,23 +32,29 @@ export default function CatPicturesFooter({ onImageUploaded }: CatPicturesFooter
         
         setIsUploading(true)
         
-        const formData = new FormData()
-        formData.append("file", selectedFile)
-        
-        const result = await uploadCatImage(token, formData)
-        
-        if (result.success) {
-            setSelectedFile(null)
-            if (fileInputRef.current) {
-                fileInputRef.current.value = ''
+        try {
+            const formData = new FormData()
+            formData.append("file", selectedFile)
+            
+            const result = await uploadCatImage(token, formData)
+            
+            if (result.success) {
+                setSelectedFile(null)
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = ''
+                }
+                if (onImageUploaded) {
+                    onImageUploaded()
+                }
+            } else {
+                alert(result.error || "Failed to upload image")
             }
-            if (onImageUploaded) {
-                onImageUploaded()
-            }
-        } else {
-            alert(result.error || "Failed to upload image")
+        } catch (error) {
+            console.error("Upload error:", error)
+            alert(`Upload failed: ${error instanceof Error ? error.message : "Unknown error occurred"}`)
+        } finally {
+            setIsUploading(false)
         }
-        setIsUploading(false)
     }
 
     // Only show upload UI for authenticated users

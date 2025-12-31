@@ -2,68 +2,29 @@
 
 import Image from "next/image";
 import { useProfile } from "@/app/context/profile-context";
+import { getImageUrl, isBackendImage } from "@/lib/api";
 
-function calculateAge(birthday: string | null): string | null {
+function calculateAge(birthday?: string | null): string | null {
     if (!birthday) return null;
     
-    // Handle format like "10/07" (month/day) - assume current year
-    // Or handle full date format like "10/07/1994" or "1994-10-07"
-    try {
-        let birthDate: Date;
-        
-        if (birthday.includes("/")) {
-            const parts = birthday.split("/");
-            if (parts.length === 2) {
-                // Format: MM/DD - use current year
-                const currentYear = new Date().getFullYear();
-                birthDate = new Date(`${currentYear}-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}`);
-            } else if (parts.length === 3) {
-                // Format: MM/DD/YYYY
-                birthDate = new Date(`${parts[2]}-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}`);
-            } else {
-                return null;
-            }
-        } else {
-            birthDate = new Date(birthday);
-        }
-        
-        if (isNaN(birthDate.getTime())) return null;
-        
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-        
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        
-        return `${age}yr`;
-    } catch {
-        return null;
+    const [month, day, year] = birthday.split("/");
+    const birthDate = new Date(+year, +month - 1, +day);
+    
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
     }
+    
+    return `${age}yr`;
 }
 
-function formatBirthday(birthday: string | null): string {
+function formatBirthday(birthday?: string | null): string {
     if (!birthday) return "[--/--]";
-    
-    // If already in MM/DD format, return as is
-    if (birthday.match(/^\d{1,2}\/\d{1,2}$/)) {
-        return `[${birthday}]`;
-    }
-    
-    // Try to parse and format as MM/DD
-    try {
-        const date = new Date(birthday);
-        if (!isNaN(date.getTime())) {
-            const month = (date.getMonth() + 1).toString().padStart(2, "0");
-            const day = date.getDate().toString().padStart(2, "0");
-            return `[${month}/${day}]`;
-        }
-    } catch {
-        // Fall through to return original
-    }
-    
-    return `[${birthday}]`;
+    const [month, day] = birthday.split("/");
+    return `[${month}/${day}]`;
 }
 
 function getSocialIconClass(platform: string): string {
@@ -80,7 +41,7 @@ export default function ProfileSection() {
     const { profile, isLoading } = useProfile();
     
     const displayName = profile?.display_name || "Rosie";
-    const profilePicture = profile?.profile_picture || "/profile.gif";
+    const profilePicture = getImageUrl(profile?.profile_picture) || "/profile.gif";
     const birthday = profile?.birthday;
     const formattedBirthday = formatBirthday(birthday);
     const age = calculateAge(birthday);
@@ -95,6 +56,7 @@ export default function ProfileSection() {
                         alt="Profile"
                         fill
                         className="pixel-borders-dome rounded-sm object-cover"
+                        unoptimized={isBackendImage(profile?.profile_picture)}
                     />
                 </div>
                 <div className="w-[60%] flex items-center ">

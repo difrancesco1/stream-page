@@ -11,6 +11,7 @@ from fastapi import HTTPException
 
 from streampage.config import ALGORITHM
 from streampage.config import OAUTH2_SCHEME
+from streampage.config import OAUTH2_SCHEME_OPTIONAL
 from streampage.config import SECRET_KEY
 from streampage.db.engine import get_db_session
 from streampage.db.models import User
@@ -71,7 +72,7 @@ def get_current_user(token: str = Depends(OAUTH2_SCHEME)) -> User:
             raise HTTPException(status_code=403, detail="Database error")
 
 
-def get_optional_current_user(token: str | None = Depends(OAUTH2_SCHEME)) -> User | None:
+def get_optional_current_user(token: str | None = Depends(OAUTH2_SCHEME_OPTIONAL)) -> User | None:
     """Get the current user if authenticated, otherwise return None."""
     if not token:
         return None

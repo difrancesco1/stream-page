@@ -138,7 +138,7 @@ interface Tab {
 }
 
 export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { isEditMode } = useEditMode();
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTab, setActiveTab] = useState<Tab | null>(null);
@@ -432,7 +432,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
                   deaths={match.deaths}
                   assists={match.assists}
                   matchId={match.match_id}
-                  onHide={handleHideGame}
+                  onHide={user?.username === "rosie" ? handleHideGame : undefined}
                   summonerName={match.summonerName}
                   rank={match.rank}
                   leaguePoints={match.leaguePoints}

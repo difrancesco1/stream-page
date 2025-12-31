@@ -12,7 +12,7 @@ import {
     type SocialLink,
 } from "@/app/api/user/actions";
 import Image from "next/image";
-import { API_URL } from "@/lib/api";
+import { getImageUrl, isBackendImage } from "@/lib/api";
 
 const PLATFORMS = ["twitter", "twitch", "youtube", "discord", "tiktok", "highlight"] as const;
 type Platform = (typeof PLATFORMS)[number];
@@ -69,13 +69,6 @@ export default function EditProfileModal({
             setFeaturedFile(null);
         }
     }, [profile, open]);
-
-    function getImageUrl(path: string | null): string {
-        if (!path) return "";
-        if (path.startsWith("http")) return path;
-        if (path.startsWith("/uploads")) return `${API_URL}${path}`;
-        return path;
-    }
 
     const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -205,6 +198,7 @@ export default function EditProfileModal({
                                         alt="Profile preview"
                                         fill
                                         className="pixel-borders rounded-sm object-cover"
+                                        unoptimized
                                     />
                                 </div>
                             )}
@@ -237,6 +231,7 @@ export default function EditProfileModal({
                                         alt="Featured preview"
                                         fill
                                         className="pixel-borders rounded-sm object-cover"
+                                        unoptimized
                                     />
                                 </div>
                             )}
