@@ -19,16 +19,19 @@ allowed_origins = [
     FRONTEND_URL,
     "http://localhost:3000",
 ]
-if IS_RAILWAY:
-    allowed_origins.append("https://*.up.railway.app")
 
-app.add_middleware(
-    CORSMiddleware,
+cors_kwargs = dict(
     allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# NOTE: `allow_origins=["https://*.up.railway.app"]` does NOT work (it's not a wildcard match).
+if IS_RAILWAY:
+    cors_kwargs["allow_origin_regex"] = r"^https://.*\.up\.railway\.app$"
+
+app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 
 @app.get("/")
