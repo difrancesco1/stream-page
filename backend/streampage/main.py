@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -20,16 +19,19 @@ allowed_origins = [
     FRONTEND_URL,
     "http://localhost:3000",
 ]
-if IS_RAILWAY:
-    allowed_origins.append("https://*.up.railway.app")
 
-app.add_middleware(
-    CORSMiddleware,
+cors_kwargs = dict(
     allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# NOTE: `allow_origins=["https://*.up.railway.app"]` does NOT work (it's not a wildcard match).
+if IS_RAILWAY:
+    cors_kwargs["allow_origin_regex"] = r"^https://.*\.up\.railway\.app$"
+
+app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 
 @app.get("/")
@@ -70,6 +72,3 @@ app.include_router(opgg_router, prefix="/opgg")
 app.include_router(media_router, prefix="/media")
 app.include_router(cat_router, prefix="/cats")
 app.include_router(page_router, prefix="/page")
-
-# Mount static files for uploads
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")

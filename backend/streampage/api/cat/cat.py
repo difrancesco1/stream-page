@@ -13,13 +13,10 @@ from streampage.api.cat.models import (
 )
 from streampage.db.engine import get_db_session
 from streampage.db.models import CatEntry, User
+from streampage.services.storage import storage_service
 
 
 cat_router = APIRouter()
-
-# Define upload directory
-UPLOAD_DIR = Path("uploads/cats")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif"}
@@ -53,17 +50,11 @@ async def add_cat_image(
             detail=f"Invalid file type. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
         )
     
-    # Generate unique filename
-    unique_filename = f"{uuid.uuid4()}{file_ext}"
-    file_path = UPLOAD_DIR / unique_filename
+    # Read file content
+    contents = await file.read()
     
-    # Save file to disk
-    try:
-        contents = await file.read()
-        with open(file_path, "wb") as f:
-            f.write(contents)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+    # Upload to Supabase
+    public_url = storage_service.upload_image(contents, "cats", file_ext)
     
     # Get rosie's user ID
     rosie_id = get_rosie_user_id()
@@ -73,7 +64,7 @@ async def add_cat_image(
         cat_entry = CatEntry(
             creator_id=rosie_id,
             contributor_id=user.id,
-            image_url=f"/uploads/cats/{unique_filename}",
+            image_url=public_url,
         )
         session.add(cat_entry)
         session.commit()
@@ -100,14 +91,9 @@ def remove_cat_image(
         if user.username != "rosie" and cat_entry.contributor_id != user.id:
             raise HTTPException(status_code=403, detail="Not authorized to delete this image")
         
-        # Delete file from disk
-        file_path = Path(cat_entry.image_url.lstrip("/"))
-        if file_path.exists():
-            try:
-                file_path.unlink()
-            except Exception as e:
-                # Log error but continue with DB deletion
-                print(f"Failed to delete file {file_path}: {str(e)}")
+        # Delete file from Supabase Storage
+        if "supabase.co" in cat_entry.image_url:
+            storage_service.delete_image(cat_entry.image_url)
         
         # Delete database entry
         session.delete(cat_entry)
