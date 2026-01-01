@@ -13,6 +13,7 @@ import {
 } from "@/app/api/user/actions";
 import Image from "next/image";
 import { getImageUrl, isBackendImage } from "@/lib/api";
+import EditOverlay from "./edit-overlay";
 
 const PLATFORMS = [
   "twitter",
@@ -148,9 +149,7 @@ export default function EditProfileModal({
       if (featuredFile) {
         const featuredResult = await uploadFeaturedImage(token, featuredFile);
         if (!featuredResult.success) {
-          throw new Error(
-            featuredResult.error || "Failed to upload featured image"
-          );
+          throw new Error(featuredResult.error || "Failed to upload Banner");
         }
       }
 
@@ -176,130 +175,105 @@ export default function EditProfileModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-foreground pixel-borders max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogTitle className="main-text text-lg mb-4">
-          Edit Profile
-        </DialogTitle>
-        <div className="p-4 space-y-4">
-          {/* Biography Section */}
-          <div>
-            <label className="main-text text-xs block mb-2">
-              About (2 bullet points):
-            </label>
+      <DialogContent className="bg-foreground pixel-borders max-h-[90vh] overflow-y-auto w-[400px] px-4 py-1">
+        <div className="flex flex-col gap-1">
+          <div className="flex gap-1 flex-col w-full">
+            <label className="main-text">About</label>
             <input
               value={bio1}
               onChange={(e) => setBio1(e.target.value)}
               placeholder="First line..."
-              className="w-full p-2 pixel-borders bg-background main-text text-xs mb-2"
+              className="p-1 pixel-borders bg-background main-text text-xs"
               disabled={isLoading}
             />
             <input
               value={bio2}
               onChange={(e) => setBio2(e.target.value)}
               placeholder="Second line..."
-              className="w-full p-2 pixel-borders bg-background main-text text-xs"
+              className="p-1 pixel-borders bg-background main-text text-xs"
               disabled={isLoading}
             />
           </div>
 
-          {/* Birthday Section */}
-          <div>
-            <label className="main-text text-xs block mb-2">
-              Birthday (MM/DD):
-            </label>
+          <div className="w-full flex flex-col">
+            <label className="main-text">Birthday (MM/DD/YY):</label>
             <input
               value={birthday}
               onChange={(e) => setBirthday(e.target.value)}
               placeholder="MM/DD"
-              className="w-full p-2 pixel-borders bg-background main-text text-xs"
+              className="p-1 pixel-borders bg-background main-text text-xs"
               disabled={isLoading}
             />
           </div>
+          <div className="grid grid-cols-2 gap-1">
+            <div>
+              <label className="main-text text-xs flex">Profile Picture:</label>
+              <div className="flex items-center">
+                {profilePicPreview && (
+                  <div
+                    className="relative w-24 h-24 flex-shrink-0"
+                    onClick={() => profilePicInputRef.current?.click()}
+                  >
+                    <EditOverlay />
+                    <Image
+                      src={profilePicPreview}
+                      alt="Profile preview"
+                      fill
+                      className="pixel-borders rounded-sm object-cover z-[-10]"
+                      unoptimized
+                    />
+                  </div>
+                )}
+                <input
+                  ref={profilePicInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/gif,image/png"
+                  onChange={handleProfilePicChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
 
-          {/* Profile Picture Section */}
-          <div>
-            <label className="main-text text-xs block mb-2">
-              Profile Picture:
-            </label>
-            <div className="flex items-center gap-3">
-              {profilePicPreview && (
-                <div className="relative w-16 h-16 flex-shrink-0">
-                  <Image
-                    src={profilePicPreview}
-                    alt="Profile preview"
-                    fill
-                    className="pixel-borders rounded-sm object-cover"
-                    unoptimized
-                  />
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={() => profilePicInputRef.current?.click()}
-                className="pixel-btn text-xs"
-                disabled={isLoading}
-              >
-                Choose File
-              </button>
-              <input
-                ref={profilePicInputRef}
-                type="file"
-                accept="image/jpeg,image/jpg,image/gif,image/png"
-                onChange={handleProfilePicChange}
-                className="hidden"
-              />
+            <div>
+              <label className="main-text text-xs block">Banner:</label>
+              <div className="flex flex-col">
+                {featuredPreview && (
+                  <div
+                    className="relative w-full aspect-video"
+                    onClick={() => featuredInputRef.current?.click()}
+                  >
+                    <EditOverlay />
+                    <Image
+                      src={featuredPreview}
+                      alt="Featured preview"
+                      fill
+                      className="pixel-borders rounded-sm object-cover z-[-10]"
+                      unoptimized
+                    />
+                  </div>
+                )}
+                <input
+                  ref={featuredInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/gif,image/png"
+                  onChange={handleFeaturedChange}
+                  className="hidden"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Featured Image Section */}
-          <div>
-            <label className="main-text text-xs block mb-2">
-              Featured Image:
-            </label>
-            <div className="flex flex-col gap-2">
-              {featuredPreview && (
-                <div className="relative w-full aspect-video">
-                  <Image
-                    src={featuredPreview}
-                    alt="Featured preview"
-                    fill
-                    className="pixel-borders rounded-sm object-cover"
-                    unoptimized
-                  />
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={() => featuredInputRef.current?.click()}
-                className="pixel-btn text-xs w-fit"
-                disabled={isLoading}
-              >
-                Choose File
-              </button>
-              <input
-                ref={featuredInputRef}
-                type="file"
-                accept="image/jpeg,image/jpg,image/gif,image/png"
-                onChange={handleFeaturedChange}
-                className="hidden"
-              />
-            </div>
-          </div>
-
-          {/* Social Links Section */}
-          <div>
-            <label className="main-text text-xs block mb-2">
-              Social Links:
-            </label>
+          <div className="w-full flex flex-col">
+            <label className="main-text">Social Links:</label>
             <div className="space-y-2">
               {socialLinks.map((link, index) => (
-                <div key={index} className="flex items-center gap-2">
+                <div key={index} className="flex items-center gap-1">
                   <select
                     value={link.platform}
                     onChange={(e) =>
                       updateSocialLink(index, "platform", e.target.value)
                     }
-                    className="p-2 pixel-borders bg-background main-text text-xs w-24"
+                    className="p-1 pixel-borders bg-background main-text text-xs w-24"
                     disabled={isLoading}
                   >
                     {PLATFORMS.map((p) => (
@@ -314,13 +288,13 @@ export default function EditProfileModal({
                       updateSocialLink(index, "url", e.target.value)
                     }
                     placeholder="URL"
-                    className="flex-1 p-2 pixel-borders bg-background main-text text-xs"
+                    className="flex-1 p-1 pixel-borders bg-background main-text text-xs"
                     disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => removeSocialLink(index)}
-                    className="pixel-btn-remove-sm text-xs"
+                    className="pixel-btn text-xs"
                     disabled={isLoading}
                   >
                     ×
