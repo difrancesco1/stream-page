@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -70,6 +69,3 @@ app.include_router(opgg_router, prefix="/opgg")
 app.include_router(media_router, prefix="/media")
 app.include_router(cat_router, prefix="/cats")
 app.include_router(page_router, prefix="/page")
-
-# Mount static files for uploads
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")

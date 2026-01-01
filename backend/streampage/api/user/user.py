@@ -23,6 +23,7 @@ from streampage.api.user.models import (
 from streampage.db.enums import Platform
 from streampage.db.engine import get_db_session
 from streampage.db.models import User, UserLogin, Biography, Social, FeaturedImages
+from streampage.services.storage import storage_service
 
 users_router = APIRouter()
 
@@ -204,25 +205,24 @@ async def upload_profile_picture(
             detail=f"File type {file.content_type} not allowed. Must be jpg, png, gif, or webp"
         )
     
-    # Create uploads directory if it doesn't exist
-    upload_dir = Path("uploads/profile")
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    # Get file extension
+    file_extension = Path(file.filename).suffix if file.filename else ".jpg"
     
-    # Generate unique filename
-    file_extension = file.filename.split(".")[-1] if file.filename else "jpg"
-    unique_filename = f"{uuid_lib.uuid4()}.{file_extension}"
-    file_path = upload_dir / unique_filename
-    
-    # Save file
+    # Read file content
     contents = await file.read()
-    with open(file_path, "wb") as f:
-        f.write(contents)
+    
+    # Upload to Supabase
+    public_url = storage_service.upload_image(contents, "profile", file_extension)
     
     # Update user's profile_picture in database
     with get_db_session() as session:
         user = session.query(User).filter(User.id == current_user.id).first()
         if user:
-            user.profile_picture = f"/uploads/profile/{unique_filename}"
+            # Delete old image from Supabase if it exists
+            if user.profile_picture and "supabase.co" in user.profile_picture:
+                storage_service.delete_image(user.profile_picture)
+            
+            user.profile_picture = public_url
             session.commit()
     
     return ResponseMessage(message="Profile picture uploaded successfully")
@@ -243,41 +243,41 @@ async def upload_featured_image(
             detail=f"File type {file.content_type} not allowed. Must be jpg, png, gif, or webp"
         )
     
-    # Create uploads directory if it doesn't exist
-    upload_dir = Path("uploads/featured")
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    # Get file extension
+    file_extension = Path(file.filename).suffix if file.filename else ".jpg"
     
-    # Generate unique filename
-    file_extension = file.filename.split(".")[-1] if file.filename else "jpg"
-    unique_filename = f"{uuid_lib.uuid4()}.{file_extension}"
-    file_path = upload_dir / unique_filename
-    
-    # Save file
+    # Read file content
     contents = await file.read()
-    with open(file_path, "wb") as f:
-        f.write(contents)
+    
+    # Upload to Supabase
+    public_url = storage_service.upload_image(contents, "featured", file_extension)
     
     # Store the URL in the FeaturedImages table
-    image_url = f"/uploads/featured/{unique_filename}"
     with get_db_session() as session:
         featured_images = session.query(FeaturedImages).filter(
             FeaturedImages.user_id == current_user.id
         ).first()
         
         if featured_images:
+            # Delete old image from Supabase if it exists
+            if featured_images.images and len(featured_images.images) > 0:
+                old_url = featured_images.images[0]
+                if "supabase.co" in old_url:
+                    storage_service.delete_image(old_url)
+            
             # Update existing entry - replace the first image
-            featured_images.images = [image_url]
+            featured_images.images = [public_url]
         else:
             # Create new entry
             featured_images = FeaturedImages(
                 user_id=current_user.id,
-                images=[image_url]
+                images=[public_url]
             )
             session.add(featured_images)
         
         session.commit()
     
-    return ResponseMessage(message=image_url)
+    return ResponseMessage(message=public_url)
 
 
 @users_router.put("/social-links")
