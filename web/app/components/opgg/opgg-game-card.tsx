@@ -69,9 +69,9 @@ export default function OpggGameCard({
                                 {rank.split("").slice(-3).join("") == " II" ? "2 " : ""}
                                 {rank.split("").slice(-3).join("") == "III" ? "3 " : ""}
                                 {rank.split("").slice(-2).join("") == "IV" ? "4 " : ""}
-                            </>
+                            </> 
                         ) : (
-                            "Unranked "
+                            "x "
                         )}
                         {leaguePoints ?? 0}lp - {summonerName}
                     </div>
