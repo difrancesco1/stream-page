@@ -6,6 +6,7 @@ from streampage.api.middleware.authenticator import require_creator, get_optiona
 from streampage.api.page.models import ResponseMessage, PageConfigResponse
 from streampage.db.engine import get_db_session
 from streampage.db.models import User, PageConfig
+from streampage.services.storage import storage_service
 
 
 page_router = APIRouter()
@@ -26,36 +27,35 @@ async def upload_background_image(
             detail=f"File type {file.content_type} not allowed. Must be jpg, png, gif, or webp"
         )
     
-    # Create uploads directory if it doesn't exist
-    upload_dir = Path("uploads/backgrounds")
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    # Get file extension
+    file_extension = Path(file.filename).suffix if file.filename else ".jpg"
     
-    # Generate unique filename
-    file_extension = file.filename.split(".")[-1] if file.filename else "jpg"
-    unique_filename = f"{uuid.uuid4()}.{file_extension}"
-    file_path = upload_dir / unique_filename
-    
-    # Save file
+    # Read file content
     contents = await file.read()
-    with open(file_path, "wb") as f:
-        f.write(contents)
+    
+    # Upload to Supabase
+    public_url = storage_service.upload_image(contents, "backgrounds", file_extension)
     
     # Update page config in database
     with get_db_session() as session:
         config = session.query(PageConfig).filter(PageConfig.owner_id == user.id).first()
         
         if config:
-            config.background_image = f"/uploads/backgrounds/{unique_filename}"
+            # Delete old background from Supabase if it exists
+            if config.background_image and "supabase.co" in config.background_image:
+                storage_service.delete_image(config.background_image)
+            
+            config.background_image = public_url
         else:
             config = PageConfig(
                 owner_id=user.id,
-                background_image=f"/uploads/backgrounds/{unique_filename}"
+                background_image=public_url
             )
             session.add(config)
         
         session.commit()
     
-    return ResponseMessage(message=f"/uploads/backgrounds/{unique_filename}")
+    return ResponseMessage(message=public_url)
 
 
 @page_router.get("/config")

@@ -14,11 +14,22 @@ const nextConfig: NextConfig = {
         port: "8000",
         pathname: "/uploads/**",
       },
+
+      {
+        protocol: "https",
+        hostname: "xbxvotbjgwkwhwaqwdho.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
   },
   experimental: {
     serverActions: {
-      bodySizeLimit: '10mb',
+      bodySizeLimit: "1000mb",
     },
   },
 };
