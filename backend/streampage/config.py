@@ -25,7 +25,7 @@ ALGORITHM: Final[str] = os.getenv("ALGORITHM", "HS256")
 OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="users/login")
 OAUTH2_SCHEME_OPTIONAL = OAuth2PasswordBearer(tokenUrl="users/login", auto_error=False)
 
-RIOT_API_KEY: Final[str] = os.getenv("RIOT_API_KEY", "RGAPI-ec90b984-af67-46e8-a74d-e29c65e1b18f")
+RIOT_API_KEY: Final[str] = os.getenv("RIOT_API_KEY", "RGAPI-ee822bbd-a864-4666-9774-c68251b8a4d4")
 
 _supabase_url = os.getenv("SUPABASE_URL", "")
 # Ensure trailing slash for Supabase storage API compatibility
