@@ -49,10 +49,10 @@ export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, c
     return (
         <>
             <div 
-                className={`flex w-full h-[43px] pixel-borders mb-1 ${canEdit && onClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
+                className={`flex w-[calc(100%-.1rem)] h-[43px] pixel-borders mb-1 ${canEdit && onClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
                 onClick={() => canEdit && onClick?.()}
             >
-                <div className="w-full">
+                <div className="w-full ">
                     <div className="grid-container">
                         <div className="relative h-8px -mt-1">
                             <span className="main-text px-1">{name}</span>
@@ -67,28 +67,19 @@ export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, c
                             </a>
                         </div>
                         <div className="-mt-[5px]">
-                            <button className="relative pixel-borders pixel-btn-white-nohover top-1">
+                            <div className="relative pixel-borders pixel-btn-white-nohover top-1">
                                 <span>{upvoteCount}</span>
-                            </button>
-                            {isEditMode && canEdit ? (
-                                <button 
-                                    onClick={handleDeleteClick}
-                                    className="absolute pixel-borders pixel-btn-remove-sm right-0 bg-red-900 hover:bg-red-800"
-                                >
-                                    <span>×</span>
-                                </button>
-                            ) : (
                                 <button onClick={handleUpvote}
                                     disabled={!token}
-                                    className="absolute pixel-borders pixel-btn-remove-sm right-0">
+                                    className="absolute pixel-borders pixel-btn-remove-sm -top-2">
                                     <span>{upvoted ? "-" : "+"}</span>
                                 </button>
-                            )}
+                            </div>
                         </div>
                     </div>
                     <hr className="mr-9"></hr>
                     <div className="grid-container -mt-1 px-1">
-                        <span className="alt-text">{info.substring(0,50)}</span>
+                        <span className="alt-text">{info.substring(0, 50)}</span>
                         <span className="alt-text m-1">- {contributorUsername || "unknown"}</span>
                     </div>
                 </div>

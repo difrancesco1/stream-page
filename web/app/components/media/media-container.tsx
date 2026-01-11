@@ -74,7 +74,7 @@ export default function MediaContainer({ onClose, onMouseDown, username}: MediaC
                     activeTab={activeTab}
                     setActiveTab={handleSetActiveTab}
                 >
-                    <div className="px-1 py-1 w-full h-full overflow-y-auto max-h-[180px]">
+                    <div className="px-1 py-1 w-full h-full overflow-y-auto max-h-[200px]">
                         {isLoading ? (
                             <div className="relative flex items-center justify-center h-full">
                             </div>

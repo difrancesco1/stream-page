@@ -67,7 +67,7 @@ export default function MediaFooter({
 
   return (
     <>
-      <div className="absolute bottom-0 px-1 w-full h-[10%] min-h-[28px] border-t-2 flex items-center gap-1">
+      <div className="absolute bottom-0 px-1 w-full h-[28px] border-t-2 flex items-center gap-1">
         <input
           className="w-28 pixel-borders pixel-input"
           placeholder="media name"
