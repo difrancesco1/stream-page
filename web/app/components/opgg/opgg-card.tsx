@@ -443,6 +443,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
           <OppggCardFooter
             tier={isAllTab ? highestRankAccount?.tier : currentAccount?.tier}
             rank={isAllTab ? highestRankAccount?.rank : currentAccount?.rank}
+            userName={user?.username}
             leaguePoints={
               isAllTab
                 ? highestRankAccount?.league_points

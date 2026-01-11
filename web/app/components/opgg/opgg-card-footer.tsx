@@ -13,10 +13,12 @@ interface OppggCardFooterProps {
   hasAccounts: boolean;
   onEasterEggTrigger?: () => void;
   onLpClick?: () => void;
+  userName?: string | null;
 }
 
 export default function OppggCardFooter({
   tier,
+  userName,
   rank,
   leaguePoints,
   onAddAccount,
@@ -56,14 +58,17 @@ export default function OppggCardFooter({
   return (
     <div className="justify-between px-1 w-full h-[8%] border-t-2 flex items-center gap-1 text-xs">
       <div className="flex items-center gap-1">
-        <button
-          onClick={onAddAccount}
-          disabled={isLoading}
-          className="pixel-borders pixel-btn-white-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Add Account"
-        >
-          <span className="text-xs font-bold leading-none">+</span>
-        </button>
+        {userName === "rosie" &&
+                <button
+                onClick={onAddAccount}
+                disabled={isLoading}
+                className="pixel-borders pixel-btn-white-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Add Account"
+              >
+                <span className="text-xs font-bold leading-none">+</span>
+              </button>
+        }
+
         {hasAccounts && (
           <button
             onClick={onRefresh}
