@@ -474,3 +474,9 @@ select:focus, select:active, select:focus-visible {
 .cursor-loading {
   cursor: url('/loading.gif'), wait;
 }
+
+
+.item1 {
+  /* This item will span two columns */
+  grid-column: span 2;
+}

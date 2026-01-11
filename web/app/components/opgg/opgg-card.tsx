@@ -376,9 +376,9 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
               </div>
             )}
             {isLoading ? (
-              <div className="relative flex items-center justify-center h-full"></div>
+              <div className="relative flex items-center justify-center"></div>
             ) : showAddForm ? (
-              <div className="flex justify-center h-full flex-col px-5">
+              <div className="flex justify-center py-10 flex-col px-5">
                 <input
                   type="text"
                   placeholder="Name#TAG"

@@ -116,16 +116,17 @@ export default function ManageOpggModal({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-foreground pixel-borders max-w-md max-h-[80vh] overflow-y-auto">
-                <DialogTitle className="main-text text-lg">
+            <DialogContent className="bg-foreground pixel-borders max-w-md max-h-[80vh] overflow-y-auto ">
+                <DialogTitle className="main-text text-lg px-1 pixel-borders bg-background">
                     Manage OPGG Accounts
                 </DialogTitle>
                 
-                <div className="space-y-4 p-4">
+                <div className="space-y-1 p-1">
                     {/* Unhide All Games */}
-                    <div className="pixel-borders p-3 bg-background">
-                        <h3 className="main-text text-sm mb-2">Unhide Games</h3>
-                        <div className="space-y-2">
+                    <div className="pixel-borders p-1 bg-background flex">
+                        <h3 className="main-text text-sm pt-1">show all Games</h3>
+
+                        <div className="space-y-2 px-2 pb-1">
                             <button
                                 onClick={() => handleUnhideAllGames()}
                                 disabled={isLoading}
@@ -133,47 +134,48 @@ export default function ManageOpggModal({
                             >
                                 Unhide All Games (All Accounts)
                             </button>
-                            
-                            {accounts.length > 0 && (
-                                <div className="mt-2">
-                                    <label className="main-text text-xs block mb-1">Or unhide for specific account:</label>
-                                    <select
-                                        value={selectedAccount || ""}
-                                        onChange={(e) => setSelectedAccount(e.target.value)}
-                                        className="w-full p-1 pixel-borders bg-foreground main-text text-xs mb-2"
-                                        disabled={isLoading}
-                                    >
-                                        <option value="">Select account...</option>
-                                        {accounts.map(account => (
-                                            <option key={account.id} value={account.id}>
-                                                {account.game_name}#{account.tag_line}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        onClick={() => selectedAccount && handleUnhideAllGames(selectedAccount)}
-                                        disabled={isLoading || !selectedAccount}
-                                        className="w-full pixel-btn text-xs"
-                                    >
-                                        Unhide All Games for Selected
-                                    </button>
-                                </div>
-                            )}
                         </div>
+                    </div><div className="pixel-borders px-1 bg-background">
+                        {accounts.length > 0 && (
+                            <div className="mt-2 ">
+                                <label className="main-text text-xs block mb-1">show all games on specific account:</label>
+                                <select
+                                    value={selectedAccount || ""}
+                                    onChange={(e) => setSelectedAccount(e.target.value)}
+                                    className="w-full p-1 pixel-borders bg-foreground main-text text-xs "
+                                    disabled={isLoading}
+                                >
+                                    <option value="">Select account...</option>
+                                    {accounts.map(account => (
+                                        <option key={account.id} value={account.id}>
+                                            {account.game_name}#{account.tag_line}
+                                        </option>
+                                    ))}
+                                </select>
+                                <button
+                                    onClick={() => selectedAccount && handleUnhideAllGames(selectedAccount)}
+                                    disabled={isLoading || !selectedAccount}
+                                    className="ml-20 pixel-btn text-xs mb-2"
+                                >
+                                    Unhide All Games for Selected
+                                </button>
+                            </div>
+                        )}
+
                     </div>
 
                     {/* Manage Accounts */}
-                    <div className="pixel-borders p-3 bg-background">
-                        <h3 className="main-text text-sm mb-2">Manage Accounts</h3>
+                    <div className="pixel-borders p-1 bg-background">
+                        <h3 className="main-text text-sm mb-1">Manage Accounts</h3>
                         <div className="space-y-2">
                             {accounts.map((account, index) => (
-                                <div key={account.id} className="pixel-borders p-2 bg-foreground flex items-center justify-between">
+                                <div key={account.id} className="pixel-borders p-1 bg-foreground flex items-center justify-between">
                                     <div className="flex-1">
                                         <span className="main-text text-xs">
                                             {account.game_name}#{account.tag_line}
                                         </span>
                                         {account.tier && (
-                                            <span className="alt-text text-xs ml-2">
+                                            <span className="alt-text text-xs ml-1">
                                                 {account.tier} {account.rank}
                                             </span>
                                         )}
@@ -218,7 +220,7 @@ export default function ManageOpggModal({
                         </div>
                     )}
 
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex gap-2 justify-center">
                         <button
                             onClick={() => onOpenChange(false)}
                             disabled={isLoading}

@@ -74,49 +74,49 @@ export default function EditMediaModal({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-foreground pixel-borders max-w-md">
-                <DialogTitle className="main-text text-lg mb-4">
+            <DialogContent className="bg-foreground pixel-borders">
+                <DialogTitle className="main-text text-lg justify-center flex pixel-borders bg-background">
                     Edit Media Item
                 </DialogTitle>
-                <div className="p-4">
-                    <div className="mb-4">
-                        <label className="main-text text-xs block mb-2">Name:</label>
+                <div className="">
+                    <div className="mb-1">
+                        <label className="main-text text-xs block">Name:</label>
                         <input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full p-2 pixel-borders bg-background main-text text-xs"
+                            className="w-full p-1 pixel-borders bg-background main-text text-xs"
                             disabled={isLoading}
                         />
                     </div>
 
-                    <div className="mb-4">
-                        <label className="main-text text-xs block mb-2">Info:</label>
+                    <div className="mb-1">
+                        <label className="main-text text-xs block">Info:</label>
                         <textarea
                             value={info}
                             onChange={(e) => setInfo(e.target.value)}
-                            className="w-full p-2 pixel-borders bg-background main-text text-xs resize-none"
+                            className="w-full p-1 pixel-borders bg-background main-text text-xs resize-none"
                             rows={3}
                             disabled={isLoading}
                         />
                     </div>
 
-                    <div className="mb-4">
-                        <label className="main-text text-xs block mb-2">URL:</label>
+                    <div className="mb-1">
+                        <label className="main-text text-xs block">URL:</label>
                         <input
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
-                            className="w-full p-2 pixel-borders bg-background main-text text-xs"
+                            className="w-full p-1 pixel-borders bg-background main-text text-xs"
                             disabled={isLoading}
                         />
                     </div>
 
                     {error && (
-                        <div className="mb-4 p-2 bg-red-900/50 pixel-borders">
+                        <div className="mb-1 p-1 bg-red-900/50 pixel-borders">
                             <p className="main-text text-xs text-red-200">{error}</p>
                         </div>
                     )}
 
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex gap-3 justify-center pt-2">
                         <button
                             onClick={handleDelete}
                             disabled={isLoading}

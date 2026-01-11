@@ -175,7 +175,7 @@ export default function EditProfileModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-foreground pixel-borders max-h-[90vh] overflow-y-auto w-[400px] px-4 py-1">
+      <DialogContent className="bg-foreground pixel-borders max-h-[90vh] overflow-y-auto w-[410px] p-[10]">
         <div className="flex flex-col gap-1">
           <div className="flex gap-1 flex-col w-full">
             <label className="main-text">About</label>
@@ -205,63 +205,7 @@ export default function EditProfileModal({
               disabled={isLoading}
             />
           </div>
-          <div className="grid grid-cols-2 gap-1">
-            <div>
-              <label className="main-text text-xs flex">Profile Picture:</label>
-              <div className="flex items-center">
-                {profilePicPreview && (
-                  <div
-                    className="relative w-24 h-24 flex-shrink-0"
-                    onClick={() => profilePicInputRef.current?.click()}
-                  >
-                    <EditOverlay />
-                    <Image
-                      src={profilePicPreview}
-                      alt="Profile preview"
-                      fill
-                      className="pixel-borders rounded-sm object-cover z-[-10]"
-                      unoptimized
-                    />
-                  </div>
-                )}
-                <input
-                  ref={profilePicInputRef}
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/gif,image/png"
-                  onChange={handleProfilePicChange}
-                  className="hidden"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="main-text text-xs block">Banner:</label>
-              <div className="flex flex-col">
-                {featuredPreview && (
-                  <div
-                    className="relative w-full aspect-video"
-                    onClick={() => featuredInputRef.current?.click()}
-                  >
-                    <EditOverlay />
-                    <Image
-                      src={featuredPreview}
-                      alt="Featured preview"
-                      fill
-                      className="pixel-borders rounded-sm object-cover z-[-10]"
-                      unoptimized
-                    />
-                  </div>
-                )}
-                <input
-                  ref={featuredInputRef}
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/gif,image/png"
-                  onChange={handleFeaturedChange}
-                  className="hidden"
-                />
-              </div>
-            </div>
-          </div>
+         
 
           <div className="w-full flex flex-col">
             <label className="main-text">Social Links:</label>
@@ -273,7 +217,7 @@ export default function EditProfileModal({
                     onChange={(e) =>
                       updateSocialLink(index, "platform", e.target.value)
                     }
-                    className="p-1 pixel-borders bg-background main-text text-xs w-18"
+                    className="p-1 pixel-borders bg-background main-text text-xs w-21"
                     disabled={isLoading}
                   >
                     {PLATFORMS.map((p) => (
@@ -312,6 +256,65 @@ export default function EditProfileModal({
             </div>
           </div>
 
+
+           <div className="grid grid-cols-3 py-2">
+            <div>
+              <label className="main-text text-xs flex">Profile Picture:</label>
+              <div className="flex items-center">
+                {profilePicPreview && (
+                  <div
+                    className="relative w-27 h-27 flex-shrink-0"
+                    onClick={() => profilePicInputRef.current?.click()}
+                  >
+                    <EditOverlay />
+                    <Image
+                      src={profilePicPreview}
+                      alt="Profile preview"
+                      fill
+                      className="pixel-borders rounded-sm object-cover z-[-10]"
+                      unoptimized
+                    />
+                  </div>
+                )}
+                <input
+                  ref={profilePicInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/gif,image/png"
+                  onChange={handleProfilePicChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            <div className="item1">
+              <label className="main-text text-xs block">Banner:</label>
+              <div className="flex flex-col">
+                {featuredPreview && (
+                  <div
+                    className="relative w-full aspect-video"
+                    onClick={() => featuredInputRef.current?.click()}
+                  >
+                    <EditOverlay />
+                    <Image
+                      src={featuredPreview}
+                      alt="Featured preview"
+                      fill
+                      className="pixel-borders rounded-sm object-cover z-[-10]"
+                      unoptimized
+                    />
+                  </div>
+                )}
+                <input
+                  ref={featuredInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/gif,image/png"
+                  onChange={handleFeaturedChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Error Display */}
           {error && (
             <div className="p-2 bg-red-900/50 pixel-borders">
@@ -320,13 +323,13 @@ export default function EditProfileModal({
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2 justify-end pt-2">
+          <div className="flex gap-2 justify-end py-1">
             <button
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
               className="pixel-btn text-xs"
             >
-              Cancel
+              x
             </button>
             <button
               onClick={handleSave}
