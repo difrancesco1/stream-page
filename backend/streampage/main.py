@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -9,10 +11,27 @@ from streampage.api.opgg.opgg import opgg_router
 from streampage.api.riot.riot import riot_router
 from streampage.api.user.user import users_router
 from streampage.api.page.page import page_router
+from streampage.api.user.auth import hash_password
 from streampage.config import FRONTEND_URL, IS_RAILWAY
-from streampage.db.engine import get_db
+from streampage.db.engine import get_db, get_db_session
+from streampage.db.models import User, UserLogin
 
-app = FastAPI(title="streampage")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: seed default user if no users exist
+    with get_db_session() as session:
+        if not session.query(User).first():
+            user = User(username="rosie")
+            session.add(user)
+            session.flush()
+            session.add(UserLogin(user=user, password=hash_password("Password1!")))
+            session.commit()
+            print("Seeded default user: rosie")
+    yield
+
+
+app = FastAPI(title="streampage", lifespan=lifespan)
 
 # Configure CORS
 allowed_origins = [

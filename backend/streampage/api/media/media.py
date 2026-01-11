@@ -2,7 +2,7 @@ from typing import Optional
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 
-from streampage.api.middleware.authenticator import get_current_user, get_optional_current_user, require_creator
+from streampage.api.middleware.authenticator import get_current_user, get_optional_current_user
 from streampage.api.media.models import (
     AddMediaRequest,
     RemoveMediaRequest,
@@ -33,8 +33,7 @@ def add_media(
     request: AddMediaRequest,
     user=Depends(get_current_user),
 ) -> ResponseMessage:
-    """Add a new media entry (rosie only)."""
-    require_rosie(user)
+    """Add a new media entry (any logged-in user)."""
     
     with get_db_session() as session:
         # Get max display_order to add at the end
@@ -48,6 +47,7 @@ def add_media(
             info=request.info,
             url=request.url,
             display_order=max_order,
+            contributor_id=user.id,
         )
         session.add(entry)
         session.commit()
@@ -164,6 +164,8 @@ def get_media_list(
             upvote_count = len(entry.upvotes)
             # Check if current user has upvoted this media
             has_upvoted = entry.id in user_upvoted_media_ids
+            # Get contributor username
+            contributor_username = entry.contributor.username if entry.contributor else None
 
             media_list.append(
                 MediaResponse(
@@ -175,6 +177,7 @@ def get_media_list(
                     display_order=entry.display_order,
                     upvote_count=upvote_count,
                     user_has_upvoted=has_upvoted,
+                    contributor_username=contributor_username,
                 )
             )
 
@@ -205,9 +208,9 @@ def sort_media(
 def update_media(
     media_id: str,
     request: UpdateMediaRequest,
-    user=Depends(require_creator),
+    user=Depends(get_current_user),
 ) -> ResponseMessage:
-    """Update a media entry's name and/or info. Only creator can update."""
+    """Update a media entry's name and/or info. Only the contributor can update."""
     with get_db_session() as session:
         try:
             media_uuid = uuid.UUID(media_id)
@@ -217,6 +220,10 @@ def update_media(
         entry = session.query(Media).filter(Media.id == media_uuid).first()
         if not entry:
             raise HTTPException(status_code=404, detail="Media not found")
+        
+        # Check if user is the contributor or rosie (admin)
+        if entry.contributor_id != user.id and user.username != "rosie":
+            raise HTTPException(status_code=403, detail="Only the contributor can update this media")
         
         # Update only provided fields
         if request.name is not None:
@@ -234,9 +241,9 @@ def update_media(
 @media_router.delete("/{media_id}")
 def delete_media(
     media_id: str,
-    user=Depends(require_creator),
+    user=Depends(get_current_user),
 ) -> ResponseMessage:
-    """Delete a media entry. Only creator can delete."""
+    """Delete a media entry. Only the contributor can delete."""
     with get_db_session() as session:
         try:
             media_uuid = uuid.UUID(media_id)
@@ -246,6 +253,10 @@ def delete_media(
         entry = session.query(Media).filter(Media.id == media_uuid).first()
         if not entry:
             raise HTTPException(status_code=404, detail="Media not found")
+        
+        # Check if user is the contributor or rosie (admin)
+        if entry.contributor_id != user.id and user.username != "rosie":
+            raise HTTPException(status_code=403, detail="Only the contributor can delete this media")
         
         session.delete(entry)
         session.commit()

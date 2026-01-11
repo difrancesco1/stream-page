@@ -19,6 +19,7 @@ export type MediaItem = {
     display_order: number;
     upvote_count: number;
     user_has_upvoted: boolean;
+    contributor_username: string | null;
 };
 
 export type GetMediaListResult = {

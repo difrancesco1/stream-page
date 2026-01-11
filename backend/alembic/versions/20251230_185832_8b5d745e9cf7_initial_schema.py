@@ -27,6 +27,7 @@ def upgrade() -> None:
     sa.Column('info', sa.String(length=500), nullable=False),
     sa.Column('url', sa.String(length=500), nullable=False),
     sa.Column('display_order', sa.Integer(), nullable=False),
+    sa.Column('contributor_id', sa.UUID(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('summoner_data',
@@ -128,6 +129,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('media_id', 'user_id', name='uq_media_upvote_media_user')
     )
+    op.create_foreign_key('fk_media_contributor', 'media', 'user', ['contributor_id'], ['id'])
     op.create_table('opgg_entry',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('owner_id', sa.UUID(), nullable=False),
@@ -166,6 +168,7 @@ def downgrade() -> None:
     op.drop_table('page_config')
     op.drop_table('opgg_entry')
     op.drop_table('media_upvote')
+    op.drop_constraint('fk_media_contributor', 'media', type_='foreignkey')
     op.drop_table('int_list_entry')
     op.drop_index(op.f('ix_hidden_match_match_id'), table_name='hidden_match')
     op.drop_table('hidden_match')

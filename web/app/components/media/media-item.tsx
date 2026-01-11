@@ -13,14 +13,19 @@ interface MediaItemProps {
     url: string;
     upvoteCount: number;
     upvoted?: boolean;
+    contributorUsername?: string | null;
+    username?: string | null;
     onUpvote?: () => void;
     onClick?: () => void;
 }
 
-export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, onUpvote, onClick }: MediaItemProps) {
+export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, contributorUsername, username, onUpvote, onClick }: MediaItemProps) {
     const { token } = useAuth();
     const { isEditMode } = useEditMode();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    
+    // Per-user edit check: contributor can edit their own entries, rosie can edit all
+    const canEdit = username && (username === contributorUsername || username === "rosie");
 
     const handleUpvote = async () => {
         if (!token) return;
@@ -44,8 +49,8 @@ export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, o
     return (
         <>
             <div 
-                className={`flex w-full h-[43px] pixel-borders mb-1 ${onClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
-                onClick={onClick}
+                className={`flex w-full h-[43px] pixel-borders mb-1 ${canEdit && onClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
+                onClick={() => canEdit && onClick?.()}
             >
                 <div className="w-full">
                     <div className="grid-container">
@@ -65,7 +70,7 @@ export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, o
                             <button className="relative pixel-borders pixel-btn-white-nohover top-1">
                                 <span>{upvoteCount}</span>
                             </button>
-                            {isEditMode ? (
+                            {isEditMode && canEdit ? (
                                 <button 
                                     onClick={handleDeleteClick}
                                     className="absolute pixel-borders pixel-btn-remove-sm right-0 bg-red-900 hover:bg-red-800"
@@ -84,7 +89,7 @@ export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, o
                     <hr className="mr-9"></hr>
                     <div className="grid-container -mt-1 px-1">
                         <span className="alt-text">{info.substring(0,50)}</span>
-                        <span className="alt-text m-1">- rosie</span>
+                        <span className="alt-text m-1">- {contributorUsername || "unknown"}</span>
                     </div>
                 </div>
             </div>

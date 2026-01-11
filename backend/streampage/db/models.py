@@ -210,12 +210,20 @@ class Media(Base):
     info: Mapped[str] = mapped_column(String(500))
     url: Mapped[str] = mapped_column(String(500))
     display_order: Mapped[int] = mapped_column(Integer, default=0)
+    contributor_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user.id"), nullable=True)
 
     # Relationship to upvotes
     upvotes: Mapped[list["MediaUpvote"]] = relationship(
         "MediaUpvote",
         back_populates="media",
         cascade="all, delete-orphan",
+    )
+    
+    # Relationship to contributor
+    contributor: Mapped["User"] = relationship(
+        "User",
+        foreign_keys=[contributor_id],
+        viewonly=True
     )
 
 

@@ -7,11 +7,11 @@ import MediaItem from "./media-item";
 import EditMediaModal from "./edit-media-modal";
 import { getMediaList, type MediaItem as MediaItemType, type MediaCategory } from "@/app/api/media/actions";
 import { useAuth } from "@/app/context/auth-context";
-import { useEditMode } from "@/app/context/edit-mode-context";
 
 interface MediaContainerProps {
     onClose?: () => void;
     onMouseDown?: () => void;
+    username?: string | null;
 }
 
 interface Tab {
@@ -27,9 +27,8 @@ const tabs: Tab[] = [
     { title: "youtubers", category: "youtube" },
 ]
 
-export default function MediaContainer({ onClose, onMouseDown }: MediaContainerProps) {
+export default function MediaContainer({ onClose, onMouseDown, username}: MediaContainerProps) {
     const { token } = useAuth();
-    const { isEditMode } = useEditMode();
     const [activeTab, setActiveTab] = useState<Tab>(tabs[0]);
     const [mediaItems, setMediaItems] = useState<MediaItemType[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -93,8 +92,10 @@ export default function MediaContainer({ onClose, onMouseDown }: MediaContainerP
                                     url={item.url}
                                     upvoteCount={item.upvote_count}
                                     upvoted={item.user_has_upvoted}
+                                    contributorUsername={item.contributor_username}
+                                    username={username}
                                     onUpvote={fetchMedia}
-                                    onClick={isEditMode ? () => setEditingItem(item) : undefined}
+                                    onClick={() => setEditingItem(item)}
                                 />
                             ))
                         )}
@@ -102,6 +103,7 @@ export default function MediaContainer({ onClose, onMouseDown }: MediaContainerP
                     <MediaFooter 
                         category={activeTab.category} 
                         onMediaAdded={fetchMedia}
+                        username={username}
                     />
                 </CardHeader>
             </div>

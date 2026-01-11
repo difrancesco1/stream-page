@@ -333,6 +333,7 @@ export default function CardContainer() {
             <MediaContainer
               onClose={() => closeCard("movies")}
               onMouseDown={() => bringToFront("movies")}
+              username={username}
             />
           </div>
         </Draggable>

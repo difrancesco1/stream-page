@@ -52,6 +52,7 @@ class MediaResponse(BaseModel):
     display_order: int
     upvote_count: int
     user_has_upvoted: bool = False
+    contributor_username: str | None = None
 
 
 class MediaListResponse(BaseModel):

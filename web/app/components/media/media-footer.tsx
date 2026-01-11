@@ -7,11 +7,13 @@ import { addMedia, type MediaCategory } from "@/app/api/media/actions";
 interface MediaFooterProps {
   category: MediaCategory;
   onMediaAdded?: () => void;
+  username?: string | null;
 }
 
 export default function MediaFooter({
   category,
   onMediaAdded,
+  username
 }: MediaFooterProps) {
   const { token, user } = useAuth();
   const [name, setName] = useState("");
@@ -59,7 +61,7 @@ export default function MediaFooter({
 
   const isFormValid = name.trim() && info.trim() && url.trim();
 
-  if (!isRosie) {
+  if (!username) {
     return null;
   }
 
