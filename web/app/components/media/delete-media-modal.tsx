@@ -58,23 +58,16 @@ export default function DeleteMediaModal({
                     </p>
 
                     {error && (
-                        <div className="mb-4 p-2 bg-red-900/50 pixel-borders">
+                        <div className="mb-4 p-2 bg-accent/50 pixel-borders">
                             <p className="main-text text-xs text-red-200">{error}</p>
                         </div>
                     )}
 
                     <div className="flex gap-2 justify-end">
                         <button
-                            onClick={() => onOpenChange(false)}
-                            disabled={isDeleting}
-                            className="pixel-btn text-xs"
-                        >
-                            Cancel
-                        </button>
-                        <button
                             onClick={handleDelete}
                             disabled={isDeleting}
-                            className="pixel-btn text-xs bg-red-900 hover:bg-red-800"
+                            className="pixel-btn text-xs bg-accent/90 hover:bg-accent/80"
                         >
                             {isDeleting ? "Deleting..." : "Delete"}
                         </button>

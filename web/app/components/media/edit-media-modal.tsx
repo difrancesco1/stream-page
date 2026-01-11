@@ -74,7 +74,7 @@ export default function EditMediaModal({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-foreground pixel-borders">
+            <DialogContent className="pixel-borders">
                 <DialogTitle className="main-text text-lg justify-center flex pixel-borders bg-background">
                     Edit Media Item
                 </DialogTitle>
@@ -111,7 +111,7 @@ export default function EditMediaModal({
                     </div>
 
                     {error && (
-                        <div className="mb-1 p-1 bg-red-900/50 pixel-borders">
+                        <div className="mb-1 p-1 bg-accent/50 pixel-borders">
                             <p className="main-text text-xs text-red-200">{error}</p>
                         </div>
                     )}
@@ -120,16 +120,9 @@ export default function EditMediaModal({
                         <button
                             onClick={handleDelete}
                             disabled={isLoading}
-                            className="pixel-btn text-xs bg-red-900 hover:bg-red-800"
+                            className="pixel-btn text-xs bg-accent/90 hover:bg-accent/80"
                         >
                             Delete
-                        </button>
-                        <button
-                            onClick={() => onOpenChange(false)}
-                            disabled={isLoading}
-                            className="pixel-btn text-xs"
-                        >
-                            Cancel
                         </button>
                         <button
                             onClick={handleUpdate}

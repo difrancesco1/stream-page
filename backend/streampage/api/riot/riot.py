@@ -190,9 +190,9 @@ def refresh_int_list_entry(
 def update_int_list_entry(
     entry_id: str,
     request: UpdateIntListEntryRequest,
-    user=Depends(require_creator),
+    user=Depends(get_current_user),
 ) -> ResponseMessage:
-    """Update the reason for an int list entry. Only creator can update."""
+    """Update the reason for an int list entry. Only the contributor or rosie can update."""
     with get_db_session() as session:
         try:
             entry_uuid = uuid.UUID(entry_id)
@@ -203,6 +203,9 @@ def update_int_list_entry(
         if not entry:
             raise HTTPException(status_code=404, detail="Entry not found")
         
+        if user.id != entry.contributor_id and user.username != "rosie":
+            raise HTTPException(status_code=403, detail="Only the contributor or rosie can update this entry")
+        
         entry.user_reason = request.user_reason
         session.commit()
         
@@ -212,7 +215,7 @@ def update_int_list_entry(
 @riot_router.delete("/int_list/{entry_id}")
 def delete_int_list_entry(
     entry_id: str,
-    user=Depends(require_creator),
+    user= Depends(get_current_user),
 ) -> ResponseMessage:
     """Delete an int list entry. Only creator can delete."""
     with get_db_session() as session:
@@ -224,7 +227,8 @@ def delete_int_list_entry(
         entry = session.query(IntListEntry).filter(IntListEntry.id == entry_uuid).first()
         if not entry:
             raise HTTPException(status_code=404, detail="Entry not found")
-        
+        if user.id != entry.contributor_id and user.username != "rosie":
+            raise HTTPException(status_code=403, detail="Only the contributor or rosie can delete this entry")
         session.delete(entry)
         session.commit()
         

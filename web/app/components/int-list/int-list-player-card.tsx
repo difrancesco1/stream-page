@@ -110,7 +110,7 @@ export default function IntListPlayerCard({ entries, isLoading, error, onEntryCl
     return (
         <div className="flex flex-col gap-1">
             {entries.map((entry) => {
-                const canEdit = username && username === entry.contributor_username;
+                const canEdit = username && username === "rosie" || username === entry.contributor_username;
                 return (
                 <div 
                     key={entry.id} 

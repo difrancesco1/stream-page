@@ -200,7 +200,7 @@ export default function ManageOpggModal({
                                         <button
                                             onClick={() => handleDeleteAccount(account.id)}
                                             disabled={isLoading}
-                                            className="pixel-btn text-xs px-2 bg-red-900 hover:bg-red-800"
+                                            className="pixel-btn text-xs px-2 bg-accent/90 hover:bg-accent/80"
                                             title="Delete"
                                         >
                                             ×
@@ -215,7 +215,7 @@ export default function ManageOpggModal({
                     </div>
 
                     {error && (
-                        <div className="p-2 bg-red-900/50 pixel-borders">
+                        <div className="p-2 bg-accent/50 pixel-borders">
                             <p className="main-text text-xs text-red-200">{error}</p>
                         </div>
                     )}
