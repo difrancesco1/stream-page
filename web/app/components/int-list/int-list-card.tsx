@@ -83,10 +83,14 @@ export default function IntListCard({ onClose, onMouseDown, username}: IntListCa
           setEntries([]);
         }
       } else {
-        // Fetch entries for rosie
+        // Fetch entries for rosie (filter by user_id if available, then filter client-side as safeguard)
         const result = await getIntListEntries(activeTab.user_id);
         if (result.success) {
-          setEntries(result.entries);
+          // Always filter client-side to ensure only rosie's entries show
+          const rosieEntries = result.entries.filter(
+            (entry) => entry.contributor_username.toLowerCase() === "rosie"
+          );
+          setEntries(rosieEntries);
         } else {
           setError(result.error || "Failed to fetch entries");
           setEntries([]);

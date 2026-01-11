@@ -68,47 +68,40 @@ export default function EditIntListModal({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="bg-foreground pixel-borders max-w-md">
-                <DialogTitle className="main-text text-lg mb-4">
+                <DialogTitle className="main-text text-lg justify-center flex mb-1 pixel-borders bg-background">
                     Edit Int List Entry
                 </DialogTitle>
-                <div className="p-4">
-                    <div className="mb-4">
-                        <p className="main-text text-sm mb-2">
+                <div className="p-1">
+                    <div className="">
+                        <p className="main-text text-sm mb-1">
                             {entry.summoner_name}#{entry.summoner_tag}
                         </p>
                     </div>
 
-                    <div className="mb-4">
-                        <label className="main-text text-xs block mb-2">Reason:</label>
+                    <div className="mb-1">
+                        <label className="main-text text-xs block">Reason:</label>
                         <textarea
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            className="w-full p-2 pixel-borders bg-background main-text text-xs resize-none"
-                            rows={3}
+                            className="w-full p-1 pixel-borders bg-background main-text text-xs resize-none"
+                            rows={1}
                             disabled={isLoading}
                         />
                     </div>
 
                     {error && (
-                        <div className="mb-4 p-2 bg-red-900/50 pixel-borders">
+                        <div className="mb-1 p-2 bg-accent/50 pixel-borders">
                             <p className="main-text text-xs text-red-200">{error}</p>
                         </div>
                     )}
 
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex gap-2 justify-center">
                         <button
                             onClick={handleDelete}
                             disabled={isLoading}
-                            className="pixel-btn text-xs bg-red-900 hover:bg-red-800"
+                            className="pixel-btn text-xs bg-accent/50 hover:bg-accent/80"
                         >
                             Delete
-                        </button>
-                        <button
-                            onClick={() => onOpenChange(false)}
-                            disabled={isLoading}
-                            className="pixel-btn text-xs"
-                        >
-                            Cancel
                         </button>
                         <button
                             onClick={handleUpdate}

@@ -261,12 +261,12 @@ export default function EditProfileModal({
             <div>
               <label className="main-text text-xs flex">Profile Picture:</label>
               <div className="flex items-center">
-                {profilePicPreview && (
                   <div
-                    className="relative w-27 h-27 flex-shrink-0"
+                    className="relative w-27 h-27 flex-shrink-0 pixel-borders"
                     onClick={() => profilePicInputRef.current?.click()}
                   >
                     <EditOverlay />
+                    {profilePicPreview && (
                     <Image
                       src={profilePicPreview}
                       alt="Profile preview"
@@ -274,8 +274,8 @@ export default function EditProfileModal({
                       className="pixel-borders rounded-sm object-cover z-[-10]"
                       unoptimized
                     />
+                    )}
                   </div>
-                )}
                 <input
                   ref={profilePicInputRef}
                   type="file"
@@ -289,12 +289,13 @@ export default function EditProfileModal({
             <div className="item1">
               <label className="main-text text-xs block">Banner:</label>
               <div className="flex flex-col">
-                {featuredPreview && (
                   <div
-                    className="relative w-full aspect-video"
+                    className="relative w-full aspect-video min-h-27 min-w-37 pixel-borders"
                     onClick={() => featuredInputRef.current?.click()}
                   >
                     <EditOverlay />
+                    {featuredPreview && (
+
                     <Image
                       src={featuredPreview}
                       alt="Featured preview"
@@ -302,8 +303,8 @@ export default function EditProfileModal({
                       className="pixel-borders rounded-sm object-cover z-[-10]"
                       unoptimized
                     />
+                    )}
                   </div>
-                )}
                 <input
                   ref={featuredInputRef}
                   type="file"
@@ -317,7 +318,7 @@ export default function EditProfileModal({
 
           {/* Error Display */}
           {error && (
-            <div className="p-2 bg-red-900/50 pixel-borders">
+            <div className="p-2 bg-accent/50 pixel-borders">
               <p className="main-text text-xs text-red-200">{error}</p>
             </div>
           )}

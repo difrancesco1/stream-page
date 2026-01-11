@@ -10,16 +10,14 @@ load_dotenv()
 
 IS_RAILWAY = bool(os.getenv("RAILWAY_ENVIRONMENT"))
 
-if IS_RAILWAY:
-    DATABASE_URL = os.getenv(
-        "DATABASE_URL",
-        "postgresql://postgres:postgres@localhost:5432/streampage"
-    )
+# Get both URLs
+_db_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/streampage")
+_db_public_url = os.getenv("DATABASE_PUBLIC_URL", "")
+
+if ".railway.internal" in _db_url and _db_public_url:
+    DATABASE_URL = _db_public_url
 else:
-    DATABASE_URL = os.getenv(
-        "DATABASE_PUBLIC_URL",
-        os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/streampage")
-    )
+    DATABASE_URL = _db_url
 
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
