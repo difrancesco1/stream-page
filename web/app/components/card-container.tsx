@@ -79,6 +79,7 @@ export default function CardContainer() {
   const { isEditMode, toggleEditMode, canEdit } = useEditMode();
 
   const isRosie = user?.username.toLowerCase() === 'rosie';
+  const username = user?.username;
 
   const openLoginModal = () => {
     setIsAddUserMode(false);
@@ -279,7 +280,7 @@ export default function CardContainer() {
             style={{ zIndex: cards.intList.zIndex }}
             onMouseDown={() => bringToFront("intList")}
           >
-            <IntList onClose={() => closeCard("intList")} onMouseDown={() => bringToFront("intList")} />
+            <IntList username={username} onClose={() => closeCard("intList")} onMouseDown={() => bringToFront("intList")} />
           </div>
         </Draggable>
       )}

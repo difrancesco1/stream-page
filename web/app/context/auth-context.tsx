@@ -71,11 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const register = useCallback(async (username: string, password: string) => {
         const result = await registerUser(username, password);
 
-        if (result.success && result.user) {
-            return login(username, password);
-        }
-
-        return { success: false, error: result.error };
+        return { success: true, error: result.error };
     }, [login]);
 
     const logout = useCallback(() => {

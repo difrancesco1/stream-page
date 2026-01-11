@@ -273,7 +273,7 @@ export default function EditProfileModal({
                     onChange={(e) =>
                       updateSocialLink(index, "platform", e.target.value)
                     }
-                    className="p-1 pixel-borders bg-background main-text text-xs w-24"
+                    className="p-1 pixel-borders bg-background main-text text-xs w-18"
                     disabled={isLoading}
                   >
                     {PLATFORMS.map((p) => (

@@ -34,6 +34,7 @@ function getSocialIconClass(platform: string): string {
     if (platformLower === "tiktok") return "hn-tiktok";
     if (platformLower === "youtube") return "hn-youtube";
     if (platformLower === "highlight" || platformLower === "vgen") return "hn-highlight";
+    if (platformLower === "discord") return "hn-discord"
     return "hn-twitter"; // Default fallback
 }
 

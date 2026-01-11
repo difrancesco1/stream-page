@@ -4,7 +4,6 @@ import CardHeader from "../shared/card-header";
 import IntListPlayerCard from "./int-list-player-card";
 import IntListFooter from "./int-list-footer";
 import EditIntListModal from "./edit-int-list-modal";
-import { useEditMode } from "@/app/context/edit-mode-context";
 import {
   getIntListEntries,
   getIntListContributors,
@@ -15,6 +14,7 @@ import {
 interface IntListCardProps {
   onClose?: () => void;
   onMouseDown?: () => void;
+  username?: string | null;
 }
 
 interface Tab {
@@ -22,14 +22,13 @@ interface Tab {
   user_id?: string;
 }
 
-export default function IntListCard({ onClose, onMouseDown }: IntListCardProps) {
+export default function IntListCard({ onClose, onMouseDown, username}: IntListCardProps) {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTab, setActiveTab] = useState<Tab | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [entries, setEntries] = useState<IntListEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isEditMode } = useEditMode();
   const [editingEntry, setEditingEntry] = useState<IntListEntry | null>(null);
 
   useEffect(() => {
@@ -37,21 +36,18 @@ export default function IntListCard({ onClose, onMouseDown }: IntListCardProps) 
       const result = await getIntListContributors();
 
       if (result.success && result.contributors.length > 0) {
-        // Sort contributors so "Rosie" is always first
-        const sortedContributors = [...result.contributors].sort((a, b) => {
-          if (a.username.toLowerCase() === "rosie") return -1;
-          if (b.username.toLowerCase() === "rosie") return 1;
-          return 0;
-        });
-
-        const contributorTabs: Tab[] = sortedContributors.map(
-          (c: IntListContributor) => ({
-            title: `${c.username} `,
-            user_id: c.user_id,
-          })
+        // Find rosie's user_id
+        const rosie = result.contributors.find(
+          (c: IntListContributor) => c.username.toLowerCase() === "rosie"
         );
-        setTabs(contributorTabs);
-        setActiveTab(contributorTabs[0]);
+
+        // Create exactly 2 tabs: rosie and ALL
+        const newTabs: Tab[] = [
+          { title: "rosie", user_id: rosie?.user_id },
+          { title: "ALL" },
+        ];
+        setTabs(newTabs);
+        setActiveTab(newTabs[0]);
       } else {
         // No contributors yet
         setTabs([]);
@@ -74,13 +70,27 @@ export default function IntListCard({ onClose, onMouseDown }: IntListCardProps) 
       setIsLoading(true);
       setError(null);
 
-      const result = await getIntListEntries(activeTab.user_id);
-
-      if (result.success) {
-        setEntries(result.entries);
+      if (activeTab.title === "ALL") {
+        // Fetch all entries and filter out rosie's
+        const result = await getIntListEntries();
+        if (result.success) {
+          const filteredEntries = result.entries.filter(
+            (entry) => entry.contributor_username.toLowerCase() !== "rosie"
+          );
+          setEntries(filteredEntries);
+        } else {
+          setError(result.error || "Failed to fetch entries");
+          setEntries([]);
+        }
       } else {
-        setError(result.error || "Failed to fetch entries");
-        setEntries([]);
+        // Fetch entries for rosie
+        const result = await getIntListEntries(activeTab.user_id);
+        if (result.success) {
+          setEntries(result.entries);
+        } else {
+          setError(result.error || "Failed to fetch entries");
+          setEntries([]);
+        }
       }
 
       setIsLoading(false);
@@ -121,10 +131,12 @@ export default function IntListCard({ onClose, onMouseDown }: IntListCardProps) 
       >
         <div className="px-1 py-1 w-full h-[calc(100%-24px)] overflow-y-auto">
           <IntListPlayerCard
+            username={username}
             entries={entries}
             isLoading={isLoading}
             error={error}
-            onEntryClick={isEditMode ? (entry) => setEditingEntry(entry) : undefined}
+            onEntryClick={(entry) => setEditingEntry(entry)}
+            showUsername={activeTab?.title === "ALL"}
           />
         </div>
         <IntListFooter onEntryAdded={handleEntryAdded} />

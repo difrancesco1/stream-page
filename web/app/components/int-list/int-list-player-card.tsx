@@ -32,7 +32,7 @@ const RANK_NUM: Record<string, string> = {
 
 // Format rank string: "DIAMOND IV 25LP" -> "D4 25LP"
 function formatRank(rank: string | null): string {
-    if (!rank || rank === "UNRANKED") return "N/A"
+    if (!rank || rank === "UNRANKED") return "X"
     
     const parts = rank.split(" ")
     if (parts.length < 3) return rank
@@ -72,9 +72,12 @@ interface IntListPlayerCardProps {
     isLoading: boolean;
     error: string | null;
     onEntryClick?: (entry: IntListEntry) => void;
+    showUsername?: boolean;
+    username?: string | null;
 }
 
-export default function IntListPlayerCard({ entries, isLoading, error, onEntryClick }: IntListPlayerCardProps) {
+export default function IntListPlayerCard({ entries, isLoading, error, onEntryClick, showUsername, username }: IntListPlayerCardProps) {
+
     if (isLoading) {
         return (
             <div className="relative flex items-center justify-center h-full">
@@ -106,11 +109,13 @@ export default function IntListPlayerCard({ entries, isLoading, error, onEntryCl
 
     return (
         <div className="flex flex-col gap-1">
-            {entries.map((entry) => (
+            {entries.map((entry) => {
+                const canEdit = username && username === entry.contributor_username;
+                return (
                 <div 
                     key={entry.id} 
-                    className={`flex flex-col w-full pixel-borders px-1 ${onEntryClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
-                    onClick={() => onEntryClick?.(entry)}
+                    className={`flex flex-col w-full pixel-borders px-1 ${canEdit && onEntryClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
+                    onClick={() => canEdit && onEntryClick?.(entry)}
                 >
                     {/* Top row: summoner#tag :: champion icons */}
                     <div className="flex justify-between items-center gap-1 flex-wrap">
@@ -142,11 +147,11 @@ export default function IntListPlayerCard({ entries, isLoading, error, onEntryCl
                             </span>
                         </div>
                         <span className="text-[8px] text-spacing ">
-                            {entry.user_reason}
+                            {showUsername ? `${entry.contributor_username}: ${entry.user_reason}` : entry.user_reason}
                         </span>
                     </div>
                 </div>
-            ))}
+            )})}
         </div>
     );
 }

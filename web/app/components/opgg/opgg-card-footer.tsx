@@ -29,7 +29,7 @@ export default function OppggCardFooter({
   onEasterEggTrigger,
   onLpClick,
 }: OppggCardFooterProps) {
-  const displayTier = tier || "Unranked";
+  const displayTier = tier || "x";
   const displayLp =
     leaguePoints !== null && leaguePoints !== undefined
       ? `${leaguePoints}lp`

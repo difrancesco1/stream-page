@@ -70,17 +70,13 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                                 className="rounded-sm object-cover"
                                                 unoptimized={isBackendImage(profile?.featured_image)}
                                             />
-                            {twitterHandle && (
                                 <a 
                                     className="absolute alt-text bottom-0 right-0 mx-1" 
                                     target="_blank" 
-                                    href={profile?.social_links?.find(
-                                        link => link.platform.toLowerCase() === "twitter" || link.platform.toLowerCase() === "x"
-                                    )?.url || "#"}
+                                    href="https://x.com/Fourdee2"
                                 >
-                                    {twitterHandle}
+                                    @Fourdee
                                 </a>
-                            )}
                         </div>
                     </div>
                     
