@@ -14,7 +14,7 @@ def seed():
         session.add(user)
         session.flush()
         
-        user_login = UserLogin(user=user, password=hash_password("Treehi1!"))
+        user_login = UserLogin(user=user, username="rosie", password=hash_password("Treehi1!"))
         session.add(user_login)
         session.commit()
         print("Created user: rosie")
