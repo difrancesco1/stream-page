@@ -40,6 +40,7 @@ export default function EditMediaModal({
         const result = await updateMediaItem(token, item.id, {
             name: name.trim(),
             info: info.trim(),
+            url: url.trim(),
         });
         
         setIsLoading(false);

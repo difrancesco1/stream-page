@@ -75,7 +75,20 @@ export default function CardContainer() {
 
   const { isAuthenticated, user, logout } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [isAddUserMode, setIsAddUserMode] = useState(false);
   const { isEditMode, toggleEditMode, canEdit } = useEditMode();
+
+  const isRosie = user?.username.toLowerCase() === 'rosie';
+
+  const openLoginModal = () => {
+    setIsAddUserMode(false);
+    setAuthModalOpen(true);
+  };
+
+  const openAddUserModal = () => {
+    setIsAddUserMode(true);
+    setAuthModalOpen(true);
+  };
 
   const bringToFront = useCallback((cardId: CardId) => {
     zIndexCounterRef.current += 1;
@@ -182,6 +195,15 @@ export default function CardContainer() {
       <div className="absolute top-4 right-4 z-[9999]">
         {isAuthenticated ? (
           <div className="flex gap-2">
+            {isRosie && (
+              <button 
+                className="pixel-btn text-xs flex items-center gap-2 hover:animate-pulse"
+                onClick={openAddUserModal}
+                title="Add new user"
+              >
+                add user
+              </button>
+            )}
             {canEdit && (
               <button 
                 className={`pixel-btn text-xs flex items-center gap-2 hover:animate-pulse ${isEditMode ? 'bg-accent text-foreground' : ''}`}
@@ -201,14 +223,19 @@ export default function CardContainer() {
         ) : (
           <button 
             className="pixel-btn text-xs hover:animate-pulse"
-            onClick={() => setAuthModalOpen(true)}
+            onClick={openLoginModal}
           >
             login
           </button>
         )}
       </div>
 
-      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
+      <AuthModal 
+        open={authModalOpen} 
+        onOpenChange={setAuthModalOpen}
+        allowedTabs={isAddUserMode ? ['register '] : ['login ']}
+        initialTab={isAddUserMode ? 'register ' : 'login '}
+      />
       {/* Main Card - Always visible */}
       <Draggable
         nodeRef={mainCardRef}

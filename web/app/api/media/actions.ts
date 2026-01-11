@@ -111,52 +111,6 @@ export async function removeMedia(
     }
 }
 
-export async function editMedia(
-    token: string,
-    media_id: string,
-    updates: {
-        category?: MediaCategory;
-        name?: string;
-        info?: string;
-        url?: string;
-    }
-): Promise<MediaResult> {
-    try {
-        const response = await fetch(`${API_URL}/media/edit`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                media_id,
-                ...updates,
-            }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            return {
-                success: false,
-                message: "",
-                error: data.detail || data.message || "Failed to edit media",
-            };
-        }
-
-        return {
-            success: true,
-            message: data.message || "Successfully updated media",
-        };
-    } catch (error) {
-        return {
-            success: false,
-            message: "",
-            error: error instanceof Error ? error.message : "An unexpected error occurred",
-        };
-    }
-}
-
 export async function upvoteMedia(
     token: string,
     media_id: string
@@ -282,7 +236,7 @@ export async function sortMedia(
 export async function updateMediaItem(
     token: string,
     mediaId: string,
-    data: { name?: string; info?: string }
+    data: { name?: string; info?: string; url?:string}
 ): Promise<MediaResult> {
     try {
         const response = await fetch(`${API_URL}/media/${mediaId}`, {
@@ -352,4 +306,3 @@ export async function deleteMediaItem(
         };
     }
 }
-

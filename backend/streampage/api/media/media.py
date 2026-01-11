@@ -223,6 +223,8 @@ def update_media(
             entry.name = request.name
         if request.info is not None:
             entry.info = request.info
+        if request.url is not None:
+            entry.url = request.url
         
         session.commit()
         
