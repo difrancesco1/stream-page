@@ -8,7 +8,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from sqlalchemy import UniqueConstraint
 
-from streampage.db.enums import Platform, SectionType, MediaCategory
+from streampage.db.enums import Platform, MediaCategory
 
 
 class Base(DeclarativeBase):

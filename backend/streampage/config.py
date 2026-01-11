@@ -20,4 +20,4 @@ ALGORITHM: Final[str] = os.getenv("ALGORITHM", "HS256")
 OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="users/login")
 OAUTH2_SCHEME_OPTIONAL = OAuth2PasswordBearer(tokenUrl="users/login", auto_error=False)
 
-RIOT_API_KEY: Final[str] = os.getenv("RIOT_API_KEY", "RGAPI-6abca425-c53a-4059-ba3b-62dde8648ceb")
+RIOT_API_KEY: Final[str] = os.getenv("RIOT_API_KEY", "RGAPI-ec90b984-af67-46e8-a74d-e29c65e1b18f")

@@ -27,6 +27,7 @@ class UpdateMediaRequest(BaseModel):
     """Update media name and/or info fields."""
     name: Optional[str] = None
     info: Optional[str] = None
+    url: Optional[str] = None
 
 
 class UpvoteMediaRequest(BaseModel):
