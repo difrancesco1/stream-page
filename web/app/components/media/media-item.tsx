@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useAuth } from "@/app/context/auth-context";
-import { useEditMode } from "@/app/context/edit-mode-context";
 import { upvoteMedia } from "@/app/api/media/actions";
 import DeleteMediaModal from "./delete-media-modal";
 
@@ -21,28 +20,23 @@ interface MediaItemProps {
 
 export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, contributorUsername, username, onUpvote, onClick }: MediaItemProps) {
     const { token } = useAuth();
-    const { isEditMode } = useEditMode();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     
-    // Per-user edit check: contributor can edit their own entries, rosie can edit all
     const canEdit = username && (username === contributorUsername || username === "rosie");
 
-    const handleUpvote = async () => {
+    const handleUpvote = async (e: React.MouseEvent) => {
         if (!token) return;
+        e.stopPropagation();
         const result = await upvoteMedia(token, id);
         if (result.success && onUpvote) {
             onUpvote();
         }
-    };
 
-    const handleDeleteClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setShowDeleteModal(true);
     };
 
     const handleDeleteSuccess = () => {
         if (onUpvote) {
-            onUpvote();  // Refresh the list
+            onUpvote();
         }
     };
 
