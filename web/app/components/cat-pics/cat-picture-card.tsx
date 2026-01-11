@@ -76,21 +76,18 @@ export default function CatPictureCard({ onImageDeleted }: CatPictureCardProps) 
         )
     }
 
-    return (
-        <div className="overflow-y-auto h-[calc(100% - 28px)]">
-            <div className="grid grid-cols-3 gap-1">
+return (
+        <div className="grid grid-cols-3 gap-1">
                 {cats.map((cat) => (
-                    <div key={cat.id} className="relative w-full h-30 flex flex-col">
-                        <div className="absolute inset-0 pixel-borders w-full h-30 bg-background overflow-hidden flex items-center justify-center">
-                            <Image
+                    <div key={cat.id} className="relative w-full flex flex-col">
+                        <Image
                                 src={getImageUrl(cat.image_url)}
                                 alt={`Cat by ${cat.contributor_username}`}
-                                width={120}
+                                width={130}
                                 height={110}
-                                className="object-contain"
+                                className="pixel-borders bg-white"
                                 unoptimized
                             />
-                        </div>
                         <div className="absolute pl-1 w-full leading-tight bg-background pixel-borders">
                             <div className="grid-container">
                                 <p className="text-[10px] text-border truncate">
@@ -113,6 +110,4 @@ export default function CatPictureCard({ onImageDeleted }: CatPictureCardProps) 
                     </div>
                 ))}
             </div>
-        </div>
-    )
-}
+    )}

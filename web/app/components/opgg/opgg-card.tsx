@@ -344,7 +344,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
 
   const displayTitle = useMemo(() => {
     if (isAllTab || !currentAccount) {
-      return "opgg";
+      return "rosies opgg";
     }
     return currentAccount.game_name;
   }, [isAllTab, currentAccount]);
