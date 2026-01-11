@@ -141,12 +141,12 @@ export default function IntListPlayerCard({ entries, isLoading, error, onEntryCl
                             <span>
                                 {formatRank(entry.rank_when_added)}
                             </span>
-                            <span>⮞</span>
+                            <span> ➜ </span>
                             <span>
                                 {formatRank(entry.current_rank)}
                             </span>
                         </div>
-                        <span className="text-[8px] text-spacing ">
+                        <span className="text-[8px] text-spacing">
                             {showUsername ? `${entry.contributor_username}: ${entry.user_reason}` : entry.user_reason}
                         </span>
                     </div>

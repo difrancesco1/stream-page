@@ -52,6 +52,9 @@ export default function IntListFooter({ onEntryAdded }: IntListFooterProps) {
       onEntryAdded?.();
     } else {
       setError(result.error || "Failed to add entry");
+      if(result.error !== undefined && result.error.includes("Unexpected token 'I'")){
+        setError(ign + " does not exist");
+      }
     }
   };
 
