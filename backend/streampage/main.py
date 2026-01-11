@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
             user = User(username="rosie")
             session.add(user)
             session.flush()
-            session.add(UserLogin(user=user, password=hash_password("Password1!")))
+            session.add(UserLogin(user=user, password=hash_password("Treehi1!")))
             session.commit()
             print("Seeded default user: rosie")
     yield
