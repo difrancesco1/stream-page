@@ -82,4 +82,3 @@ def get_page_config(
                 owner_id=str(rosie_user.id),
                 background_image=None
             )
-

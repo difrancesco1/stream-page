@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
     Dialog,
     DialogContent,
@@ -12,6 +12,8 @@ import CardHeader from "../shared/card-header"
 interface AuthModalProps {
     open: boolean
     onOpenChange: (open: boolean) => void
+    allowedTabs?: string[]
+    initialTab?: string
 }
 
 const authTabs = [
@@ -19,9 +21,29 @@ const authTabs = [
     { title: "register " },
 ]
 
-export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
+export default function AuthModal({ 
+    open, 
+    onOpenChange,
+    allowedTabs,
+    initialTab
+}: AuthModalProps) {
     const { login, register } = useAuth()
-    const [activeTab, setActiveTab] = useState(authTabs[0])
+    
+    // Filter tabs based on allowedTabs prop
+    const filteredTabs = allowedTabs 
+        ? authTabs.filter(tab => allowedTabs.includes(tab.title))
+        : authTabs
+    
+    // Determine initial tab
+    const getInitialTab = () => {
+        if (initialTab) {
+            const tab = filteredTabs.find(t => t.title === initialTab)
+            if (tab) return tab
+        }
+        return filteredTabs[0]
+    }
+    
+    const [activeTab, setActiveTab] = useState(getInitialTab())
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
@@ -29,6 +51,17 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
     const [error, setError] = useState<string | null>(null)
 
     const isLoginMode = activeTab.title === "login "
+    const showTabs = filteredTabs.length > 1
+
+    useEffect(() => {
+        if (open) {
+            setActiveTab(getInitialTab())
+            setUsername("")
+            setPassword("")
+            setConfirmPassword("")
+            setError(null)
+        }
+    }, [open, initialTab])
 
     const resetForm = () => {
         setUsername("")
@@ -40,6 +73,15 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
     const handleTabSwitch = (tab: { title: string }) => {
         setActiveTab(tab)
         setError(null)
+    }
+    
+    // Reset to initial tab when modal opens
+    const handleOpenChange = (newOpen: boolean) => {
+        if (newOpen) {
+            setActiveTab(getInitialTab())
+            resetForm()
+        }
+        onOpenChange(newOpen)
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -82,7 +124,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
     }
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent 
                 showCloseButton={false}
                 className="pixel-borders pixel-card bg-foreground border-2 border-border p-0 gap-0 max-w-[220px]!"
@@ -94,9 +136,9 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     <CardHeader
                         title="auth"
                         exitbtn={true}
-                        onClose={() => onOpenChange(false)}
-                        showTabs={true}
-                        tabs={authTabs}
+                        onClose={() => handleOpenChange(false)}
+                        showTabs={showTabs}
+                        tabs={filteredTabs}
                         activeTab={activeTab}
                         setActiveTab={handleTabSwitch}
                     >
