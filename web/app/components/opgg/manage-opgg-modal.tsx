@@ -116,33 +116,33 @@ export default function ManageOpggModal({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-foreground pixel-borders max-w-md max-h-[80vh] overflow-y-auto ">
-                <DialogTitle className="main-text text-lg px-1 pixel-borders bg-background">
+            <DialogContent className="bg-foreground pixel-borders max-w-[28rem] max-h-[80vh] overflow-y-auto ">
+                <DialogTitle className="main-text text-[1.125rem] px-[var(--spacing-sm)] pixel-borders bg-background">
                     Manage OPGG Accounts
                 </DialogTitle>
                 
-                <div className="space-y-1 p-1">
+                <div className="space-y-[var(--spacing-sm)] p-[var(--spacing-sm)]">
                     {/* Unhide All Games */}
-                    <div className="pixel-borders p-1 bg-background flex">
-                        <h3 className="main-text text-sm pt-1">show all Games</h3>
+                    <div className="pixel-borders p-[var(--spacing-sm)] bg-background flex">
+                        <h3 className="main-text text-[0.875rem] pt-[var(--spacing-sm)]">show all Games</h3>
 
-                        <div className="space-y-2 px-2 pb-1">
+                        <div className="space-y-[var(--spacing-md)] px-[var(--spacing-md)] pb-[var(--spacing-sm)]">
                             <button
                                 onClick={() => handleUnhideAllGames()}
                                 disabled={isLoading}
-                                className="w-full pixel-btn text-xs"
+                                className="w-full pixel-btn text-[var(--text-btn)]"
                             >
                                 Unhide All Games (All Accounts)
                             </button>
                         </div>
-                    </div><div className="pixel-borders px-1 bg-background">
+                    </div><div className="pixel-borders px-[var(--spacing-sm)] bg-background">
                         {accounts.length > 0 && (
-                            <div className="mt-2 ">
-                                <label className="main-text text-xs block mb-1">show all games on specific account:</label>
+                            <div className="mt-[var(--spacing-md)] ">
+                                <label className="main-text text-[var(--text-btn)] block mb-[var(--spacing-sm)]">show all games on specific account:</label>
                                 <select
                                     value={selectedAccount || ""}
                                     onChange={(e) => setSelectedAccount(e.target.value)}
-                                    className="w-full p-1 pixel-borders bg-foreground main-text text-xs "
+                                    className="w-full p-[var(--spacing-sm)] pixel-borders bg-foreground main-text text-[var(--text-btn)] "
                                     disabled={isLoading}
                                 >
                                     <option value="">Select account...</option>
@@ -155,7 +155,7 @@ export default function ManageOpggModal({
                                 <button
                                     onClick={() => selectedAccount && handleUnhideAllGames(selectedAccount)}
                                     disabled={isLoading || !selectedAccount}
-                                    className="ml-20 pixel-btn text-xs mb-2"
+                                    className="ml-[5rem] pixel-btn text-[var(--text-btn)] mb-[var(--spacing-md)]"
                                 >
                                     Unhide All Games for Selected
                                 </button>
@@ -165,26 +165,26 @@ export default function ManageOpggModal({
                     </div>
 
                     {/* Manage Accounts */}
-                    <div className="pixel-borders p-1 bg-background">
-                        <h3 className="main-text text-sm mb-1">Manage Accounts</h3>
-                        <div className="space-y-2">
+                    <div className="pixel-borders p-[var(--spacing-sm)] bg-background">
+                        <h3 className="main-text text-[0.875rem] mb-[var(--spacing-sm)]">Manage Accounts</h3>
+                        <div className="space-y-[var(--spacing-md)]">
                             {accounts.map((account, index) => (
-                                <div key={account.id} className="pixel-borders p-1 bg-foreground flex items-center justify-between">
+                                <div key={account.id} className="pixel-borders p-[var(--spacing-sm)] bg-foreground flex items-center justify-between">
                                     <div className="flex-1">
-                                        <span className="main-text text-xs">
+                                        <span className="main-text text-[var(--text-btn)]">
                                             {account.game_name}#{account.tag_line}
                                         </span>
                                         {account.tier && (
-                                            <span className="alt-text text-xs ml-1">
+                                            <span className="alt-text text-[var(--text-btn)] ml-[var(--spacing-sm)]">
                                                 {account.tier} {account.rank}
                                             </span>
                                         )}
                                     </div>
-                                    <div className="flex gap-1">
+                                    <div className="flex gap-[var(--spacing-sm)]">
                                         <button
                                             onClick={() => handleMoveUp(index)}
                                             disabled={isLoading || index === 0}
-                                            className="pixel-btn text-xs px-2"
+                                            className="pixel-btn text-[var(--text-btn)] px-[var(--spacing-md)]"
                                             title="Move up"
                                         >
                                             ↑
@@ -192,7 +192,7 @@ export default function ManageOpggModal({
                                         <button
                                             onClick={() => handleMoveDown(index)}
                                             disabled={isLoading || index === accounts.length - 1}
-                                            className="pixel-btn text-xs px-2"
+                                            className="pixel-btn text-[var(--text-btn)] px-[var(--spacing-md)]"
                                             title="Move down"
                                         >
                                             ↓
@@ -200,7 +200,7 @@ export default function ManageOpggModal({
                                         <button
                                             onClick={() => handleDeleteAccount(account.id)}
                                             disabled={isLoading}
-                                            className="pixel-btn text-xs px-2 bg-accent/90 hover:bg-accent/80"
+                                            className="pixel-btn text-[var(--text-btn)] px-[var(--spacing-md)] bg-accent/90 hover:bg-accent/80"
                                             title="Delete"
                                         >
                                             ×
@@ -209,22 +209,22 @@ export default function ManageOpggModal({
                                 </div>
                             ))}
                             {accounts.length === 0 && (
-                                <p className="main-text text-xs opacity-50">No accounts added yet</p>
+                                <p className="main-text text-[var(--text-btn)] opacity-50">No accounts added yet</p>
                             )}
                         </div>
                     </div>
 
                     {error && (
-                        <div className="p-2 bg-accent/50 pixel-borders">
-                            <p className="main-text text-xs text-red-200">{error}</p>
+                        <div className="p-[var(--spacing-md)] bg-accent/50 pixel-borders">
+                            <p className="main-text text-[var(--text-btn)] text-red-200">{error}</p>
                         </div>
                     )}
 
-                    <div className="flex gap-2 justify-center">
+                    <div className="flex gap-[var(--spacing-md)] justify-center">
                         <button
                             onClick={() => onOpenChange(false)}
                             disabled={isLoading}
-                            className="pixel-btn text-xs"
+                            className="pixel-btn text-[var(--text-btn)]"
                         >
                             Close
                         </button>
