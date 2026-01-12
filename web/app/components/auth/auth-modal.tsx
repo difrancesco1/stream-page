@@ -127,12 +127,12 @@ export default function AuthModal({
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent 
                 showCloseButton={false}
-                className="pixel-borders pixel-card bg-foreground border-2 border-border p-0 gap-0 max-w-[220px]!"
+                className="pixel-borders pixel-card bg-foreground border-[length:var(--border-width)] border-border p-0 gap-0 max-w-[13.75rem]!"
             >
                 <DialogTitle className="sr-only">
                     {isLoginMode ? "Login" : "Register"}
                 </DialogTitle>
-                <div className="wrapper min-h-[200px]">
+                <div className="wrapper min-h-[12.5rem]">
                     <CardHeader
                         title="auth"
                         exitbtn={true}
@@ -143,15 +143,15 @@ export default function AuthModal({
                         setActiveTab={handleTabSwitch}
                     >
                         {/* Form */}
-                        <form onSubmit={handleSubmit} className="p-3">
+                        <form onSubmit={handleSubmit} className="p-[0.75rem]">
                             {error && (
-                                <div className="text-[10px] text-red-400 bg-red-400/10 px-2 py-1 pixel-borders">
+                                <div className="text-[0.625rem] text-red-400 bg-red-400/10 px-[var(--spacing-md)] py-[var(--spacing-sm)] pixel-borders">
                                     {error}
                                 </div>
                             )}
 
-                            <div className="space-y-1">
-                                <label className="main-text text-xs">username</label>
+                            <div className="space-y-[var(--spacing-sm)]">
+                                <label className="main-text text-[var(--text-btn)]">username</label>
                                 <input
                                     type="text"
                                     value={username}
@@ -163,8 +163,8 @@ export default function AuthModal({
                                 />
                             </div>
 
-                            <div className="space-y-1">
-                                <label className="main-text text-xs">password</label>
+                            <div className="space-y-[var(--spacing-sm)]">
+                                <label className="main-text text-[var(--text-btn)]">password</label>
                                 <input
                                     type="password"
                                     value={password}
@@ -177,8 +177,8 @@ export default function AuthModal({
                             </div>
 
                             {!isLoginMode && (
-                                <div className="space-y-1">
-                                    <label className="main-text text-xs">confirm password</label>
+                                <div className="space-y-[var(--spacing-sm)]">
+                                    <label className="main-text text-[var(--text-btn)]">confirm password</label>
                                     <input
                                         type="password"
                                         value={confirmPassword}
@@ -194,7 +194,7 @@ export default function AuthModal({
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="pixel-borders pixel-btn-border mt-2"
+                                    className="pixel-borders pixel-btn-border mt-[var(--spacing-md)]"
                                 >
                                     {isLoading ? "..." : isLoginMode ? "login" : "register"}
                                 </button>

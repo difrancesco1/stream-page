@@ -67,31 +67,30 @@ export default function MediaFooter({
 
   return (
     <>
-      <div className="absolute bottom-0 px-1 w-full h-[28px] border-t-2 flex items-center gap-1">
+      <div className="absolute bottom-0 px-[var(--spacing-sm)] w-full h-[1.75rem] border-t-[length:var(--border-width)] flex items-center gap-[var(--spacing-sm)]">
         <input
-          className="w-28 pixel-borders pixel-input"
+          className="w-[7rem] pixel-borders pixel-input"
           placeholder="media name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={handleKeyDown}
         />
         <input
-          className="w-48 pixel-borders pixel-input"
+          className="w-[12rem] pixel-borders pixel-input"
           placeholder="short info"
           value={info}
           onChange={(e) => setInfo(e.target.value)}
           onKeyDown={handleKeyDown}
         />
         <input
-          className="w-12 pixel-borders pixel-input"
+          className="w-[3rem] pixel-borders pixel-input"
           placeholder="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={handleKeyDown}
         />
         <button
-          className=" pixel-borders px-1 my-1 text-xs bg-border text-background 
-                                        hover:bg-accent hover:text-background disabled:opacity-50 disabled:cursor-not-allowed"
+          className="pixel-borders px-[0.325rem] py-0 text-[0.75rem] bg-border text-background hover:bg-accent hover:text-background disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleAdd}
           disabled={isAdding || !isFormValid}
         >
