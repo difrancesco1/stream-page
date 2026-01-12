@@ -26,23 +26,23 @@ export default function Tabs({ tabs, activeTab, setActiveTab }: TabProps) {
         <div 
             ref={scrollRef}
             onWheel={handleWheel}
-            className="flex items-center justify-start gap-0.5 h-5.5 relative ml-0.5 pb-[1px] overflow-x-auto overflow-y-visible scrollbar-hide"
+            className="flex items-center justify-start gap-[var(--spacing-xs)] h-[1.375rem] relative ml-[var(--spacing-xs)] pb-[0.0625rem] overflow-x-auto overflow-y-visible scrollbar-hide"
         >
             {tabs.map((tab, index) => (
                 <div className="relative cursor-pointer" key={`${tab.title}-${index}`} onClick={() => setActiveTab(tab)}>
                     {activeTab.title === tab.title ? (
                         <>
-                            <div className="bg-white absolute mt-0.5 w-[calc(100%_-_4px)] left-0.5 pointer-events-none rounded-t-sm h-0.5 border-accent!"></div>
-                            <div className="absolute mt-[3px] w-[calc(100%_-_6px)] left-[3.1px] pointer-events-none z-[10] h-[1px] bg-accent! z-[11]"></div>
-                            <div className="border rounded-t-sm px-0.5 bg-accent h-5.5 flex items-center justify-center border-accent!">
+                            <div className="bg-white absolute mt-[var(--spacing-xs)] w-[calc(100%-var(--spacing-sm))] left-[var(--spacing-xs)] pointer-events-none rounded-t-sm h-[var(--spacing-xs)] border-accent!"></div>
+                            <div className="absolute mt-[0.1875rem] w-[calc(100%-0.375rem)] left-[0.1875rem] pointer-events-none z-[10] h-[0.0625rem] bg-accent! z-[11]"></div>
+                            <div className="border rounded-t-sm px-[var(--spacing-xs)] bg-accent h-[1.375rem] flex items-center justify-center border-accent!">
                                 <span className="main-text text-background!">{tab.title}</span>
                             </div>
                         </>
                     ) : (
                         <>
-                        <div className="bg-foreground absolute mt-0.5 w-[calc(100%_-_4px)] left-0.5 pointer-events-none rounded-t-sm h-0.5"></div>
-                        <div className="absolute mt-[3px] w-[calc(100%_-_6px)] left-[3.1px] pointer-events-none z-[10] h-[1px] bg-border! z-[11]"></div>
-                        <div className="border rounded-t-sm px-0.5 bg-border h-5.5 flex items-center justify-center">
+                        <div className="bg-foreground absolute mt-[var(--spacing-xs)] w-[calc(100%-var(--spacing-sm))] left-[var(--spacing-xs)] pointer-events-none rounded-t-sm h-[var(--spacing-xs)]"></div>
+                        <div className="absolute mt-[0.1875rem] w-[calc(100%-0.375rem)] left-[0.1875rem] pointer-events-none z-[10] h-[0.0625rem] bg-border! z-[11]"></div>
+                        <div className="border rounded-t-sm px-[var(--spacing-xs)] bg-border h-[1.375rem] flex items-center justify-center">
                         <span className="main-text text-background!">{tab.title}</span>
                         </div>
                         </>

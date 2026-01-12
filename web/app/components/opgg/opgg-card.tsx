@@ -352,7 +352,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
   return (
     <>
       <div
-        className="relative wrapper pixel-borders pixel-card w-full max-w-[200px] h-auto min-h-[350px] aspect-[5/3] bg-foreground"
+        className="relative wrapper pixel-borders pixel-card w-full max-w-[12.5rem] min-w-[12.5rem] h-auto min-h-[21.875rem] aspect-[5/3] bg-foreground"
         onMouseDown={onMouseDown}
       >
         <CardHeader
