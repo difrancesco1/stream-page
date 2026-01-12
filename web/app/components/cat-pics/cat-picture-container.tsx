@@ -20,7 +20,7 @@ export default function CatPictureContainer({onClose, onMouseDown}: CatPicturesC
 
     return (
         <div 
-            className="wrapper pixel-borders pixel-card w-full max-w-[400px] h-auto min-h-[280px] aspect-[5/3] bg-foreground"
+            className="wrapper pixel-borders pixel-card w-full max-w-[25rem] h-auto min-h-[17.5rem] aspect-[5/3] bg-foreground"
             onMouseDown={onMouseDown}
         >
             <CardHeader
@@ -29,7 +29,7 @@ export default function CatPictureContainer({onClose, onMouseDown}: CatPicturesC
                 onClose={onClose}
                 showTabs={false}
             >
-            <div key={refreshKey} className="px-1 py-1 w-full h-[calc(100%-24px)] overflow-y-auto border-t-2">
+            <div key={refreshKey} className="px-[var(--spacing-sm)] py-[var(--spacing-sm)] w-full h-[calc(100%-1.5rem)] overflow-y-auto border-t-[length:var(--border-width)]">
                 <CatPictureCard onImageDeleted={handleImageChange} />
             </div>
             <CatPicturesFooter onImageUploaded={handleImageChange} />
