@@ -51,7 +51,7 @@ interface ChampionIconProps {
 function ChampionIcon({ match }: ChampionIconProps) {
     return (
         <div 
-            className={`relative w-4 h-4 rounded-sm overflow-hidden border-2 ${
+            className={`relative w-[1rem] h-[1rem] rounded-sm overflow-hidden border-[length:var(--border-width)] ${
                 match.win ? 'border-blue-400' : 'border-accent'
             }`}
             title={`${match.champion_name} - ${match.win ? 'Win' : 'Loss'}`}
@@ -83,7 +83,7 @@ export default function IntListPlayerCard({ entries, isLoading, error, onEntryCl
             <div className="relative flex items-center justify-center h-full">
                 <span className="main-text cursor-loading">
                     <img src="loading.gif"
-                        className="absolute h-10"
+                        className="absolute h-[2.5rem]"
                         alt="loading magical girl"
                     ></img>
                 </span>
@@ -108,26 +108,26 @@ export default function IntListPlayerCard({ entries, isLoading, error, onEntryCl
     }
 
     return (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-[var(--spacing-sm)]">
             {entries.map((entry) => {
                 const canEdit = username && username === "rosie" || username === entry.contributor_username;
                 return (
                 <div 
                     key={entry.id} 
-                    className={`flex flex-col w-full pixel-borders px-1 ${canEdit && onEntryClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
+                    className={`flex flex-col w-full pixel-borders px-[var(--spacing-sm)] ${canEdit && onEntryClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
                     onClick={() => canEdit && onEntryClick?.(entry)}
                 >
                     {/* Top row: summoner#tag :: champion icons */}
-                    <div className="flex justify-between items-center gap-1 flex-wrap">
-                        <span className="main-text text-xs font-bold">
+                    <div className="flex justify-between items-center gap-[var(--spacing-sm)] flex-wrap">
+                        <span className="main-text text-[var(--text-btn)] font-bold">
                             {entry.summoner_name}#{entry.summoner_tag}
                         </span>
-                        <div className="flex gap-0.5 flex-wrap">
+                        <div className="flex gap-[var(--spacing-xs)] flex-wrap">
                             {(entry.recent_matches || []).map((match, index) => (
                                 <ChampionIcon key={index} match={match} />
                             ))}
                             {(!entry.recent_matches || entry.recent_matches.length === 0) && (
-                                <span className="main-text text-[10px] alt-text">no recent games</span>
+                                <span className="main-text text-[0.625rem] alt-text">no recent games</span>
                             )}
                         </div>
                     </div>
@@ -137,7 +137,7 @@ export default function IntListPlayerCard({ entries, isLoading, error, onEntryCl
                     
                     {/* Bottom row: rank progression :: reason */}
                     <div className="flex justify-between items-center alt-text">
-                        <div className="text-[8px] text-spacing">
+                        <div className="text-[var(--text-accent)] text-spacing">
                             <span>
                                 {formatRank(entry.rank_when_added)}
                             </span>
@@ -146,7 +146,7 @@ export default function IntListPlayerCard({ entries, isLoading, error, onEntryCl
                                 {formatRank(entry.current_rank)}
                             </span>
                         </div>
-                        <span className="text-[8px] text-spacing ">
+                        <span className="text-[var(--text-accent)] text-spacing ">
                             {showUsername ? `${entry.contributor_username}: ${entry.user_reason}` : entry.user_reason}
                         </span>
                     </div>
