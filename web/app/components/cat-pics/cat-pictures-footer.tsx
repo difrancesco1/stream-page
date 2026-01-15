@@ -63,19 +63,15 @@ export default function CatPicturesFooter({ onImageUploaded }: CatPicturesFooter
     }
 
     return (
-        <div className="px-1 w-full h-[28px] flex items-center gap-1">
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept=".png,.jpg,.jpeg,.gif"
-                onChange={handleFileSelect}
-                className="hidden"
-                id="cat-file-input"
-            />
-            <label
-                htmlFor="cat-file-input"
-                className="pixel-borders pixel-input w-300 cursor-pointer"
-            >
+        <div className="px-[var(--spacing-sm)] w-full h-[1.75rem] flex items-center gap-[var(--spacing-sm)]">
+            <label className="pixel-borders pixel-input w-full cursor-pointer">
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.gif"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                />
                 {selectedFile ? selectedFile.name : "Choose image..."}
             </label>
             <button

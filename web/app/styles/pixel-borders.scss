@@ -1,6 +1,9 @@
 @use "../../node_modules/pixel-borders/src/styles/pixel-borders/pixel-borders-mixins" as pb;
 
-// Base pixel-borders class with default styling
+// === BREAKPOINTS ===
+// sm: 640px, md: 768px, lg: 1024px
+
+// === BASE (Mobile-first: smallest screens) ===
 .pixel-borders {
   @include pb.pixel-borders(
     $corner-size: 2,
@@ -10,33 +13,31 @@
 }
 
 .pixel-borders-accent {
-    @include pb.pixel-borders(
-      $corner-size: 2,
-      $border-size: 3px,
-      $border-color: #f088ab
-    );
-  }
+  @include pb.pixel-borders(
+    $corner-size: 2,
+    $border-size: 2px,
+    $border-color: #f088ab
+  );
+}
 
-  .pixel-borders-shine {
-    @include pb.pixel-borders(
-      $border-size: 1px,
-      $border-color: #fcfdfc
-    );
-  }
+.pixel-borders-shine {
+  @include pb.pixel-borders(
+    $border-size: 1px,
+    $border-color: #fcfdfc
+  );
+}
 
-// Base pixel-borders class with default styling
 .pixel-borders-dome {
-    @include pb.pixel-borders(
-      $border-size: 2px,
-      $border-color: #161b67
-    );
-  }
+  @include pb.pixel-borders(
+    $border-size: 2px,
+    $border-color: #161b67
+  );
+}
 
-// Themed pixel boxes that match your color scheme
 .pixel-box-primary {
   @include pb.pixel-box(
     $corner-size: 1,
-    $border-size: 4px,
+    $border-size: 3px,
     $background-color: #a84370,
     $border-inset: true,
     $border-inset-sides: 'all'
@@ -46,7 +47,7 @@
 .pixel-box-secondary {
   @include pb.pixel-box(
     $corner-size: 1,
-    $border-size: 4px,
+    $border-size: 3px,
     $background-color: #f1c4e6,
     $border-inset: true,
     $border-inset-sides: 'all'
@@ -56,18 +57,17 @@
 .pixel-box-card {
   @include pb.pixel-box(
     $corner-size: 1,
-    $border-size: 4px,
+    $border-size: 3px,
     $background-color: #faf5fa,
     $border-inset: true,
     $border-inset-sides: 'bottom-right'
   );
 }
 
-// Size variants
 .pixel-borders-lg {
   @include pb.pixel-borders(
     $corner-size: 2,
-    $border-size: 6px,
+    $border-size: 4px,
     $border-color: #323765
   );
 }
@@ -75,12 +75,11 @@
 .pixel-borders-sm {
   @include pb.pixel-borders(
     $corner-size: 1,
-    $border-size: 2px,
+    $border-size: 1px,
     $border-color: #323765
   );
 }
 
-// Top-only pixel borders
 .pixel-borders-top {
   $corner-size: 1;
   $border-size: 2px;
@@ -89,22 +88,176 @@
   @supports (border-image-source: none) {
     border-radius: ($border-size * ($corner-size + 2)) + ($corner-size * 2);
   }
-
   border-style: solid;
   border-width: $border-size;
   border-color: $border-color;
-
-  // Only apply pixel corners to top by adjusting slice values
-  // Format: top / right / bottom / left
   border-image-slice: ($corner-size * 2) ($corner-size * 2) 0 ($corner-size * 2);
   border-image-width: $corner-size $corner-size 0 $corner-size;
   border-image-outset: 0;
   border-image-source: url(pb.pixel-borders-image($corner-size, $border-color));
-  
-  // Add solid bottom border to complete the border
   border-bottom: $border-size solid $border-color;
-  
-  // Make bottom corners square
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+}
+
+// === MEDIUM SCREENS (768px+) ===
+@media (min-width: 768px) {
+  .pixel-borders {
+    @include pb.pixel-borders(
+      $corner-size: 2,
+      $border-size: 2px,
+      $border-color: #161b67
+    );
+  }
+
+  .pixel-borders-accent {
+    @include pb.pixel-borders(
+      $corner-size: 2,
+      $border-size: 3px,
+      $border-color: #f088ab
+    );
+  }
+
+  .pixel-borders-dome {
+    @include pb.pixel-borders(
+      $border-size: 2px,
+      $border-color: #161b67
+    );
+  }
+
+  .pixel-box-primary {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 4px,
+      $background-color: #a84370,
+      $border-inset: true,
+      $border-inset-sides: 'all'
+    );
+  }
+
+  .pixel-box-secondary {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 4px,
+      $background-color: #f1c4e6,
+      $border-inset: true,
+      $border-inset-sides: 'all'
+    );
+  }
+
+  .pixel-box-card {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 4px,
+      $background-color: #faf5fa,
+      $border-inset: true,
+      $border-inset-sides: 'bottom-right'
+    );
+  }
+
+  .pixel-borders-lg {
+    @include pb.pixel-borders(
+      $corner-size: 2,
+      $border-size: 5px,
+      $border-color: #323765
+    );
+  }
+
+  .pixel-borders-sm {
+    @include pb.pixel-borders(
+      $corner-size: 1,
+      $border-size: 2px,
+      $border-color: #323765
+    );
+  }
+
+  .pixel-borders-top {
+    $corner-size: 1;
+    $border-size: 2px;
+    $border-color: #323765;
+    
+    border-width: $border-size;
+    border-bottom: $border-size solid $border-color;
+  }
+}
+
+// === LARGE SCREENS (1024px+) ===
+@media (min-width: 1024px) {
+  .pixel-borders {
+    @include pb.pixel-borders(
+      $corner-size: 2,
+      $border-size: 2px,
+      $border-color: #161b67
+    );
+  }
+
+  .pixel-borders-accent {
+    @include pb.pixel-borders(
+      $corner-size: 2,
+      $border-size: 2.5px,
+      $border-color: #f088ab
+    );
+  }
+
+  .pixel-borders-dome {
+    @include pb.pixel-borders(
+      $border-size: 2.5px,
+      $border-color: #161b67
+    );
+  }
+
+  .pixel-box-primary {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 5px,
+      $background-color: #a84370,
+      $border-inset: true,
+      $border-inset-sides: 'all'
+    );
+  }
+
+  .pixel-box-secondary {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 5px,
+      $background-color: #f1c4e6,
+      $border-inset: true,
+      $border-inset-sides: 'all'
+    );
+  }
+
+  .pixel-box-card {
+    @include pb.pixel-box(
+      $corner-size: 1,
+      $border-size: 5px,
+      $background-color: #faf5fa,
+      $border-inset: true,
+      $border-inset-sides: 'bottom-right'
+    );
+  }
+
+  .pixel-borders-lg {
+    @include pb.pixel-borders(
+      $corner-size: 2,
+      $border-size: 6px,
+      $border-color: #323765
+    );
+  }
+
+  .pixel-borders-sm {
+    @include pb.pixel-borders(
+      $corner-size: 1,
+      $border-size: 2px,
+      $border-color: #323765
+    );
+  }
+
+  .pixel-borders-top {
+    $corner-size: 1;
+    $border-size: 3px;
+    $border-color: #323765;
+    
+    border-width: $border-size;
+    border-bottom: $border-size solid $border-color;
+  }
 }

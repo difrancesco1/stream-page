@@ -352,7 +352,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
   return (
     <>
       <div
-        className="relative wrapper pixel-borders pixel-card w-full max-w-[200px] h-auto min-h-[350px] aspect-[5/3] bg-foreground"
+        className="relative wrapper pixel-borders pixel-card w-full max-w-[12.5rem] min-w-[12.5rem] h-auto min-h-[21.875rem] aspect-[5/3] bg-foreground"
         onMouseDown={onMouseDown}
       >
         <CardHeader
@@ -364,7 +364,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
           activeTab={activeTab || undefined}
           setActiveTab={handleSetActiveTab}
         >
-          <div className="px-1 py-1 w-full h-full overflow-y-auto">
+          <div className="px-1 py-1 w-full h-full overflow-y-auto pt-0">
             {isEditMode && accounts.length > 0 && (
               <div className="px-1 mb-2">
                 <button

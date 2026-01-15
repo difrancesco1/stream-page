@@ -45,29 +45,29 @@ export default function DeleteMediaModal({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="bg-foreground pixel-borders max-w-md">
-                <DialogTitle className="main-text text-lg mb-4">
+            <DialogContent className="bg-foreground pixel-borders max-w-[28rem]">
+                <DialogTitle className="main-text text-[1.125rem] mb-[var(--spacing-lg)]">
                     Delete Media Item
                 </DialogTitle>
-                <div className="p-4">
-                    <p className="main-text text-sm mb-4">
+                <div className="p-[var(--spacing-lg)]">
+                    <p className="main-text text-[0.875rem] mb-[var(--spacing-lg)]">
                         Are you sure you want to delete <strong>"{item.name}"</strong>?
                     </p>
-                    <p className="alt-text text-xs mb-4 opacity-70">
+                    <p className="alt-text text-[var(--text-btn)] mb-[var(--spacing-lg)] opacity-70">
                         This action cannot be undone.
                     </p>
 
                     {error && (
-                        <div className="mb-4 p-2 bg-accent/50 pixel-borders">
-                            <p className="main-text text-xs text-red-200">{error}</p>
+                        <div className="mb-[var(--spacing-lg)] p-[var(--spacing-md)] bg-accent/50 pixel-borders">
+                            <p className="main-text text-[var(--text-btn)] text-red-200">{error}</p>
                         </div>
                     )}
 
-                    <div className="flex gap-2 justify-end">
+                    <div className="flex gap-[var(--spacing-md)] justify-end">
                         <button
                             onClick={handleDelete}
                             disabled={isDeleting}
-                            className="pixel-btn text-xs bg-accent/90 hover:bg-accent/80"
+                            className="pixel-btn text-[var(--text-btn)] bg-accent/90 hover:bg-accent/80"
                         >
                             {isDeleting ? "Deleting..." : "Delete"}
                         </button>

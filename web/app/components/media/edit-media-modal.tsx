@@ -75,59 +75,59 @@ export default function EditMediaModal({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="pixel-borders">
-                <DialogTitle className="main-text text-lg justify-center flex pixel-borders bg-background">
+                <DialogTitle className="main-text text-[1.125rem] justify-center flex pixel-borders bg-background">
                     Edit Media Item
                 </DialogTitle>
                 <div className="">
-                    <div className="mb-1">
-                        <label className="main-text text-xs block">Name:</label>
+                    <div className="mb-[var(--spacing-sm)]">
+                        <label className="main-text text-[var(--text-btn)] block">Name:</label>
                         <input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full p-1 pixel-borders bg-background main-text text-xs"
+                            className="w-full p-[var(--spacing-sm)] pixel-borders bg-background main-text text-[var(--text-btn)]"
                             disabled={isLoading}
                         />
                     </div>
 
-                    <div className="mb-1">
-                        <label className="main-text text-xs block">Info:</label>
+                    <div className="mb-[var(--spacing-sm)]">
+                        <label className="main-text text-[var(--text-btn)] block">Info:</label>
                         <textarea
                             value={info}
                             onChange={(e) => setInfo(e.target.value)}
-                            className="w-full p-1 pixel-borders bg-background main-text text-xs resize-none"
+                            className="w-full p-[var(--spacing-sm)] pixel-borders bg-background main-text text-[var(--text-btn)] resize-none"
                             rows={3}
                             disabled={isLoading}
                         />
                     </div>
 
-                    <div className="mb-1">
-                        <label className="main-text text-xs block">URL:</label>
+                    <div className="mb-[var(--spacing-sm)]">
+                        <label className="main-text text-[var(--text-btn)] block">URL:</label>
                         <input
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
-                            className="w-full p-1 pixel-borders bg-background main-text text-xs"
+                            className="w-full p-[var(--spacing-sm)] pixel-borders bg-background main-text text-[var(--text-btn)]"
                             disabled={isLoading}
                         />
                     </div>
 
                     {error && (
-                        <div className="mb-1 p-1 bg-accent/50 pixel-borders">
-                            <p className="main-text text-xs text-red-200">{error}</p>
+                        <div className="mb-[var(--spacing-sm)] p-[var(--spacing-sm)] bg-accent/50 pixel-borders">
+                            <p className="main-text text-[var(--text-btn)] text-red-200">{error}</p>
                         </div>
                     )}
 
-                    <div className="flex gap-3 justify-center pt-2">
+                    <div className="flex gap-[0.75rem] justify-center pt-[var(--spacing-md)]">
                         <button
                             onClick={handleDelete}
                             disabled={isLoading}
-                            className="pixel-btn text-xs bg-accent/90 hover:bg-accent/80"
+                            className="pixel-btn text-[var(--text-btn)] bg-accent/90 hover:bg-accent/80"
                         >
                             Delete
                         </button>
                         <button
                             onClick={handleUpdate}
                             disabled={isLoading || !name.trim() || !info.trim()}
-                            className="pixel-btn text-xs bg-accent text-foreground"
+                            className="pixel-btn text-[var(--text-btn)] bg-accent text-foreground"
                         >
                             {isLoading ? "Saving..." : "Save"}
                         </button>

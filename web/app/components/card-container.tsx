@@ -182,7 +182,7 @@ export default function CardContainer() {
   return (
     <div
       ref={containerRef}
-      className="w-full h-full bg-card p-2 rounded-lg shadow-md relative"
+      className="w-full h-full bg-card p-[0.125rem] rounded-lg shadow-md relative"
     >
       <Image
         src="/background.gif"

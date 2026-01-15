@@ -121,7 +121,7 @@ export default function IntListCard({ onClose, onMouseDown, username}: IntListCa
 
   return (
     <div 
-      className="relative wrapper pixel-borders pixel-card w-full max-w-[400px] h-auto min-h-[280px] aspect-[5/3] bg-foreground"
+      className="relative wrapper pixel-borders pixel-card w-full max-w-[25rem] h-auto min-h-[17.5rem] aspect-[5/3] bg-foreground"
       onMouseDown={onMouseDown}
     >
       <CardHeader
@@ -133,7 +133,7 @@ export default function IntListCard({ onClose, onMouseDown, username}: IntListCa
         activeTab={activeTab || undefined}
         setActiveTab={handleSetActiveTab}
       >
-        <div className="px-1 py-1 w-full h-[calc(100%-24px)] overflow-y-auto">
+        <div className="px-[var(--spacing-sm)] py-[var(--spacing-sm)] w-full h-[calc(100%-1.5rem)] overflow-y-auto">
           <IntListPlayerCard
             username={username}
             entries={entries}

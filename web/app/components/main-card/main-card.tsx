@@ -25,7 +25,7 @@ export default function MainCard({ onOpenCard, onMouseDown }: MainCardProps) {
 
   return (
     <div 
-      className="relative wrapper pixel-borders pixel-card w-full max-w-[350px] h-auto min-h-[237px] aspect-[5/3] bg-foreground"
+      className="relative wrapper pixel-borders pixel-card w-full max-w-[var(--card-main-width)] h-auto min-h-[var(--card-main-min-height)] aspect-[5/3] bg-foreground"
       onMouseDown={onMouseDown}
     >
       {/* Edit Button */}

@@ -175,22 +175,22 @@ export default function EditProfileModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-foreground pixel-borders max-h-[90vh] overflow-y-auto w-[410px] p-[10]">
-        <div className="flex flex-col gap-1">
-          <div className="flex gap-1 flex-col w-full">
+      <DialogContent className="bg-foreground pixel-borders max-h-[90vh] overflow-y-auto max-w-[20.625rem] min-w-[20.625rem] sm:!max-w-[22.625rem] p-[var(--spacing-md)] overflow-x-hidden">
+        <div className="flex flex-col gap-[var(--spacing-sm)] w-full max-w-full overflow-hidden">
+          <div className="flex gap-[var(--spacing-sm)] flex-col w-full">
             <label className="main-text">About</label>
             <input
               value={bio1}
               onChange={(e) => setBio1(e.target.value)}
               placeholder="First line..."
-              className="p-1 pixel-borders bg-background main-text text-xs"
+              className="p-[var(--spacing-sm)] pixel-borders bg-background main-text text-xs"
               disabled={isLoading}
             />
             <input
               value={bio2}
               onChange={(e) => setBio2(e.target.value)}
               placeholder="Second line..."
-              className="p-1 pixel-borders bg-background main-text text-xs"
+              className="p-[var(--spacing-sm)] pixel-borders bg-background main-text text-xs"
               disabled={isLoading}
             />
           </div>
@@ -201,23 +201,23 @@ export default function EditProfileModal({
               value={birthday}
               onChange={(e) => setBirthday(e.target.value)}
               placeholder="MM/DD"
-              className="p-1 pixel-borders bg-background main-text text-xs"
+              className="p-[var(--spacing-sm)] pixel-borders bg-background main-text text-xs"
               disabled={isLoading}
             />
           </div>
          
 
-          <div className="w-full flex flex-col">
+          <div className="w-full flex flex-col overflow-hidden">
             <label className="main-text">Social Links:</label>
-            <div className="space-y-2">
+            <div className="space-y-[var(--spacing-md)]">
               {socialLinks.map((link, index) => (
-                <div key={index} className="flex items-center gap-1">
+                <div key={index} className="flex items-center gap-[var(--spacing-sm)] w-full">
                   <select
                     value={link.platform}
                     onChange={(e) =>
                       updateSocialLink(index, "platform", e.target.value)
                     }
-                    className="p-1 pixel-borders bg-background main-text text-xs w-21"
+                    className="p-[var(--spacing-sm)] pixel-borders bg-background main-text text-xs w-[4.5rem] flex-shrink-0"
                     disabled={isLoading}
                   >
                     {PLATFORMS.map((p) => (
@@ -232,7 +232,7 @@ export default function EditProfileModal({
                       updateSocialLink(index, "url", e.target.value)
                     }
                     placeholder="URL"
-                    className="flex-1 p-1 pixel-borders bg-background main-text text-xs"
+                    className="flex-1 min-w-0 p-[var(--spacing-sm)] pixel-borders bg-background main-text text-xs"
                     disabled={isLoading}
                   />
                   <button
@@ -257,12 +257,12 @@ export default function EditProfileModal({
           </div>
 
 
-           <div className="grid grid-cols-3 py-2">
+           <div className="flex justify-between py-[var(--spacing-md)]">
             <div>
               <label className="main-text text-xs flex">Profile Picture:</label>
               <div className="flex items-center">
                   <div
-                    className="relative w-27 h-27 flex-shrink-0 pixel-borders"
+                    className="relative w-[6.75rem] h-[6.75rem] flex-shrink-0 pixel-borders"
                     onClick={() => profilePicInputRef.current?.click()}
                   >
                     <EditOverlay />
@@ -290,7 +290,7 @@ export default function EditProfileModal({
               <label className="main-text text-xs block">Banner:</label>
               <div className="flex flex-col">
                   <div
-                    className="relative w-full aspect-video min-h-27 min-w-37 pixel-borders"
+                    className="relative w-full aspect-video min-h-[6.75rem] max-w-[12.625rem] pixel-borders"
                     onClick={() => featuredInputRef.current?.click()}
                   >
                     <EditOverlay />
@@ -318,13 +318,13 @@ export default function EditProfileModal({
 
           {/* Error Display */}
           {error && (
-            <div className="p-2 bg-accent/50 pixel-borders">
+            <div className="p-[var(--spacing-md)] bg-accent/50 pixel-borders">
               <p className="main-text text-xs text-red-200">{error}</p>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2 justify-end py-1">
+          <div className="flex gap-[var(--spacing-md)] justify-end py-[var(--spacing-sm)]">
             <button
               onClick={() => onOpenChange(false)}
               disabled={isLoading}

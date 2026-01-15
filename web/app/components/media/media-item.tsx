@@ -43,38 +43,38 @@ export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, c
     return (
         <>
             <div 
-                className={`flex w-[calc(100%-.1rem)] h-[43px] pixel-borders mb-1 ${canEdit && onClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
+                className={`flex w-[calc(100%-0.0625rem)] h-[2.6875rem] pixel-borders mb-[var(--spacing-sm)] ${canEdit && onClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
                 onClick={() => canEdit && onClick?.()}
             >
-                <div className="w-full ">
+                <div className="w-full flex flex-col justify-center">
                     <div className="grid-container">
-                        <div className="relative h-8px -mt-1">
-                            <span className="main-text px-1">{name}</span>
+                        <div className="flex items-center justify-start gap-[var(--spacing-sm)]">
+                            <span className="main-text px-[var(--spacing-sm)]">{name}</span>
                             <a
                                 href={url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="absolute top-[33%] pixel-borders pixel-btn-white-sm cursor-pointer opacity-80"
+                                className="pixel-borders pixel-btn-white-sm cursor-pointer opacity-80"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <span>url</span>
                             </a>
                         </div>
-                        <div className="-mt-[5px]">
-                            <div className="relative pixel-borders pixel-btn-white-nohover top-1">
+                        <div className="mt-[-0.3125rem]">
+                            <div className="relative pixel-borders pixel-btn-white-nohover top-[var(--spacing-sm)]">
                                 <span>{upvoteCount}</span>
                                 <button onClick={handleUpvote}
                                     disabled={!token}
-                                    className="absolute pixel-borders pixel-btn-remove-sm -top-2">
+                                    className="absolute pixel-borders pixel-btn-remove-sm top-[calc(var(--spacing-md)*-1)]">
                                     <span>{upvoted ? "-" : "+"}</span>
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <hr className="mr-9"></hr>
-                    <div className="grid-container -mt-1 px-1">
+                    <hr className="mr-[2.25rem]"></hr>
+                    <div className="grid-container mt-[calc(var(--spacing-sm)*-1)] px-[var(--spacing-sm)]">
                         <span className="alt-text">{info.substring(0, 50)}</span>
-                        <span className="alt-text m-1">- {contributorUsername || "unknown"}</span>
+                        <span className="alt-text m-[var(--spacing-sm)]">- {contributorUsername || "unknown"}</span>
                     </div>
                 </div>
             </div>

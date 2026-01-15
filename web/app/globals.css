@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html {
+  font-size: clamp(0.875rem, 0.75rem + 0.5vw, 1.25rem);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -62,12 +66,35 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 0.25rem);
 }
 :root {
+  /*SIZING VARIABLES*/
+  --card-main-width: 21.875rem;
+  --card-main-min-height: 14.8rem;
+
+  /* SPACING VARIABLES*/
+  --spacing-xs: 0.125rem;
+  --spacing-sm: 0.25rem;
+  --spacing-md: 0.5rem; 
+  --spacing-lg: 1rem;
+
+  /*BORDER VARIABLES*/
+  --border-width: 0.125rem;
+
+  /*TEXT VARIABLES*/
+  --text-btn: 0.75rem;
+  --text-accent: 0.5625rem;
+
+  /*ICON VARIABLES*/
+  --size-icon-social: 1.125rem;
+
+  /* PROGRESS BAR */
+  --size-progress-bar: 0.9375rem;
+
   --background: #fcfdfc;
   --foreground: #d0d8eb;
   --accent: #f088ab;
@@ -136,10 +163,10 @@
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 0.25rem);
 
   --shadow-2xs: var(--shadow-2xs);
   --shadow-xs: var(--shadow-xs);
@@ -185,13 +212,13 @@
 .main-text {
   letter-spacing: var(--letter-spacing);
   color: var(--border);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .accent-text {
   letter-spacing: var(--letter-spacing);
   color: var(--accent);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 
 .text-spacing {
@@ -202,26 +229,26 @@
   letter-spacing: var(--letter-spacing);
   color: var(--border);
   opacity: 50%;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 
 /* ui additions */
 
 .dome{
-  width: 100px;
-  height: 100px;
-  border-radius: 0 0 100px 100px; 
+  width: 6.25rem;
+  height: 6.25rem;
+  border-radius: 0 0 6.25rem 6.25rem; 
 }
 
 .wrapper {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  grid-template-rows: 21px 21px 1fr 21px;
+  grid-template-rows: 1.3125rem 1.3125rem 1fr 1.3125rem;
 }
 
 hr {
   border: none;
-  border-top: 2px dashed var(--border);
+  border-top: 0.125rem dashed var(--border);
 }
 
 
@@ -229,22 +256,23 @@ hr {
 
 .pixel-card {
   box-shadow: 
-    5px 0px 0px 0px var(--border),
-    0px 3px 0px 0px var(--border),
-    5px 3px 0px 0px var(--border);
+    0.3125rem 0 0 0 var(--border),
+    0 0.1875rem 0 0 var(--border),
+    0.3125rem 0.1875rem 0 0 var(--border);
 }
 
 .pixel-btn {
   background: var(--border);
   color: var(--foreground);
-  padding: 2px 8px;
+  padding: 0.125rem 0.5rem;
+  font-size: var(--text-btn);
   border: none;
   cursor: pointer;
   image-rendering: pixelated;
   box-shadow: 
-    inset -2px -2px 0px 0px var(--border),
-    inset 2px 2px 0px 0px var(--foreground),
-    0px 1px 0px 0px var(--border);
+    inset -0.125rem -0.125rem 0px 0px var(--border),
+    inset 0.125rem 0.125rem 0px 0px var(--foreground),
+    0px 0.0625rem 0px 0px var(--border);
   transition: all 0.05s ease;
 }
 
@@ -252,45 +280,45 @@ hr {
   background: var(--accent);
   color: var(--background);
   box-shadow: 
-    inset -2px -2px 0px 0px var(--accent-shadow),
-    inset 2px 2px 0px 0px var(--background),
-    0px 1px 0px 0px var(--accent-shadow);
+    inset -0.125rem -0.125rem 0px 0px var(--accent-shadow),
+    inset 0.125rem 0.125rem 0px 0px var(--background),
+    0px 0.0625rem 0px 0px var(--accent-shadow);
 }
 
 .pixel-btn:active {
-  transform: translateY(2px);
+  transform: translateY(0.125rem);
 }
 
 .pixel-btn-sm {
   background: var(--border);
   color: var(--foreground);
-  padding: 1px 5px;
-  font-size: 12px;
+  padding: 0.0625rem 0.3125rem;
+  font-size: var(--text-btn);
   border: none;
   cursor: pointer;
   image-rendering: pixelated;
   box-shadow: 
-    inset -1px -1px 0px 0px var(--border),
-    inset 1px 1px 0px 0px var(--foreground),
-    0px 1px 0px 0px var(--border);
+    inset -0.0625rem -0.0625rem 0px 0px var(--border),
+    inset 0.0625rem 0.0625rem 0px 0px var(--foreground),
+    0px 0.0625rem 0px 0px var(--border);
   transition: all 0.05s ease;
 }
 
 .pixel-btn-sm:hover {
   background: var(--accent);
   box-shadow: 
-    inset -1px -1px 0px 0px var(--accent-shadow),
-    inset 1px 1px 0px 0px var(--foreground),
-    0px 1px 0px 0px var(--accent-shadow);
+    inset -0.0625rem -0.0625rem 0px 0px var(--accent-shadow),
+    inset 0.0625rem 0.0625rem 0px 0px var(--foreground),
+    0px 0.0625rem 0px 0px var(--accent-shadow);
   
 }
 
 .pixel-btn-sm:active {
   background: #c0608a;
   box-shadow: 
-    inset 1px 1px 0px 0px #903060,
-    inset -1px -1px 0px 0px #f088ab;
-  transform: translateY(1px);
+    inset 0.0625rem 0.0625rem 0px 0px #903060,
+    inset -0.0625rem -0.0625rem 0px 0px #f088ab;
+  transform: translateY(0.0625rem);
 }
 
 /* simple pixel button (border color) */
@@ -300,8 +328,8 @@ hr {
   color: var(--foreground);
   justify-content: center;
   align-items: center;
-  font-size: 12px;
-  padding: 0 .25rem;
+  font-size: 0.75rem;
+  padding: 0 0.25rem;
 }
 
 .pixel-btn-border:disabled{
@@ -318,8 +346,8 @@ hr {
   color: var(--foreground);
   justify-content: center;
   align-items: center;
-  font-size: 5px;
-  padding: .25rem .25rem;
+  font-size: 0.3125rem;
+  padding: 0.25rem 0.25rem;
 }
 
 .pixel-btn-border-sm:disabled{
@@ -338,8 +366,8 @@ hr {
   color: var(--border);
   justify-content: center;
   align-items: center;
-  font-size: 12px;
-  padding: 0 .5rem;
+  font-size: 0.75rem;
+  padding: 0 0.5rem;
 }
 
 .pixel-btn-white-nohover{
@@ -347,8 +375,8 @@ hr {
   color: var(--border);
   justify-content: center;
   align-items: center;
-  font-size: 12px;
-  padding: 0 .5rem;
+  font-size: 0.75rem;
+  padding: 0 0.5rem;
 }
 
 .pixel-btn-white:disabled{
@@ -365,8 +393,8 @@ hr {
   color: var(--border);
   justify-content: center;
   align-items: center;
-  font-size: 5px;
-  padding: 1px 1px;
+  font-size: 0.3125rem;
+  padding: 0.0625rem 0.0625rem;
 }
 
 .pixel-btn-white-sm-nohover{
@@ -374,8 +402,8 @@ hr {
   color: var(--border);
   justify-content: center;
   align-items: center;
-  font-size: 5px;
-  padding: 1px 1px;
+  font-size: 0.3125rem;
+  padding: 0.0625rem 0.0625rem;
 }
 
 .pixel-btn-white-sm:hover{
@@ -390,8 +418,8 @@ hr {
   color: var(--accent);
   justify-content: center;
   align-items: center;
-  font-size: 12px;
-  padding: 0 .5rem;
+  font-size: 0.75rem;
+  padding: 0 0.5rem;
 }
 
 .pixel-btn-remove:disabled{
@@ -408,8 +436,8 @@ hr {
   color: var(--accent);
   justify-content: center;
   align-items: center;
-  font-size: 8px;
-  padding: 0 0.2rem;
+  font-size: 0.5rem;
+  padding: 0 0.125rem;
   font-weight: bolder;
 }
 
@@ -425,9 +453,9 @@ hr {
 /* simple input (white bg) */
 
 .pixel-input{
-  margin: .25rem 0;
-  padding: 0 .5rem;
-  font-size: 12px;
+  margin: 0.25rem 0;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
   background: var(--background);
   color: var(--border);
   outline: none;
@@ -444,10 +472,10 @@ hr {
 /* grid */
 
 .grid-container {
-    display: grid; /* Makes the container a grid container */
+    display: grid;
     grid-template-columns: 1fr auto; 
-    gap: 3px; /* Adds space between the columns */
-    align-items: center; /* Vertically centers the elements */
+    gap: 0.1875rem;
+    align-items: center;
 }
 
 

@@ -45,15 +45,15 @@ export default function OpggGameCard({
                 <Image
                     src={getChampionIconUrl(championName)}
                     alt={championName}
-                    width={32}
-                    height={32}
+                    fill
+                    sizes="2rem"
                     className="object-cover"
                 />
             </div>
-            <div className="w-full h-full flex flex-col justify-center -mt-[5px] overflow-y-hidden">
+            <div className="w-full h-full flex flex-col justify-center -mt-[0.3125rem] overflow-y-hidden">
                 <span className="flex justify-between items-center">
                     <div>
-                    <span className={`${textClass} !text-[12px]`}>{resultText} </span>
+                    <span className={`${textClass} !text-[0.75rem]`}>{resultText} </span>
                     <span className={`alt-text`}>{kills}/{deaths}/{assists}</span>
                     </div>
                     

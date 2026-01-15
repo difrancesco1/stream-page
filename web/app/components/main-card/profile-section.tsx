@@ -49,8 +49,8 @@ export default function ProfileSection() {
     const socialLinks = profile?.social_links || [];
     
     return (
-        <div className="col-span-4 flex flex-col gap-[2%] items-center h-full overflow-hidden py-[2%] border-t-2 select-none">
-            <div className="flex flex-col w-full justify center items-center gap-[2px]">
+        <div className="col-span-4 flex flex-col gap-[0.2rem] items-center h-full overflow-hidden py-[0.125rem] border-t-2 select-none">
+            <div className="flex flex-col w-full justify center items-center gap-[var(--spacing-xs)]">
                 <div className="relative w-[95%] aspect-square flex-shrink-0">
                     <Image
                         src={profilePicture}
@@ -60,33 +60,33 @@ export default function ProfileSection() {
                         unoptimized={isBackendImage(profile?.profile_picture)}
                     />
                 </div>
-                <div className="w-[60%] flex items-center ">
+                <div className="w-[60%] flex items-center">
                     <span className="text-center text-accent w-full leading-tight bg-background pixel-borders hover:animate-spin">
                         {isLoading ? "..." : displayName}
                     </span>
                 </div>
             </div>
-            <div className="w-full px-1 pt-[2px] main-text flex flex-col -mt-[5px]">
-                <div className="flex gap-[3%] flex-start " >
+            <div className="w-full px-1 pt-[var(--spacing-xs)] main-text flex flex-col -mt-[0.3125rem]">
+                <div className="flex gap-[3%] flex-start">
                     <span className="font-bold">bday</span>
-                    <div className="">{isLoading ? "[--/--]" : formattedBirthday}</div>
+                    <div>{isLoading ? "[--/--]" : formattedBirthday}</div>
                 </div>
-                <div className="pixel-borders relative -mt-[3px] bg-background">
-                    <div className="h-[3px] "></div>
-                    <div className="h-[1px] absolute -top-[0px] w-[77%] bg-accent left-[2.3px]"></div>
-                    <div className="h-[2px] absolute top-[2.5px] w-[74%] bg-accent left-[5.5px]"></div>
-                    <div className="h-[15px] bg-accent w-[80%]"></div>
+                <div className="pixel-borders relative -mt-[0.1875rem] bg-background">
+                    <div className="h-[0.1875rem]"></div>
+                    <div className="h-[0.0625rem] absolute top-0 w-[77%] bg-accent left-[0.15rem]"></div>
+                    <div className="h-[var(--spacing-xs)] absolute top-[0.15rem] w-[74%] bg-accent left-[0.35rem]"></div>
+                    <div className="h-[var(--size-progress-bar)] bg-accent w-[80%]"></div>
                     {age && (
-                        <span className="top-0 absolute left-[35px] text-[11px] text-foreground animate-pulse">
+                        <span className="top-[-0.05rem] absolute left-[2.1875rem] text-[0.7525rem] text-foreground animate-pulse">
                             {age}
                         </span>
                     )}
                 </div>
             </div>
-            <div className="flex gap-1 py-[2] px-1">
+            <div className="flex gap-1 py-[var(--spacing-xs)] px-1">
                 {socialLinks.map((social, index) => (
                     <a key={index} href={social.url} target="_blank" rel="noopener noreferrer">
-                        <div className="p-0.5 flex items-center justify-center w-[18] h-5">
+                        <div className="p-0.5 flex items-center justify-center w-[var(--size-icon-social)] h-[1.25rem]">
                             <i className={`hn ${getSocialIconClass(social.platform)} text-border hover:animate-bounce pixel-borders bg-background`} />
                         </div>
                     </a>

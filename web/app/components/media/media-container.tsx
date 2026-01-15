@@ -62,7 +62,7 @@ export default function MediaContainer({ onClose, onMouseDown, username}: MediaC
     return (
         <>
             <div 
-                className="relative wrapper pixel-borders pixel-card w-full max-w-[400px] h-auto min-h-[280px] aspect-[5/3] bg-foreground"
+                className="relative wrapper pixel-borders pixel-card w-full max-w-[25rem] h-auto min-h-[17.5rem] aspect-[5/3] bg-foreground"
                 onMouseDown={onMouseDown}
             >
                 <CardHeader
@@ -74,13 +74,13 @@ export default function MediaContainer({ onClose, onMouseDown, username}: MediaC
                     activeTab={activeTab}
                     setActiveTab={handleSetActiveTab}
                 >
-                    <div className="px-1 py-1 w-full h-full overflow-y-auto max-h-[200px]">
+                    <div className="px-[var(--spacing-sm)] py-[var(--spacing-sm)] w-full h-full overflow-y-auto max-h-[12.5rem]">
                         {isLoading ? (
                             <div className="relative flex items-center justify-center h-full">
                             </div>
                         ) : filteredMedia.length === 0 ? (
                             <div className="flex items-center justify-center h-full">
-                                <span className="main-text text-xs opacity-50">No {activeTab.title} added yet</span>
+                                <span className="main-text text-[var(--text-btn)] opacity-50">No {activeTab.title} added yet</span>
                             </div>
                         ) : (
                             filteredMedia.map((item) => (

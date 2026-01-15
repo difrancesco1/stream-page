@@ -44,11 +44,10 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
     
     const biography = profile?.biography || [];
     const featuredImage = getImageUrl(profile?.featured_image) || "/wide-rose.png";
-    const twitterHandle = extractTwitterHandle(profile?.social_links || null);
     
     return (
         <div className="col-span-8 w-full h-full overflow-y-auto flex flex-col relative border-l-2 border-t-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            <div className="flex flex-col flex-start ">
+            <div className="flex flex-col flex-start">
                 {isLoading ? (
                     <div className="flex gap-1 items-center px-1">
                         <span className="main-text">...</span>
@@ -83,11 +82,11 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
 
                 </div>
             </div>
-            <footer className=" bottom-0 w-full flex items-center px-2 gap-2 main-text bg-foreground rounded-b py-[3px] border-t-2">
-                <button className="pixel-btn text-[12px] hover:animate-pulse" onClick={() => onOpenCard?.("opgg")}>opgg</button>
-                <button className="pixel-btn text-[12px] hover:animate-pulse" onClick={() => onOpenCard?.("movies")}>movies</button>
-                <button className="pixel-btn text-[12px] hover:animate-pulse" onClick={() => onOpenCard?.("intList")}>intlist</button>
-                <button className="pixel-btn text-[12px] hover:animate-pulse" onClick={() => onOpenCard?.("catPictures")}>cat</button>
+            <footer className="h-full w-full flex items-center justify-center gap-[var(--spacing-md)] main-text rounded-b border-t-2">
+                <button className="pixel-btn hover:animate-pulse" onClick={() => onOpenCard?.("opgg")}>opgg</button>
+                <button className="pixel-btn hover:animate-pulse" onClick={() => onOpenCard?.("movies")}>movies</button>
+                <button className="pixel-btn hover:animate-pulse" onClick={() => onOpenCard?.("intList")}>intlist</button>
+                <button className="pixel-btn hover:animate-pulse" onClick={() => onOpenCard?.("catPictures")}>cat</button>
             </footer>
         </div>
         

@@ -54,30 +54,30 @@ export default function CatPictureCard({ onImageDeleted }: CatPictureCardProps) 
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full p-4">
-                <p className="text-xs text-border"></p>
+            <div className="flex items-center justify-center h-full p-[var(--spacing-lg)]">
+                <p className="text-[var(--text-btn)] text-border"></p>
             </div>
         )
     }
 
     if (error) {
         return (
-            <div className="flex items-center justify-center h-full p-4">
-                <p className="text-xs text-red-500">{error}</p>
+            <div className="flex items-center justify-center h-full p-[var(--spacing-lg)]">
+                <p className="text-[var(--text-btn)] text-red-500">{error}</p>
             </div>
         )
     }
 
     if (cats.length === 0) {
         return (
-            <div className="flex items-center justify-center h-full p-4">
-                <p className="text-xs text-border">meow :(</p>
+            <div className="flex items-center justify-center h-full p-[var(--spacing-lg)]">
+                <p className="text-[var(--text-btn)] text-border">meow :(</p>
             </div>
         )
     }
 
 return (
-        <div className="grid grid-cols-3 gap-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-[var(--spacing-sm)]">
                 {cats.map((cat) => (
                     <div key={cat.id} className="relative w-full flex flex-col">
                         <Image
@@ -85,12 +85,12 @@ return (
                                 alt={`Cat by ${cat.contributor_username}`}
                                 width={130}
                                 height={110}
-                                className="pixel-borders bg-white"
+                                className="pixel-borders bg-white w-full"
                                 unoptimized
                             />
-                        <div className="absolute pl-1 w-full leading-tight bg-background pixel-borders">
+                        <div className="absolute pl-[var(--spacing-sm)] w-full leading-tight bg-background pixel-borders">
                             <div className="grid-container">
-                                <p className="text-[10px] text-border truncate">
+                                <p className="text-[0.625rem] text-border truncate">
                                     {cat.contributor_username}
                                 </p>
                                 {canDelete(cat) && (
