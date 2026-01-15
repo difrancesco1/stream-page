@@ -364,7 +364,7 @@ export default function OpggCard({ onClose, onMouseDown }: OpggCardProps) {
           activeTab={activeTab || undefined}
           setActiveTab={handleSetActiveTab}
         >
-          <div className="px-1 py-1 w-full h-full overflow-y-auto">
+          <div className="px-1 py-1 w-full h-full overflow-y-auto pt-0">
             {isEditMode && accounts.length > 0 && (
               <div className="px-1 mb-2">
                 <button

@@ -46,15 +46,15 @@ export default function MediaItem({ id, name, info, url, upvoteCount, upvoted, c
                 className={`flex w-[calc(100%-0.0625rem)] h-[2.6875rem] pixel-borders mb-[var(--spacing-sm)] ${canEdit && onClick ? 'cursor-pointer hover:bg-accent/20' : ''}`}
                 onClick={() => canEdit && onClick?.()}
             >
-                <div className="w-full ">
+                <div className="w-full flex flex-col justify-center">
                     <div className="grid-container">
-                        <div className="flex items-center justify-start gap-[var(--spacing-sm)] mt-[calc(var(--spacing-sm)*-1)]">
+                        <div className="flex items-center justify-start gap-[var(--spacing-sm)]">
                             <span className="main-text px-[var(--spacing-sm)]">{name}</span>
                             <a
                                 href={url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="pixel-borders pixel-btn-white-sm cursor-pointer opacity-80 mt-[var(--spacing-sm)]"
+                                className="pixel-borders pixel-btn-white-sm cursor-pointer opacity-80"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <span>url</span>

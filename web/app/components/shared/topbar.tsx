@@ -21,7 +21,7 @@ export default function Topbar({
       {exitbtn && (
         <button
           type="button"
-          className="pixel-borders pixel-btn-remove-sm -mx-[2px]"
+          className="pixel-borders pixel-btn-remove-sm -mx-[0.1rem]"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
