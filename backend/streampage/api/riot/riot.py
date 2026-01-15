@@ -164,28 +164,6 @@ def get_int_list_contributors() -> IntListContributorsResponse:
         return IntListContributorsResponse(contributors=contributors)
 
 
-@riot_router.post("/int_list/{entry_id}/refresh")
-def refresh_int_list_entry(
-    entry_id: str,
-    user=Depends(get_current_user),
-) -> ResponseMessage:
-    """Manually refresh summoner data for an int list entry."""
-    with get_db_session() as session:
-        entry = session.query(IntListEntry).filter(IntListEntry.id == entry_id).first()
-        if not entry:
-            return ResponseMessage(message="Entry not found")
-        
-        fetch_and_store_summoner_data(
-            session,
-            entry.puuid,
-            entry.summoner_name,
-            entry.summoner_tag,
-        )
-        session.commit()
-        
-        return ResponseMessage(message="Summoner data refreshed")
-
-
 @riot_router.patch("/int_list/{entry_id}")
 def update_int_list_entry(
     entry_id: str,

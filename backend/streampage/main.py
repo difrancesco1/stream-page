@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -15,6 +16,10 @@ from streampage.api.user.auth import hash_password
 from streampage.config import FRONTEND_URL, IS_RAILWAY
 from streampage.db.engine import get_db, get_db_session
 from streampage.db.models import User, UserLogin
+from streampage.services.scheduler import update_all_int_list_entries
+
+# Background scheduler for periodic tasks
+scheduler = BackgroundScheduler()
 
 
 @asynccontextmanager
@@ -28,7 +33,20 @@ async def lifespan(app: FastAPI):
             session.add(UserLogin(user=user, password=hash_password("Treehi1!")))
             session.commit()
             print("Seeded default user: rosie")
+    
+    # Start background scheduler for periodic int list updates
+    scheduler.add_job(
+        update_all_int_list_entries,
+        'interval',
+        hours=24,
+        id='int_list_update',
+    )
+    scheduler.start()
+    print("Background scheduler started for int list updates (every 24 hours)")
+    
     yield
+    
+    scheduler.shutdown()
 
 
 app = FastAPI(title="streampage", lifespan=lifespan)
