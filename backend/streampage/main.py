@@ -1,7 +1,13 @@
+import logging
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, Depends
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -32,17 +38,19 @@ async def lifespan(app: FastAPI):
             session.flush()
             session.add(UserLogin(user=user, password=hash_password("Treehi1!")))
             session.commit()
-            print("Seeded default user: rosie")
+            logger.info("Seeded default user: rosie")
     
     # Start background scheduler for periodic int list updates
+    # Run first update 30 seconds after startup, then every 24 hours
     scheduler.add_job(
         update_all_int_list_entries,
         'interval',
         hours=24,
         id='int_list_update',
+        next_run_time=datetime.now() + timedelta(seconds=30),
     )
     scheduler.start()
-    print("Background scheduler started for int list updates (every 24 hours)")
+    logger.info("Background scheduler started - first run in 30 seconds, then every 24 hours")
     
     yield
     
