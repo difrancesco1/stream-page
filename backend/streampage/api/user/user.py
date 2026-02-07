@@ -22,6 +22,7 @@ from streampage.api.user.models import (
 )
 from streampage.db.enums import Platform
 from streampage.db.engine import get_db_session
+from sqlalchemy import func
 from streampage.db.models import User, UserLogin, Biography, Social, FeaturedImages
 from streampage.services.storage import storage_service
 
@@ -67,7 +68,7 @@ def login(request: LoginRequest) -> LoginResponse:
         # Find user login
         user_login = (
             session.query(UserLogin)
-            .filter(UserLogin.username == request.username)
+            .filter(func.lower(UserLogin.username) == request.username.lower())
             .first()
         )
 
