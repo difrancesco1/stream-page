@@ -18,6 +18,7 @@ from streampage.api.opgg.opgg import opgg_router
 from streampage.api.riot.riot import riot_router
 from streampage.api.user.user import users_router
 from streampage.api.page.page import page_router
+from streampage.api.forms.forms import forms_router
 from streampage.api.user.auth import hash_password
 from streampage.config import FRONTEND_URL, IS_RAILWAY
 from streampage.db.engine import get_db, get_db_session
@@ -117,3 +118,4 @@ app.include_router(opgg_router, prefix="/opgg")
 app.include_router(media_router, prefix="/media")
 app.include_router(cat_router, prefix="/cats")
 app.include_router(page_router, prefix="/page")
+app.include_router(forms_router, prefix="/forms")

@@ -55,6 +55,7 @@ def register(request: RegisterRequest) -> UserResponse:
         return UserResponse(
             id=user.id,
             username=user.username,
+            email=user.email,
             display_name=user.display_name,
             birthday=user.birthday,
             profile_picture=user.profile_picture,
@@ -105,6 +106,7 @@ def get_user_with_jwt(current_user=Depends(get_current_user)) -> UserResponse:
     return UserResponse(
         id=current_user.id,
         username=current_user.username,
+        email=current_user.email,
         display_name=current_user.display_name,
         birthday=current_user.birthday,
         profile_picture=current_user.profile_picture,
@@ -169,7 +171,9 @@ def update_profile(
             user.display_name = request.display_name
         if request.birthday is not None:
             user.birthday = request.birthday
-        
+        if request.email is not None:
+            user.email = request.email
+
         # Update biography if provided
         if request.biography is not None:
             bio = session.query(Biography).filter(Biography.user_id == user.id).first()
@@ -185,6 +189,7 @@ def update_profile(
         return UserResponse(
             id=user.id,
             username=user.username,
+            email=user.email,
             display_name=user.display_name,
             birthday=user.birthday,
             profile_picture=user.profile_picture,

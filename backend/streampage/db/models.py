@@ -1,14 +1,14 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, ForeignKey, Enum, Integer, DateTime
+from sqlalchemy import String, ForeignKey, Enum, Integer, DateTime, Boolean, Text
 from sqlalchemy import LargeBinary
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, ARRAY, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from sqlalchemy import UniqueConstraint
 
-from streampage.db.enums import Platform, MediaCategory
+from streampage.db.enums import Platform, MediaCategory, QuestionType
 
 
 class Base(DeclarativeBase):
@@ -21,6 +21,7 @@ class User(Base):
         PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     username: Mapped[str] = mapped_column(String(50), unique=True)
+    email: Mapped[str | None] = mapped_column(String(254), nullable=True)
     display_name: Mapped[str | None]
     birthday: Mapped[str | None]
     profile_picture: Mapped[str | None]  # URL stored as string
@@ -276,3 +277,111 @@ class PageConfig(Base):
     background_image: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Form(Base):
+    """A user-created form (Google Forms-like)."""
+    __tablename__ = "form"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    creator_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    is_open: Mapped[bool] = mapped_column(Boolean, default=True)
+    email_notifications_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    # Relationships
+    creator: Mapped["User"] = relationship(
+        "User", foreign_keys=[creator_id], viewonly=True
+    )
+    questions: Mapped[list["FormQuestion"]] = relationship(
+        "FormQuestion",
+        back_populates="form",
+        cascade="all, delete-orphan",
+        order_by="FormQuestion.display_order",
+    )
+    responses: Mapped[list["FormResponse"]] = relationship(
+        "FormResponse",
+        back_populates="form",
+        cascade="all, delete-orphan",
+    )
+
+
+class FormQuestion(Base):
+    """A single question within a form."""
+    __tablename__ = "form_question"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    form_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("form.id", ondelete="CASCADE")
+    )
+    question_text: Mapped[str] = mapped_column(String(500))
+    question_type: Mapped[QuestionType] = mapped_column(Enum(QuestionType))
+    options: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    is_required: Mapped[bool] = mapped_column(Boolean, default=False)
+    display_order: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Relationships
+    form: Mapped["Form"] = relationship("Form", back_populates="questions")
+    answers: Mapped[list["FormAnswer"]] = relationship(
+        "FormAnswer",
+        back_populates="question",
+        cascade="all, delete-orphan",
+    )
+
+
+class FormResponse(Base):
+    """A single user's submission to a form."""
+    __tablename__ = "form_response"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    form_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("form.id", ondelete="CASCADE")
+    )
+    respondent_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
+    submitted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    form: Mapped["Form"] = relationship("Form", back_populates="responses")
+    respondent: Mapped["User"] = relationship(
+        "User", foreign_keys=[respondent_id], viewonly=True
+    )
+    answers: Mapped[list["FormAnswer"]] = relationship(
+        "FormAnswer",
+        back_populates="response",
+        cascade="all, delete-orphan",
+    )
+
+    __table_args__ = (
+        UniqueConstraint("form_id", "respondent_id", name="uq_form_response_form_respondent"),
+    )
+
+
+class FormAnswer(Base):
+    """A single answer to a question within a response."""
+    __tablename__ = "form_answer"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    response_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("form_response.id", ondelete="CASCADE")
+    )
+    question_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("form_question.id", ondelete="CASCADE")
+    )
+    answer_value: Mapped[dict | list | str | None] = mapped_column(JSONB, nullable=True)
+
+    # Relationships
+    response: Mapped["FormResponse"] = relationship("FormResponse", back_populates="answers")
+    question: Mapped["FormQuestion"] = relationship("FormQuestion", back_populates="answers")

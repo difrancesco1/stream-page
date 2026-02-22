@@ -25,3 +25,14 @@ class MediaCategory(PyEnum):
     ANIME = "anime"
     YOUTUBE = "youtube"
 
+
+class QuestionType(PyEnum):
+    SHORT_TEXT = "short_text"
+    LONG_TEXT = "long_text"
+    MULTIPLE_CHOICE = "multiple_choice"
+    CHECKBOXES = "checkboxes"
+    DROPDOWN = "dropdown"
+    RATING = "rating"
+    DATE = "date"
+    FILE_UPLOAD = "file_upload"
+

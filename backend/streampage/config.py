@@ -31,6 +31,12 @@ OAUTH2_SCHEME_OPTIONAL = OAuth2PasswordBearer(tokenUrl="users/login", auto_error
 
 RIOT_API_KEY: Final[str] = os.getenv("RIOT_API_KEY", "")
 
+SMTP_HOST: Final[str] = os.getenv("SMTP_HOST", "")
+SMTP_PORT: Final[int] = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER: Final[str] = os.getenv("SMTP_USER", "")
+SMTP_PASSWORD: Final[str] = os.getenv("SMTP_PASSWORD", "")
+SMTP_FROM_EMAIL: Final[str] = os.getenv("SMTP_FROM_EMAIL", "")
+
 _supabase_url = os.getenv("SUPABASE_URL", "")
 # Ensure trailing slash for Supabase storage API compatibility
 SUPABASE_URL: Final[str] = _supabase_url.rstrip("/") + "/" if _supabase_url else ""

@@ -95,9 +95,12 @@ class SupabaseStorageService:
                 '.jpeg': 'image/jpeg',
                 '.png': 'image/png',
                 '.gif': 'image/gif',
-                '.webp': 'image/webp'
+                '.webp': 'image/webp',
+                '.pdf': 'application/pdf',
+                '.doc': 'application/msword',
+                '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             }
-            content_type = content_type_map.get(extension.lower(), 'image/jpeg')
+            content_type = content_type_map.get(extension.lower(), 'application/octet-stream')
 
             # Compress images (best-effort) before upload
             file_content = self._maybe_compress_image(file_content, extension)

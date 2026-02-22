@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class UserResponse(BaseModel):
     id: UUID
     username: str
+    email: str | None = None
     display_name: str | None
     birthday: str | None
     profile_picture: str | None
@@ -30,6 +31,7 @@ class UpdateProfileRequest(BaseModel):
     display_name: str | None = None
     birthday: str | None = None
     biography: list[str] | None = None
+    email: str | None = None
 
 
 class SocialLinkRequest(BaseModel):
