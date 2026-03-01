@@ -12,6 +12,7 @@ from streampage.db.models import SummonerData
 
 RIOT_ACCOUNT_API_BASE = "https://americas.api.riotgames.com"
 RIOT_NA_API_BASE = "https://na1.api.riotgames.com"
+RIOT_AUTH_HEADERS = {"X-Riot-Token": RIOT_API_KEY}
 
 
 def get_puuid(game_name: str, tag_line: str) -> str:
@@ -20,7 +21,7 @@ def get_puuid(game_name: str, tag_line: str) -> str:
     url = f"{RIOT_ACCOUNT_API_BASE}/riot/account/v1/accounts/by-riot-id/{encoded_name}/{tag_line}"
     
     with httpx.Client() as client:
-        response = client.get(url, params={"api_key": RIOT_API_KEY})
+        response = client.get(url, headers=RIOT_AUTH_HEADERS)
         response.raise_for_status()
         data = response.json()
         return data["puuid"]
@@ -31,7 +32,7 @@ def get_rank_by_puuid(puuid: str) -> Optional[str]:
     url = f"{RIOT_NA_API_BASE}/lol/league/v4/entries/by-puuid/{puuid}"
     
     with httpx.Client() as client:
-        response = client.get(url, params={"api_key": RIOT_API_KEY})
+        response = client.get(url, headers=RIOT_AUTH_HEADERS)
         if response.status_code != 200:
             return None
         data = response.json()
@@ -54,11 +55,11 @@ def get_last_10_match_ids(puuid: str) -> list[str]:
     with httpx.Client() as client:
         response = client.get(
             url, 
+            headers=RIOT_AUTH_HEADERS,
             params={
-                "api_key": RIOT_API_KEY,
                 "type": "ranked",
-                "count": 10
-            }
+                "count": 10,
+            },
         )
         if response.status_code != 200:
             return []
@@ -73,7 +74,7 @@ def get_match_details(match_id: str, puuid: str) -> Optional[dict]:
     url = f"{RIOT_ACCOUNT_API_BASE}/lol/match/v5/matches/{match_id}"
     
     with httpx.Client() as client:
-        response = client.get(url, params={"api_key": RIOT_API_KEY})
+        response = client.get(url, headers=RIOT_AUTH_HEADERS)
         if response.status_code != 200:
             return None
         data = response.json()
@@ -119,7 +120,7 @@ def get_ranked_data_by_puuid(puuid: str) -> Optional[dict]:
     url = f"{RIOT_NA_API_BASE}/lol/league/v4/entries/by-puuid/{puuid}"
     
     with httpx.Client() as client:
-        response = client.get(url, params={"api_key": RIOT_API_KEY})
+        response = client.get(url, headers=RIOT_AUTH_HEADERS)
         if response.status_code != 200:
             return None
         data = response.json()
