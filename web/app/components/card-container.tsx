@@ -6,13 +6,14 @@ import MainCard from "./main-card/main-card";
 import IntList from "./int-list/int-list-card";
 import OpggCard from "./opgg/opgg-card";
 import CatPictureContainer from "./cat-pics/cat-picture-container";
+import DuoTrackerContainer from "./duo-tracker/duo-tracker-container";
 import MediaContainer from "./media/media-container";
 import Image from "next/image";
 import { useAuth } from "@/app/context/auth-context";
 import { useEditMode } from "@/app/context/edit-mode-context";
 import AuthModal from "./auth/auth-modal";
 
-type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures";
+type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures" | "duoTracker";
 
 interface CardState {
   id: CardId;
@@ -60,6 +61,13 @@ const initialCards: CardsRecord = {
     isVisible: false,
     isClosable: true,
   },
+  duoTracker: {
+    id: "duoTracker",
+    position: null,
+    zIndex: 6,
+    isVisible: true,
+    isClosable: true,
+  }
 };
 
 export default function CardContainer() {
@@ -69,6 +77,7 @@ export default function CardContainer() {
   const opggRef = useRef<HTMLDivElement>(null);
   const moviesRef = useRef<HTMLDivElement>(null);
   const catPicturesRef = useRef<HTMLDivElement>(null);
+  const duoTrackerRef = useRef<HTMLDivElement>(null);
 
   const [cards, setCards] = useState<CardsRecord>(initialCards);
   const zIndexCounterRef = useRef(10);
@@ -172,6 +181,8 @@ export default function CardContainer() {
         opgg: { ...prev.opgg, position: getStaggeredPosition(1) },
         movies: { ...prev.movies, position: getStaggeredPosition(2) },
         catPictures: { ...prev.catPictures, position: getStaggeredPosition(3) },
+        duoTracker: { ...prev.duoTracker, position: getStaggeredPosition(4) },
+
       }));
     };
 
@@ -362,6 +373,33 @@ export default function CardContainer() {
             <CatPictureContainer
               onClose={() => closeCard("catPictures")}
               onMouseDown={() => bringToFront("catPictures")}
+            />
+          </div>
+        </Draggable>
+      )}
+      {/* Duo Tracker Card */}
+      {cards.duoTracker.isVisible && (
+        <Draggable
+          nodeRef={duoTrackerRef}
+          bounds="parent"
+          handle=".drag-handle"
+          position={cards.duoTracker.position ?? undefined}
+          onStart={() => bringToFront("duoTracker")}
+          onStop={(_, data) =>
+            updateCardPosition("duoTracker", { x: data.x, y: data.y })
+          }
+        >
+          <div
+            ref={duoTrackerRef}
+            className={`w-fit absolute transition-opacity duration-150 ${
+              cards.duoTracker.position === null ? "opacity-0" : "opacity-100"
+            }`}
+            style={{ zIndex: cards.duoTracker.zIndex }}
+            onMouseDown={() => bringToFront("duoTracker")}
+          >
+            <DuoTrackerContainer
+              onClose={() => closeCard("duoTracker")}
+              onMouseDown={() => bringToFront("duoTracker")}
             />
           </div>
         </Draggable>
