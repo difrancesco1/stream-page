@@ -9,7 +9,7 @@ interface DuoTrackerFooterProps {
 
 export default function DuoTrackerFooter({ isRosie, onOpenOpgg }: DuoTrackerFooterProps) {
     const [name, setName] = useState("")
-    const [result, setResult] = useState<"W" | "L">("W")
+    const [result, setResult] = useState("")
 
     const handleAdd = () => {
         // TODO: hook up to backend
@@ -37,19 +37,18 @@ export default function DuoTrackerFooter({ isRosie, onOpenOpgg }: DuoTrackerFoot
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="name"
-                className="flex-1 min-w-0 h-5 bg-transparent border border-border px-1 main-text outline-none"
+                className="pixel-borders pixel-input w-full cursor-pointer"
             />
-            <select
+            <input
                 value={result}
-                onChange={(e) => setResult(e.target.value as "W" | "L")}
-                className="h-5 bg-transparent border border-border px-1 main-text outline-none cursor-pointer"
+                onChange={(e) => setResult(e.target.value)}
+                className="pixel-borders pixel-input w-13 cursor-pointer"
+                placeholder="w-l"
             >
-                <option value="W">W</option>
-                <option value="L">L</option>
-            </select>
+            </input>
             <button
                 onClick={handleAdd}
-                className="pixel-btn h-5 px-1.5 text-xs leading-none hover:animate-pulse flex-shrink-0"
+                className="pixel-borders pixel-btn-white hover:bg-background! cursor-pointer select-none"
             >
                 +
             </button>
