@@ -3,7 +3,7 @@ import Image from "next/image"
 import { useProfile } from "@/app/context/profile-context";
 import { getImageUrl, isBackendImage } from "@/lib/api";
 
-type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures";
+type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures" | "duoTracker";
 
 interface MainContainerProps {
     onOpenCard?: (cardId: CardId) => void;
@@ -69,6 +69,12 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                                 className="rounded-sm object-cover"
                                                 unoptimized={isBackendImage(profile?.featured_image)}
                                             />
+                                <button
+                                    className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn hover:animate-pulse text-xs w-[calc(100%-0.5rem)]"
+                                    onClick={() => onOpenCard?.("duoTracker")}
+                                >
+                                    duo tracker
+                                </button>
                                 <a 
                                     className="absolute alt-text bottom-0 right-0 mx-1" 
                                     target="_blank" 

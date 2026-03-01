@@ -65,7 +65,7 @@ const initialCards: CardsRecord = {
     id: "duoTracker",
     position: null,
     zIndex: 6,
-    isVisible: true,
+    isVisible: false,
     isClosable: true,
   }
 };
@@ -400,6 +400,8 @@ export default function CardContainer() {
             <DuoTrackerContainer
               onClose={() => closeCard("duoTracker")}
               onMouseDown={() => bringToFront("duoTracker")}
+              isRosie={isRosie}
+              onOpenOpgg={() => openCard("opgg")}
             />
           </div>
         </Draggable>
