@@ -47,7 +47,7 @@ cd backend && python reset_db.py
 
 ## Do Not
 
-- Add heavy dependencies without justification
+- Implement large changes without properly planning with the end user
 - Break or change existing API contracts without updating both backend and frontend together
 - Change asset formats/locations or deployment configs without reason
 - Commit `.env` files or secrets
