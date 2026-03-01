@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import httpx
 from datetime import datetime
 from typing import Optional
@@ -8,7 +9,9 @@ from urllib.parse import quote
 from sqlalchemy.orm import Session
 
 from streampage.config import RIOT_API_KEY
-from streampage.db.models import SummonerData
+from streampage.db.models import IntListEntry, OpggEntry, SummonerData
+
+logger = logging.getLogger(__name__)
 
 RIOT_ACCOUNT_API_BASE = "https://americas.api.riotgames.com"
 RIOT_NA_API_BASE = "https://na1.api.riotgames.com"
@@ -139,6 +142,26 @@ def get_ranked_data_by_puuid(puuid: str) -> Optional[dict]:
         return None
 
 
+def _migrate_puuid(session: Session, old_puuid: str, new_puuid: str) -> None:
+    """Update all DB references when a PUUID changes."""
+    logger.info(f"Migrating PUUID: {old_puuid[:12]}... -> {new_puuid[:12]}...")
+
+    session.query(IntListEntry).filter(
+        IntListEntry.puuid == old_puuid
+    ).update({"puuid": new_puuid})
+
+    session.query(OpggEntry).filter(
+        OpggEntry.puuid == old_puuid
+    ).update({"puuid": new_puuid})
+
+    old_data = session.query(SummonerData).filter(
+        SummonerData.puuid == old_puuid
+    ).first()
+    if old_data:
+        session.delete(old_data)
+        session.flush()
+
+
 def fetch_and_store_summoner_data(
     session: Session,
     puuid: str,
@@ -147,20 +170,26 @@ def fetch_and_store_summoner_data(
 ) -> SummonerData:
     """Fetch data from Riot API and store it in the database.
     
+    Re-resolves the PUUID from the Riot ID to handle cases where the
+    stored PUUID becomes invalid (e.g. API key project change).
+    
     Returns the created/updated SummonerData object.
     """
-    
-    # Fetch ranked data
-    ranked_data = get_ranked_data_by_puuid(puuid)
-    
-    # Fetch recent matches
-    recent_matches = get_recent_matches(puuid)
-    
-    # Check if we already have a record for this PUUID
-    existing = session.query(SummonerData).filter(SummonerData.puuid == puuid).first()
-    
+    fresh_puuid = get_puuid(game_name, tag_line)
+
+    if fresh_puuid != puuid:
+        _migrate_puuid(session, puuid, fresh_puuid)
+
+    active_puuid = fresh_puuid
+
+    ranked_data = get_ranked_data_by_puuid(active_puuid)
+    recent_matches = get_recent_matches(active_puuid)
+
+    existing = session.query(SummonerData).filter(
+        SummonerData.puuid == active_puuid
+    ).first()
+
     if existing:
-        # Update existing record
         existing.game_name = game_name
         existing.tag_line = tag_line
         existing.tier = ranked_data.get("tier") if ranked_data else None
@@ -172,9 +201,8 @@ def fetch_and_store_summoner_data(
         existing.last_updated = datetime.utcnow()
         return existing
     else:
-        # Create new record
         summoner_data = SummonerData(
-            puuid=puuid,
+            puuid=active_puuid,
             game_name=game_name,
             tag_line=tag_line,
             tier=ranked_data.get("tier") if ranked_data else None,
