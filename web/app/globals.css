@@ -393,8 +393,8 @@ hr {
   color: var(--border);
   justify-content: center;
   align-items: center;
-  font-size: 0.3125rem;
-  padding: 0.0625rem 0.0625rem;
+  font-size: 0.4125rem;
+  padding: 0.0625rem 0.09245rem;
 }
 
 .pixel-btn-white-sm-nohover{

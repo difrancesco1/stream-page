@@ -62,29 +62,29 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                 <div className="justify-start">
                     <div className="flex py-1 border-t-2 px-1 ">
                         <div className="relative w-full aspect-video ">
-<Image
-                                                src={featuredImage}
-                                                alt="Featured"
-                                                fill
-                                                className="rounded-sm object-cover"
-                                                unoptimized={isBackendImage(profile?.featured_image)}
-                                            />
-                                <button
-                                    className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn hover:animate-pulse text-xs w-[calc(100%-0.5rem)]"
-                                    onClick={() => onOpenCard?.("duoTracker")}
-                                >
-                                    duo tracker
-                                </button>
-                                <a 
-                                    className="absolute alt-text bottom-0 right-0 mx-1" 
-                                    target="_blank" 
-                                    href="https://x.com/Fourdee2"
-                                >
-                                    @Fourdee
-                                </a>
+                            <Image
+                                src={featuredImage}
+                                alt="Featured"
+                                fill
+                                className="rounded-sm object-cover"
+                                unoptimized={isBackendImage(profile?.featured_image)}
+                            />
+                            <button
+                                className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn hover:animate-pulse text-xs w-[calc(100%-0.5rem)] opacity-60"
+                                onClick={() => onOpenCard?.("duoTracker")}
+                            >
+                                duo tracker
+                            </button>
+                            <a
+                                className="absolute alt-text bottom-0 right-0 mx-1"
+                                target="_blank"
+                                href="https://x.com/Fourdee2"
+                            >
+                                @Fourdee
+                            </a>
                         </div>
                     </div>
-                    
+
 
                 </div>
             </div>
