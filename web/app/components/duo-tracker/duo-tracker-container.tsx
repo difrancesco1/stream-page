@@ -18,7 +18,7 @@ export default function DuoTrackerContainer({onClose, onMouseDown, isRosie, onOp
             onMouseDown={onMouseDown}
         >
             <CardHeader
-                title="duo tracker"
+                title="duo anyone#addme"
                 exitbtn={true}
                 onClose={onClose}
                 showTabs={false}
