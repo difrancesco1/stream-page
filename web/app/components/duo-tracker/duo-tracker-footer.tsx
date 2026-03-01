@@ -42,7 +42,7 @@ export default function DuoTrackerFooter({ isRosie, onOpenOpgg }: DuoTrackerFoot
             <input
                 value={result}
                 onChange={(e) => setResult(e.target.value)}
-                className="pixel-borders pixel-input w-13 cursor-pointer"
+                className="pixel-borders pixel-input w-11 cursor-pointer"
                 placeholder="w-l"
             >
             </input>
