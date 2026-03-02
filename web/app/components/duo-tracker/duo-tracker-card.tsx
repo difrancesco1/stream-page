@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 interface DuoEntry {
@@ -25,9 +25,9 @@ export default function DuoTrackerCard() {
 
     return (
         <div className="flex-1 overflow-y-auto px-[var(--spacing-sm)] py-[var(--spacing-xs)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {sorted.map((duo) => (
-                <div key={duo.id} className="flex items-center gap-[var(--spacing-md)] main-text">
-                    <span className="w-6 text-right">{duo.gamesPlayed}</span>
+            {sorted.map((duo, index) => (
+                <div key={duo.id} className="flex items-center gap-[var(--spacing-sm)] main-text">
+                    <span className="w-6 text-left px-[var(--spacing-md)]">{index + 1}</span>
                     <span className="flex-1 truncate">{duo.name}</span>
                     <span>
                         {duo.result}
