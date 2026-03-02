@@ -16,13 +16,13 @@ const DUMMY_DUOS: DuoEntry[] = [
     { id: 2, gamesPlayed: 3,  name: "Summer July Rain#NA0", result: "0-3" , note: "sry." },
     { id: 3, gamesPlayed: 8, name: "lilAnnabelle#NA1", result: "6-2" , note: "gamerelf vlad god" },
     { id: 4, gamesPlayed: 5, name: "spongebob#TVO", result: "3-2" , note: "tyson1" },
-    { id: 5, gamesPlayed: 2, name: "Thumper#Frank", result: "1-1" , note: "" },
+    { id: 5, gamesPlayed: 2, name: "Thumper#Frank", result: "1-1" , note: `verma` },
     { id: 6, gamesPlayed: 1, name: "Let Me Adem#MOAK", result: "0-1" , note: "asol power" },
     { id: 7, gamesPlayed: 3, name: "GnawMe#SOLAR", result: "2-1" , note: "sigh" },
     { id: 8, gamesPlayed: 4, name: "greeenpink#NA1", result: "2-2" , note: "fred" },
     { id: 9, gamesPlayed: 2, name: "Esudesu#NA1 ", result: "2-0" , note: "just on my fl" },
-    { id: 10, gamesPlayed: 3, name: "Gon#small", result: "2-1" , note: "" },
-    { id: 11, gamesPlayed: 2, name: "QarthO#NA1 ", result: "2-0" , note: "" },
+    { id: 10, gamesPlayed: 3, name: "Gon#small", result: "2-1" , note: `smol-der` },
+    { id: 11, gamesPlayed: 2, name: "QarthO#NA1 ", result: "2-0" , note: `arena player` },
     { id: 12, gamesPlayed: 8, name: "Akito#NA1", result: "5-3" , note: "janna+" },
     { id: 13, gamesPlayed: 2, name: "IlIIlIlIIIIIIIll#NA1", result: "2-0" , note: "puppeh fk this guy" },
     { id: 14, gamesPlayed: 3, name: "marcellui#NA1", result: "1-2" , note: "sry marcell" },
@@ -55,7 +55,7 @@ export default function DuoTrackerCard() {
                             cursor-pointer opacity-80"> i n f o - </span>
                         </TooltipTrigger>
                         <TooltipContent
-                            style={{ display: duo.note==="" ? 'none' : 'block' }}
+                            style={{ display: duo.note===`` ? 'none' : 'block' }}
                         >
                             {duo.note}
                             </TooltipContent>
