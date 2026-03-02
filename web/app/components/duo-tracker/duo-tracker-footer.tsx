@@ -39,13 +39,6 @@ export default function DuoTrackerFooter({ isRosie, onOpenOpgg }: DuoTrackerFoot
                 placeholder="name"
                 className="pixel-borders pixel-input w-full cursor-pointer"
             />
-            <input
-                value={result}
-                onChange={(e) => setResult(e.target.value)}
-                className="pixel-borders pixel-input w-11 cursor-pointer"
-                placeholder="w-l"
-            >
-            </input>
             <button
                 onClick={handleAdd}
                 className="pixel-borders pixel-btn-white hover:bg-background! cursor-pointer select-none"
