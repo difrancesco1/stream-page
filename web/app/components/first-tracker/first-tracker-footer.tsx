@@ -17,9 +17,9 @@ export default function DuoTrackerFooter({ isRosie }: DuoTrackerFooterProps) {
 
     if (!isRosie) {
         return (
-            <div className="h-[1.75rem] px-[var(--spacing-md)] border-t-2 opacity-70">
+            <div className="h-[1.75rem] px-[var(--spacing-md)] border-t-2">
                 <button
-                    className="main-text"
+                    className="main-text opacity-70"
                 >
                     since 7/8/2023
                 </button>
