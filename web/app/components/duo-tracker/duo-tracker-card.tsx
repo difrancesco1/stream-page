@@ -8,12 +8,13 @@ interface DuoEntry {
     gamesPlayed: number;
     name: string;
     result: string;
+    note: string;
 }
 
 const DUMMY_DUOS: DuoEntry[] = [
-    { id: 1, gamesPlayed: 15, name: "Player1", result: "14-1" },
-    { id: 2, gamesPlayed: 8,  name: "Player2", result: "1-7" },
-    { id: 3, gamesPlayed: 22, name: "Player3", result: "11-11" },
+    { id: 1, gamesPlayed: 15, name: "Player1", result: "14-1" , note: "" },
+    { id: 2, gamesPlayed: 8,  name: "Player2", result: "1-7" , note: "fred" },
+    { id: 3, gamesPlayed: 22, name: "Player3", result: "11-11" , note: "" },
 ]
 
 export default function DuoTrackerCard() {
@@ -33,9 +34,15 @@ export default function DuoTrackerCard() {
                     </span>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <span className="pixel-borders pixel-btn-white-sm cursor-pointer opacity-80"> i n f o - </span>
+                            <span className="pixel-borders 
+                            ${duo.note===`` ? pixel-btn-white-sm-nohover : pixel-btn-white-sm} 
+                            cursor-pointer opacity-80"> i n f o - </span>
                         </TooltipTrigger>
-                        <TooltipContent>add text here</TooltipContent>
+                        <TooltipContent
+                            style={{ display: duo.note==="" ? 'none' : 'block' }}
+                        >
+                            {duo.note}
+                            </TooltipContent>
                     </Tooltip>
                 </div>
             ))}
