@@ -7,13 +7,14 @@ import IntList from "./int-list/int-list-card";
 import OpggCard from "./opgg/opgg-card";
 import CatPictureContainer from "./cat-pics/cat-picture-container";
 import DuoTrackerContainer from "./duo-tracker/duo-tracker-container";
+import FirstTrackerContainer from "./first-tracker/first-tracker-container";
 import MediaContainer from "./media/media-container";
 import Image from "next/image";
 import { useAuth } from "@/app/context/auth-context";
 import { useEditMode } from "@/app/context/edit-mode-context";
 import AuthModal from "./auth/auth-modal";
 
-type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures" | "duoTracker";
+type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures" | "duoTracker" | "firstTracker";
 
 interface CardState {
   id: CardId;
@@ -67,6 +68,13 @@ const initialCards: CardsRecord = {
     zIndex: 6,
     isVisible: false,
     isClosable: true,
+  },
+  firstTracker: {
+    id: "firstTracker",
+    position: null,
+    zIndex: 7,
+    isVisible: false,
+    isClosable: true,
   }
 };
 
@@ -78,6 +86,7 @@ export default function CardContainer() {
   const moviesRef = useRef<HTMLDivElement>(null);
   const catPicturesRef = useRef<HTMLDivElement>(null);
   const duoTrackerRef = useRef<HTMLDivElement>(null);
+  const firstTrackerRef = useRef<HTMLDivElement>(null);
 
   const [cards, setCards] = useState<CardsRecord>(initialCards);
   const zIndexCounterRef = useRef(10);
@@ -182,6 +191,7 @@ export default function CardContainer() {
         movies: { ...prev.movies, position: getStaggeredPosition(2) },
         catPictures: { ...prev.catPictures, position: getStaggeredPosition(3) },
         duoTracker: { ...prev.duoTracker, position: getStaggeredPosition(4) },
+        firstTracker: { ...prev.firstTracker, position: getStaggeredPosition(5) },
 
       }));
     };
@@ -391,9 +401,8 @@ export default function CardContainer() {
         >
           <div
             ref={duoTrackerRef}
-            className={`w-fit absolute transition-opacity duration-150 ${
-              cards.duoTracker.position === null ? "opacity-0" : "opacity-100"
-            }`}
+            className={`w-fit absolute transition-opacity duration-150 ${cards.duoTracker.position === null ? "opacity-0" : "opacity-100"
+              }`}
             style={{ zIndex: cards.duoTracker.zIndex }}
             onMouseDown={() => bringToFront("duoTracker")}
           >
@@ -402,6 +411,33 @@ export default function CardContainer() {
               onMouseDown={() => bringToFront("duoTracker")}
               isRosie={isRosie}
               onOpenOpgg={() => openCard("opgg")}
+            />
+          </div>
+        </Draggable>
+      )}
+      {/* First Tracker Card */}
+      {cards.firstTracker.isVisible && (
+        <Draggable
+          nodeRef={firstTrackerRef}
+          bounds="parent"
+          handle=".drag-handle"
+          position={cards.firstTracker.position ?? undefined}
+          onStart={() => bringToFront("firstTracker")}
+          onStop={(_, data) =>
+            updateCardPosition("firstTracker", { x: data.x, y: data.y })
+          }
+        >
+          <div
+            ref={firstTrackerRef}
+            className={`w-fit absolute transition-opacity duration-150 ${cards.firstTracker.position === null ? "opacity-0" : "opacity-100"
+              }`}
+            style={{ zIndex: cards.firstTracker.zIndex }}
+            onMouseDown={() => bringToFront("firstTracker")}
+          >
+            <FirstTrackerContainer
+              onClose={() => closeCard("firstTracker")}
+              onMouseDown={() => bringToFront("firstTracker")}
+              isRosie={isRosie}
             />
           </div>
         </Draggable>

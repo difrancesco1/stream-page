@@ -3,7 +3,7 @@ import Image from "next/image"
 import { useProfile } from "@/app/context/profile-context";
 import { getImageUrl, isBackendImage } from "@/lib/api";
 
-type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures" | "duoTracker";
+type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures" | "duoTracker" | "firstTracker";
 
 interface MainContainerProps {
     onOpenCard?: (cardId: CardId) => void;
@@ -61,7 +61,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                 )}
                 <div className="justify-start">
                     <div className="flex py-1 border-t-2 px-1 ">
-                        <div className="relative w-full aspect-video ">
+                        <div className="relative w-full aspect-video">
                             <Image
                                 src={featuredImage}
                                 alt="Featured"
@@ -71,6 +71,12 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                             />
                             <button
                                 className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn hover:animate-pulse text-xs w-[calc(100%-0.5rem)] opacity-60"
+                                onClick={() => onOpenCard?.("firstTracker")}
+                            >
+                                first in stream
+                            </button>
+                            <button
+                                className="absolute top-1 my-6 left-1/2 -translate-x-1/2 z-10 pixel-btn hover:animate-pulse text-xs w-[calc(100%-0.5rem)] opacity-60"
                                 onClick={() => onOpenCard?.("duoTracker")}
                             >
                                 duo tracker

@@ -7,7 +7,7 @@ import EditProfileModal from "./edit-profile-modal";
 import { useEditMode } from "@/app/context/edit-mode-context";
 import { useProfile } from "@/app/context/profile-context";
 
-type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures" | "duoTracker";
+type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures" | "duoTracker" | "firstTracker";
 
 interface MainCardProps {
   onOpenCard?: (cardId: CardId) => void;
