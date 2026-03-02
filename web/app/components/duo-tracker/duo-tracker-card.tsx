@@ -12,9 +12,25 @@ interface DuoEntry {
 }
 
 const DUMMY_DUOS: DuoEntry[] = [
-    { id: 1, gamesPlayed: 15, name: "Player1", result: "14-1" , note: "" },
-    { id: 2, gamesPlayed: 8,  name: "Player2", result: "1-7" , note: "fred" },
-    { id: 3, gamesPlayed: 22, name: "Player3", result: "11-11" , note: "" },
+    { id: 1, gamesPlayed: 5, name: "curse#NA2", result: "2-3" , note: "thresh player. sus in among us" },
+    { id: 2, gamesPlayed: 3,  name: "Summer July Rain#NA0", result: "0-3" , note: "sry." },
+    { id: 3, gamesPlayed: 8, name: "lilAnnabelle#NA1", result: "6-2" , note: "gamerelf vlad god" },
+    { id: 4, gamesPlayed: 5, name: "spongebob#TVO", result: "3-2" , note: "tyson1" },
+    { id: 5, gamesPlayed: 2, name: "Thumper#Frank", result: "1-1" , note: "" },
+    { id: 6, gamesPlayed: 1, name: "Let Me Adem#MOAK", result: "0-1" , note: "asol power" },
+    { id: 7, gamesPlayed: 3, name: "GnawMe#SOLAR", result: "2-1" , note: "sigh" },
+    { id: 8, gamesPlayed: 4, name: "greeenpink#NA1", result: "2-2" , note: "fred" },
+    { id: 9, gamesPlayed: 2, name: "Esudesu#NA1 ", result: "2-0" , note: "just on my fl" },
+    { id: 10, gamesPlayed: 3, name: "Gon#small", result: "2-1" , note: "" },
+    { id: 11, gamesPlayed: 2, name: "QarthO#NA1 ", result: "2-0" , note: "" },
+    { id: 12, gamesPlayed: 8, name: "Akito#NA1", result: "5-3" , note: "janna+" },
+    { id: 13, gamesPlayed: 2, name: "IlIIlIlIIIIIIIll#NA1", result: "2-0" , note: "puppeh fk this guy" },
+    { id: 14, gamesPlayed: 3, name: "marcellui#NA1", result: "1-2" , note: "sry marcell" },
+    { id: 15, gamesPlayed: 2, name: "rellge#ILMBF", result: "2-0" , note: "loves her bf :3" },
+    { id: 16, gamesPlayed: 3, name: "Claver#SOMA", result: "2-1" , note: "cleric wow player" },
+    { id: 17, gamesPlayed: 4, name: "TrevorKTran#Wish", result: "4-0" , note: "cait/mf goat" },
+    { id: 18, gamesPlayed: 1, name: "Gromp Rider#SEJ", result: "0-1" , note: "experience ruined due to fool#pyke" },
+    { id: 19, gamesPlayed: 1, name: "Munke#lol", result: "1-0" , note: "just played 1 the betrayal" },
 ]
 
 export default function DuoTrackerCard() {
@@ -27,7 +43,7 @@ export default function DuoTrackerCard() {
         <div className="flex-1 overflow-y-auto px-[var(--spacing-sm)] py-[var(--spacing-xs)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {sorted.map((duo, index) => (
                 <div key={duo.id} className="flex items-center gap-[var(--spacing-sm)] main-text">
-                    <span className="w-6 text-left px-[var(--spacing-md)]">{index + 1}</span>
+                    <span className="w-6 opacity-50 text-left px-[var(--spacing-md)]">{index + 1}</span>
                     <span className="flex-1 truncate">{duo.name}</span>
                     <span>
                         {duo.result}

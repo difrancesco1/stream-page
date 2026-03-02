@@ -14,7 +14,7 @@ interface DuoTrackerContainerProps {
 export default function DuoTrackerContainer({onClose, onMouseDown, isRosie, onOpenOpgg}: DuoTrackerContainerProps) {
     return (
         <div 
-            className="wrapper pixel-borders pixel-card w-full max-w-[12rem] h-auto min-h-[28rem] aspect-[5/3] bg-foreground"
+            className="wrapper pixel-borders pixel-card w-full max-w-[14rem] h-auto min-h-[28rem] aspect-[5/3] bg-foreground"
             onMouseDown={onMouseDown}
         >
             <CardHeader
