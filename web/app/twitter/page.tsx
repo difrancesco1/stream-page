@@ -4,7 +4,7 @@ import { useEffect } from "react"
 
 export default function Twitter() {
     useEffect(() => {
-        window.location.replace("https://x.com/ttvrosie")
+        window.location.replace("https://x.com/roziggz")
     }, [])
 
     return null
