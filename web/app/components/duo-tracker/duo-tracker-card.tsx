@@ -27,7 +27,7 @@ const DUMMY_DUOS: DuoEntry[] = [
     { id: 13, gamesPlayed: 2, name: "IlIIlIlIIIIIIIll#NA1", result: "2-0" , note: "puppeh fk this guy" },
     { id: 14, gamesPlayed: 3, name: "marcellui#NA1", result: "1-2" , note: "sry marcell" },
     { id: 15, gamesPlayed: 2, name: "rellge#ILMBF", result: "2-0" , note: "loves her bf :3 asks to play then disappears D:" },
-    { id: 16, gamesPlayed: 3, name: "Claver#SOMA", result: "2-1" , note: "picky cleric retail wow player #boston" },
+    { id: 16, gamesPlayed: 4, name: "Claver#SOMA", result: "2-2" , note: "picky cleric retail wow player #boston does not honor me but will prime sub" },
     { id: 17, gamesPlayed: 4, name: "TrevorKTran#Wish", result: "4-0" , note: "cait/mf goat" },
     { id: 18, gamesPlayed: 1, name: "Gromp Rider#SEJ", result: "0-1" , note: "experience ruined due to fool#pyke" },
     { id: 19, gamesPlayed: 1, name: "Munke#lol", result: "1-0" , note: "just played 1 the betrayal" },
