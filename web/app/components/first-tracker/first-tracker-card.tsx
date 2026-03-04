@@ -10,7 +10,7 @@ interface FirstEntry {
 }
 
 const DUMMY_FIRST: FirstEntry[] = [
-    { id: 1, firstCount: 43, name: "TrevorKTran" },
+    { id: 1, firstCount: 44, name: "TrevorKTran" },
     { id: 2, firstCount: 40, name: "The_Beastly_D" },
     { id: 3, firstCount: 32, name: "swordex123" },
     { id: 4, firstCount: 31, name: "Lokimjolnir" },
