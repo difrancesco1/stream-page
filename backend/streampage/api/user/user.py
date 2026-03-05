@@ -7,11 +7,20 @@ import os
 import uuid as uuid_lib
 from pathlib import Path
 
-from streampage.api.middleware.authenticator import create_access_token, get_current_user, require_creator, get_optional_current_user
+from streampage.api.middleware.authenticator import (
+    create_access_token,
+    create_refresh_token,
+    validate_refresh_token,
+    get_current_user,
+    require_creator,
+    get_optional_current_user,
+)
 from streampage.api.user.auth import hash_password, verify_password
 from streampage.api.user.models import (
     LoginRequest,
     LoginResponse,
+    RefreshRequest,
+    RefreshResponse,
     RegisterRequest,
     UserResponse,
     UpdateProfileRequest,
@@ -88,10 +97,33 @@ def login(request: LoginRequest) -> LoginResponse:
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        # Create JWT token
         access_token, _ = create_access_token(user_login)
+        refresh_token, _ = create_refresh_token(user_login)
 
-        return LoginResponse(access_token=access_token)
+        return LoginResponse(access_token=access_token, refresh_token=refresh_token)
+
+
+@users_router.post("/refresh")
+def refresh(request: RefreshRequest) -> RefreshResponse:
+    """Exchange a valid refresh token for a new access + refresh token pair."""
+    username = validate_refresh_token(request.refresh_token)
+
+    with get_db_session() as session:
+        user_login = (
+            session.query(UserLogin)
+            .filter(func.lower(UserLogin.username) == username.lower())
+            .first()
+        )
+        if not user_login:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+            )
+
+        access_token, _ = create_access_token(user_login)
+        new_refresh_token, _ = create_refresh_token(user_login)
+
+        return RefreshResponse(access_token=access_token, refresh_token=new_refresh_token)
 
 
 @users_router.get("/user")

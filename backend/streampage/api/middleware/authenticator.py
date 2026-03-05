@@ -18,21 +18,55 @@ from streampage.db.models import User
 from streampage.db.models import UserLogin
 
 
+def _encode_token(token_data: dict) -> str:
+    encoded = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
+    if isinstance(encoded, bytes):
+        return encoded.decode("utf-8")
+    return encoded
+
+
 def create_access_token(user_login: UserLogin) -> tuple[str, datetime]:
-    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
 
     token_data = {
         "username": user_login.username,
+        "type": "access",
         "exp": expires_at,
     }
-    encoded_token = jwt.encode(token_data, SECRET_KEY, ALGORITHM)
+    return _encode_token(token_data), expires_at
 
-    if isinstance(encoded_token, bytes):
-        token = encoded_token.decode("utf-8")
-    else:
-        token = encoded_token
 
-    return token, expires_at
+def create_refresh_token(user_login: UserLogin) -> tuple[str, datetime]:
+    expires_at = datetime.now(timezone.utc) + timedelta(days=30)
+
+    token_data = {
+        "username": user_login.username,
+        "type": "refresh",
+        "exp": expires_at,
+    }
+    return _encode_token(token_data), expires_at
+
+
+def validate_refresh_token(token: str) -> str:
+    """Decode a refresh token and return the username.
+
+    Raises HTTPException on any validation failure.
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Refresh token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    if payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Invalid token type")
+
+    username = payload.get("username")
+    if not isinstance(username, str):
+        raise HTTPException(status_code=401, detail="Invalid refresh token payload")
+
+    return username
 
 
 def get_current_user(token: str = Depends(OAUTH2_SCHEME)) -> User:
@@ -40,24 +74,22 @@ def get_current_user(token: str = Depends(OAUTH2_SCHEME)) -> User:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
         logger.error("Token has expired")
-        raise HTTPException(status_code=403, detail="Token has expired")
+        raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError:
         logger.error("Invalid token")
-        raise HTTPException(status_code=403, detail="Invalid token")
+        raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
         logger.error(f"Error getting current user: {str(e)}")
         raise HTTPException(
-            status_code=403, detail=f"Error getting current user: {str(e)}"
+            status_code=401, detail=f"Error getting current user: {str(e)}"
         )
 
     username = payload.get("username")
     if not isinstance(username, str) or username is None:
-        raise HTTPException(status_code=403, detail="Can't get username from payload")
+        raise HTTPException(status_code=401, detail="Can't get username from payload")
 
     with get_db_session() as db:
         try:
-            pass
-
             user_login = (
                 db.query(User)
                 .join(User.logins)
@@ -65,11 +97,11 @@ def get_current_user(token: str = Depends(OAUTH2_SCHEME)) -> User:
                 .first()
             )
             if user_login is None:
-                raise HTTPException(status_code=403, detail="Can't get user")
+                raise HTTPException(status_code=401, detail="Can't get user")
             return user_login
         except Exception as e:
             logger.error(f"Database error in get_current_user: {str(e)}")
-            raise HTTPException(status_code=403, detail="Database error")
+            raise HTTPException(status_code=401, detail="Database error")
 
 
 def get_optional_current_user(token: str | None = Depends(OAUTH2_SCHEME_OPTIONAL)) -> User | None:
