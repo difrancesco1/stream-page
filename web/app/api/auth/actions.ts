@@ -9,6 +9,12 @@ export type AuthResult = {
 
 export type LoginResult = AuthResult & {
     token?: string;
+    refreshToken?: string;
+};
+
+export type RefreshResult = AuthResult & {
+    token?: string;
+    refreshToken?: string;
 };
 
 export type RegisterResult = AuthResult & {
@@ -43,6 +49,41 @@ export async function loginUser(
         return {
             success: true,
             token: data.access_token,
+            refreshToken: data.refresh_token,
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function refreshAccessToken(
+    refreshToken: string
+): Promise<RefreshResult> {
+    try {
+        const response = await fetch(`${API_URL}/users/refresh`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return {
+                success: false,
+                error: data.detail || "Token refresh failed",
+            };
+        }
+
+        return {
+            success: true,
+            token: data.access_token,
+            refreshToken: data.refresh_token,
         };
     } catch (error) {
         return {

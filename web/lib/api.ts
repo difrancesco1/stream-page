@@ -20,6 +20,21 @@ export function isBackendImage(path: string | null | undefined): boolean {
   return path.startsWith("/uploads") || path.includes(API_URL);
 }
 
+const AUTH_ERROR_MESSAGES = [
+  "Token has expired",
+  "Invalid token",
+  "Could not validate credentials",
+];
+
+/**
+ * Check if an action result represents an authentication error (expired/invalid token).
+ * Components can use this with `onAuthError()` from the auth context to trigger a refresh.
+ */
+export function isAuthError(result: { success: boolean; error?: string }): boolean {
+  if (result.success || !result.error) return false;
+  return AUTH_ERROR_MESSAGES.some((msg) => result.error!.includes(msg));
+}
+
 export async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_URL}${endpoint}`;
   const response = await fetch(url, {
