@@ -14,7 +14,7 @@ interface DuoEntry {
 const DUMMY_DUOS: DuoEntry[] = [
     { id: 1, gamesPlayed: 5, name: "curse#NA2", result: "2-3" , note: "thresh player. sus in among us" },
     { id: 2, gamesPlayed: 3,  name: "Summer July Rain#NA0", result: "0-3" , note: "sry." },
-    { id: 3, gamesPlayed: 8, name: "lilAnnabelle#NA1", result: "7-4" , note: "gamerelf vlad god" },
+    { id: 3, gamesPlayed: 11, name: "lilAnnabelle#NA1", result: "7-4" , note: "gamerelf vlad god" },
     { id: 4, gamesPlayed: 5, name: "spongebob#TVO", result: "3-2" , note: "tyson1" },
     { id: 5, gamesPlayed: 2, name: "Thumper#Frank", result: "1-1" , note: `verma` },
     { id: 6, gamesPlayed: 1, name: "Let Me Adem#MOAK", result: "0-1" , note: "asol power" },
