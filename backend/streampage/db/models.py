@@ -385,3 +385,20 @@ class FormAnswer(Base):
     # Relationships
     response: Mapped["FormResponse"] = relationship("FormResponse", back_populates="answers")
     question: Mapped["FormQuestion"] = relationship("FormQuestion", back_populates="answers")
+
+
+class FirstEntry(Base):
+    """Tracks 'first in stream' counts per viewer for a page owner."""
+    __tablename__ = "first_entry"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
+    name: Mapped[str] = mapped_column(String(100))
+    first_count: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("owner_id", "name", name="uq_first_entry_owner_name"),
+    )

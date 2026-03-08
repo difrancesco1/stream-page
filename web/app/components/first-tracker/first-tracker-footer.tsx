@@ -2,26 +2,27 @@
 
 import { useState } from "react"
 
-interface DuoTrackerFooterProps {
+interface FirstTrackerFooterProps {
     isRosie?: boolean;
+    since?: string | null;
+    onAdd?: (name: string) => void;
 }
 
-export default function DuoTrackerFooter({ isRosie }: DuoTrackerFooterProps) {
+export default function FirstTrackerFooter({ isRosie, since, onAdd }: FirstTrackerFooterProps) {
     const [name, setName] = useState("")
 
     const handleAdd = () => {
-        // TODO: hook up to backend
-        console.log("Add first:", { name })
+        const trimmed = name.trim()
+        if (!trimmed || !onAdd) return
+        onAdd(trimmed)
         setName("")
-    };
+    }
 
     if (!isRosie) {
         return (
             <div className="h-[1.75rem] px-[var(--spacing-md)] border-t-2">
-                <button
-                    className="main-text opacity-70"
-                >
-                    since 7/8/2023
+                <button className="main-text opacity-70">
+                    {since ? `since ${since}` : "\u00A0"}
                 </button>
             </div>
         )
@@ -33,6 +34,7 @@ export default function DuoTrackerFooter({ isRosie }: DuoTrackerFooterProps) {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                 placeholder="first user"
                 className="pixel-borders pixel-input w-full cursor-pointer"
             />

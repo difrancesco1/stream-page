@@ -19,6 +19,7 @@ from streampage.api.riot.riot import riot_router
 from streampage.api.user.user import users_router
 from streampage.api.page.page import page_router
 from streampage.api.forms.forms import forms_router
+from streampage.api.first.first import first_router
 from streampage.api.user.auth import hash_password
 from streampage.config import FRONTEND_URL, IS_RAILWAY
 from streampage.db.engine import get_db, get_db_session
@@ -37,7 +38,7 @@ async def lifespan(app: FastAPI):
             user = User(username="rosie")
             session.add(user)
             session.flush()
-            session.add(UserLogin(user=user, password=hash_password("Treehi1!")))
+            session.add(UserLogin(user=user, password=hash_password("Password1!")))
             session.commit()
             logger.info("Seeded default user: rosie")
     
@@ -119,3 +120,4 @@ app.include_router(media_router, prefix="/media")
 app.include_router(cat_router, prefix="/cats")
 app.include_router(page_router, prefix="/page")
 app.include_router(forms_router, prefix="/forms")
+app.include_router(first_router, prefix="/firsts")
