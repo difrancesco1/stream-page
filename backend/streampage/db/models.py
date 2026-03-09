@@ -402,3 +402,77 @@ class FirstEntry(Base):
     __table_args__ = (
         UniqueConstraint("owner_id", "name", name="uq_first_entry_owner_name"),
     )
+
+
+class DuoTrackedAccount(Base):
+    """The owner's Riot account used to fetch match history for duo tracking."""
+    __tablename__ = "duo_tracked_account"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"), unique=True)
+    puuid: Mapped[str] = mapped_column(String)
+    game_name: Mapped[str] = mapped_column(String(100))
+    tag_line: Mapped[str] = mapped_column(String(10))
+    last_updated: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class DuoMatch(Base):
+    """A stored ranked match from the owner's match history."""
+    __tablename__ = "duo_match"
+
+    match_id: Mapped[str] = mapped_column(String, primary_key=True)
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"), primary_key=True)
+    win: Mapped[bool] = mapped_column(Boolean)
+    teammates: Mapped[list] = mapped_column(JSONB)
+    played_at: Mapped[datetime] = mapped_column(DateTime)
+
+
+class DuoEntry(Base):
+    """Tracks duo partners and their game results for a page owner."""
+    __tablename__ = "duo_entry"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id"))
+    name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    wins: Mapped[int] = mapped_column(Integer, default=0)
+    losses: Mapped[int] = mapped_column(Integer, default=0)
+    note: Mapped[str] = mapped_column(String(500), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    accounts: Mapped[list["DuoEntryAccount"]] = relationship(
+        "DuoEntryAccount",
+        back_populates="entry",
+        cascade="all, delete-orphan",
+        order_by="DuoEntryAccount.summoner_name",
+    )
+
+    @property
+    def display_name(self) -> str:
+        if self.name:
+            return self.name
+        if self.accounts:
+            return self.accounts[0].summoner_name
+        return "unknown"
+
+
+class DuoEntryAccount(Base):
+    """A summoner account linked to a duo entry for match tracking."""
+    __tablename__ = "duo_entry_account"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    entry_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("duo_entry.id", ondelete="CASCADE")
+    )
+    summoner_name: Mapped[str] = mapped_column(String(100))
+
+    entry: Mapped["DuoEntry"] = relationship("DuoEntry", back_populates="accounts")
+
+    __table_args__ = (
+        UniqueConstraint("entry_id", "summoner_name", name="uq_duo_entry_account_entry_name"),
+    )

@@ -1,6 +1,6 @@
 """Seed database with default user if empty."""
 from streampage.db.engine import get_db_session
-from streampage.db.models import User, UserLogin, FirstEntry
+from streampage.db.models import User, UserLogin, FirstEntry, DuoEntry, DuoEntryAccount
 from streampage.api.user.auth import hash_password
 
 
@@ -59,6 +59,30 @@ FIRST_ENTRIES = [
 ]
 
 
+DUO_ENTRIES = [
+    ("lilAnnabelle#NA1", 7, 4, "gamerelf vlad god"),
+    ("curse#NA2", 2, 3, "thresh player. sus in among us"),
+    ("Akito#NA1", 6, 3, "janna main but doesn't play janna"),
+    ("spongebob#TVO", 3, 2, "tyson1"),
+    ("greeenpink#NA1", 2, 2, "fred"),
+    ("TrevorKTran#Wish", 4, 0, "cait/mf goat"),
+    ("Summer July Rain#NA0", 0, 3, "sry."),
+    ("GnawMe#SOLAR", 2, 1, "sigh"),
+    ("Gon#small", 2, 1, "smol-der"),
+    ("marcellui#NA1", 1, 2, "sry marcell"),
+    ("Claver#SOMA", 2, 2, "picky cleric retail wow player #boston does not honor me but will prime sub"),
+    ("Thumper#Frank", 1, 1, "verma"),
+    ("Esudesu#NA1", 2, 0, "just on my fl"),
+    ("QarthO#NA1", 2, 0, "arena player"),
+    ("IlIIlIlIIIIIIIll#NA1", 2, 0, "puppeh fk this guy"),
+    ("rellge#ILMBF", 2, 0, "loves her bf :3 asks to play then disappears D:"),
+    ("yearner#wish", 0, 2, "very nice for a jungler"),
+    ("Let Me Adem#MOAK", 0, 1, "asol power"),
+    ("Gromp Rider#SEJ", 0, 1, "experience ruined due to fool#pyke"),
+    ("Munke#lol", 1, 0, "just played 1 the betrayal"),
+]
+
+
 def seed():
     with get_db_session() as session:
         if session.query(User).first():
@@ -75,20 +99,32 @@ def seed():
             print("Created user: rosie")
 
         if not user:
-            print("Rosie user not found, cannot seed first entries.")
+            print("Rosie user not found, cannot seed entries.")
             return
 
-        existing_count = session.query(FirstEntry).filter(FirstEntry.owner_id == user.id).count()
-        if existing_count > 0:
-            print(f"First entries already exist ({existing_count}), skipping.")
-            return
+        # Seed first entries
+        existing_first = session.query(FirstEntry).filter(FirstEntry.owner_id == user.id).count()
+        if existing_first > 0:
+            print(f"First entries already exist ({existing_first}), skipping.")
+        else:
+            for name, count in FIRST_ENTRIES:
+                entry = FirstEntry(owner_id=user.id, name=name, first_count=count)
+                session.add(entry)
+            session.commit()
+            print(f"Seeded {len(FIRST_ENTRIES)} first entries for rosie.")
 
-        for name, count in FIRST_ENTRIES:
-            entry = FirstEntry(owner_id=user.id, name=name, first_count=count)
-            session.add(entry)
-
-        session.commit()
-        print(f"Seeded {len(FIRST_ENTRIES)} first entries for rosie.")
+        # Seed duo entries
+        existing_duo = session.query(DuoEntry).filter(DuoEntry.owner_id == user.id).count()
+        if existing_duo > 0:
+            print(f"Duo entries already exist ({existing_duo}), skipping.")
+        else:
+            for summoner_name, wins, losses, note in DUO_ENTRIES:
+                entry = DuoEntry(owner_id=user.id, name=None, wins=wins, losses=losses, note=note)
+                session.add(entry)
+                session.flush()
+                session.add(DuoEntryAccount(entry_id=entry.id, summoner_name=summoner_name))
+            session.commit()
+            print(f"Seeded {len(DUO_ENTRIES)} duo entries for rosie.")
 
 
 if __name__ == "__main__":

@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    const scheduleRefresh = useCallback((accessToken: string, doRefresh: () => Promise<void>) => {
+    const scheduleRefresh = useCallback((accessToken: string, doRefresh: () => Promise<unknown>) => {
         if (refreshTimerRef.current) {
             clearTimeout(refreshTimerRef.current);
         }
