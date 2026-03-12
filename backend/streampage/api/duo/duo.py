@@ -39,6 +39,8 @@ def _get_rosie(session) -> User:
 
 def _recalculate_duo_entries(session, owner_id: uuid.UUID) -> int:
     """Recount wins/losses for every duo entry from stored matches."""
+    session.expire_all()
+
     entries = session.execute(
         select(DuoEntry)
         .options(selectinload(DuoEntry.accounts))
@@ -48,6 +50,8 @@ def _recalculate_duo_entries(session, owner_id: uuid.UUID) -> int:
     matches = session.execute(
         select(DuoMatch).where(DuoMatch.owner_id == owner_id)
     ).scalars().all()
+
+    logger.info("Recalculating duo entries: %d entries, %d matches", len(entries), len(matches))
 
     updated = 0
     for entry in entries:
@@ -61,10 +65,12 @@ def _recalculate_duo_entries(session, owner_id: uuid.UUID) -> int:
                 else:
                     losses += 1
         if entry.wins != wins or entry.losses != losses:
+            logger.info("Entry %s (%s): %d-%d -> %d-%d", entry.id, names, entry.wins, entry.losses, wins, losses)
             entry.wins = wins
             entry.losses = losses
             updated += 1
 
+    logger.info("Recalculation complete: %d entries updated", updated)
     return updated
 
 
@@ -246,34 +252,25 @@ def record_duo(
         raise HTTPException(status_code=400, detail="Name cannot be empty")
 
     with get_db_session() as session:
-        normalized = name.strip().lower()
-        wins = 0
-        losses = 0
-        matches = session.execute(
-            select(DuoMatch).where(DuoMatch.owner_id == user.id)
-        ).scalars().all()
-        for m in matches:
-            if normalized in m.teammates:
-                if m.win:
-                    wins += 1
-                else:
-                    losses += 1
-
         entry = DuoEntry(
             owner_id=user.id,
             name=None,
-            wins=wins,
-            losses=losses,
+            wins=0,
+            losses=0,
         )
         session.add(entry)
         session.flush()
 
-        account = DuoEntryAccount(
+        session.add(DuoEntryAccount(
             entry_id=entry.id,
             summoner_name=name,
-        )
-        session.add(account)
+        ))
+        session.flush()
+
+        _recalculate_duo_entries(session, user.id)
         session.commit()
+
+        wins, losses = entry.wins, entry.losses
 
     return ResponseMessage(message=f"Added duo partner {name} ({wins}-{losses})")
 
