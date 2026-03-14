@@ -22,7 +22,7 @@ export default function DuoTrackerCard({ entries, loading, isRosie, onDelete, on
     const [newAccount, setNewAccount] = useState("")
 
     const sorted = useMemo(
-        () => [...entries].sort((a, b) => b.games_played - a.games_played),
+        () => [...entries].sort((a, b) => b.games_played - a.games_played || b.wins - a.wins),
         [entries]
     )
 

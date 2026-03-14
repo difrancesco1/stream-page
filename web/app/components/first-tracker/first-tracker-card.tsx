@@ -14,6 +14,7 @@ interface FirstTrackerCardProps {
 
 export default function FirstTrackerCard({ entries, loading, isRosie, isEditMode, onDelete, onUpdate }: FirstTrackerCardProps) {
     const sorted = useMemo(
+
         () => [...entries].sort((a, b) => b.first_count - a.first_count),
         [entries]
     )
