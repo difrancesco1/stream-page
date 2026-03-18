@@ -10,6 +10,7 @@ import DuoTrackerContainer from "./duo-tracker/duo-tracker-container";
 import FirstTrackerContainer from "./first-tracker/first-tracker-container";
 import MediaContainer from "./media/media-container";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/auth-context";
 import { useEditMode } from "@/app/context/edit-mode-context";
 import AuthModal from "./auth/auth-modal";
@@ -99,6 +100,10 @@ export default function CardContainer() {
   const isRosie = user?.username.toLowerCase() === 'rosie';
   const username = user?.username;
 
+  const searchParams = useSearchParams();
+  const focusCardParam = searchParams.get("card");
+  const focusCard = focusCardParam && focusCardParam in initialCards ? (focusCardParam as CardId) : null;
+
   const openLoginModal = () => {
     setIsAddUserMode(false);
     setAuthModalOpen(true);
@@ -169,36 +174,69 @@ export default function CardContainer() {
   }, []);
 
   useEffect(() => {
-    const initializePositions = () => {
-      if (containerRef.current && mainCardRef.current) {
-        const container = containerRef.current.getBoundingClientRect();
-        const card = mainCardRef.current.getBoundingClientRect();
+    requestAnimationFrame(() => {
+      const container = containerRef.current?.getBoundingClientRect();
+      if (!container) return;
 
-        const centerX = (container.width - card.width) / 2;
-        const centerY = (container.height - card.height) / 2;
+      setCards((prev) => {
+        const next = { ...prev };
 
-        setCards((prev) => ({
-          ...prev,
-          main: { ...prev.main, position: { x: centerX, y: centerY } },
-        }));
+        if (focusCard) {
+          for (const key of Object.keys(next) as CardId[]) {
+            next[key] = { ...next[key], isVisible: key === focusCard };
+          }
+        }
+
+        if (!focusCard && mainCardRef.current) {
+          const card = mainCardRef.current.getBoundingClientRect();
+          next.main = {
+            ...next.main,
+            position: {
+              x: (container.width - card.width) / 2,
+              y: (container.height - card.height) / 2,
+            },
+          };
+        }
+
+        const staggerMap: [CardId, number][] = [
+          ["intList", 0], ["opgg", 1], ["movies", 2],
+          ["catPictures", 3], ["duoTracker", 4], ["firstTracker", 5],
+        ];
+        for (const [id, idx] of staggerMap) {
+          if (id !== focusCard) {
+            next[id] = { ...next[id], position: getStaggeredPosition(idx) };
+          }
+        }
+
+        return next;
+      });
+
+      if (focusCard) {
+        requestAnimationFrame(() => {
+          const refMap = {
+            main: mainCardRef, intList: intListRef, opgg: opggRef,
+            movies: moviesRef, catPictures: catPicturesRef,
+            duoTracker: duoTrackerRef, firstTracker: firstTrackerRef,
+          };
+          const focusRef = refMap[focusCard];
+          if (focusRef.current && containerRef.current) {
+            const cRect = containerRef.current.getBoundingClientRect();
+            const cardRect = focusRef.current.getBoundingClientRect();
+            setCards((prev) => ({
+              ...prev,
+              [focusCard]: {
+                ...prev[focusCard],
+                position: {
+                  x: (cRect.width - cardRect.width) / 2,
+                  y: (cRect.height - cardRect.height) / 2,
+                },
+              },
+            }));
+          }
+        });
       }
-
-      // Initialize positions for other cards with staggered offsets
-      setCards((prev) => ({
-        ...prev,
-        intList: { ...prev.intList, position: getStaggeredPosition(0) },
-        opgg: { ...prev.opgg, position: getStaggeredPosition(1) },
-        movies: { ...prev.movies, position: getStaggeredPosition(2) },
-        catPictures: { ...prev.catPictures, position: getStaggeredPosition(3) },
-        duoTracker: { ...prev.duoTracker, position: getStaggeredPosition(4) },
-        firstTracker: { ...prev.firstTracker, position: getStaggeredPosition(5) },
-
-      }));
-    };
-
-    // Use requestAnimationFrame to ensure DOM measurements are accurate
-    requestAnimationFrame(initializePositions);
-  }, [getStaggeredPosition]);
+    });
+  }, [getStaggeredPosition, focusCard]);
 
   return (
     <div
@@ -258,28 +296,30 @@ export default function CardContainer() {
         allowedTabs={isAddUserMode ? ['register '] : ['login ']}
         initialTab={isAddUserMode ? 'register ' : 'login '}
       />
-      {/* Main Card - Always visible */}
-      <Draggable
-        nodeRef={mainCardRef}
-        bounds="parent"
-        handle=".drag-handle"
-        position={cards.main.position ?? undefined}
-        onStart={() => bringToFront("main")}
-        onStop={(_, data) =>
-          updateCardPosition("main", { x: data.x, y: data.y })
-        }
-      >
-        <div
-          ref={mainCardRef}
-          className={`w-fit absolute transition-opacity duration-150 ${
-            cards.main.position === null ? "opacity-0" : "opacity-100"
-          }`}
-          style={{ zIndex: cards.main.zIndex }}
-          onMouseDown={() => bringToFront("main")}
+      {/* Main Card */}
+      {cards.main.isVisible && (
+        <Draggable
+          nodeRef={mainCardRef}
+          bounds="parent"
+          handle=".drag-handle"
+          position={cards.main.position ?? undefined}
+          onStart={() => bringToFront("main")}
+          onStop={(_, data) =>
+            updateCardPosition("main", { x: data.x, y: data.y })
+          }
         >
-          <MainCard onOpenCard={openCard} onMouseDown={() => bringToFront("main")} />
-        </div>
-      </Draggable>
+          <div
+            ref={mainCardRef}
+            className={`w-fit absolute transition-opacity duration-150 ${
+              cards.main.position === null ? "opacity-0" : "opacity-100"
+            }`}
+            style={{ zIndex: cards.main.zIndex }}
+            onMouseDown={() => bringToFront("main")}
+          >
+            <MainCard onOpenCard={openCard} onMouseDown={() => bringToFront("main")} />
+          </div>
+        </Draggable>
+      )}
 
       {/* IntList Card */}
       {cards.intList.isVisible && (
