@@ -289,7 +289,7 @@ hr {
   transform: translateY(0.125rem);
 }
 
-.pixel-btn-white {
+.pixel-btn-w {
   background: var(--foreground);
   color: var(--border);
   padding: 0.125rem 0.5rem;
@@ -304,7 +304,7 @@ hr {
   transition: all 0.05s ease;
 }
 
-.pixel-btn-white:hover {
+.pixel-btn-w:hover {
   background: var(--accent);
   color: var(--background);
   box-shadow: 
@@ -313,7 +313,7 @@ hr {
     0px 0.0625rem 0px 0px var(--accent-shadow);
 }
 
-.pixel-btn-white:active {
+.pixel-btn-w:active {
   transform: translateY(0.125rem);
 }
 
