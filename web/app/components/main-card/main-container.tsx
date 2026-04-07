@@ -45,6 +45,8 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
     const biography = profile?.biography || [];
     const featuredImage = getImageUrl(profile?.featured_image) || "/wide-rose.png";
     const tokenImage = "/token.png";
+    const stickerImage = "/stickers.png";
+    const chipsImage = "/chips.png";
     
     return (
         <div className="col-span-8 w-full h-full overflow-y-auto flex flex-col relative border-l-2 border-t-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -82,20 +84,32 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                             >
                                 duo tracker
                             </button>
-                            <div className="absolute top-1 my-12 left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.5rem)] px-[0.1rem] flex items-center h-[5rem]">
-                                <div className="pixel-btn-w flex flex-col">
+                            <div className="absolute top-1 my-10 left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem]">
+                                <div className="pixel-btn-w flex flex-col items-center">
                                     <Image 
                                         src={tokenImage}
                                         alt="x"
-                                        width={40}
+                                        width={30}
                                         height={100}
-                                        className=""/>
+                                        className="object-cover object-center w-25 h-9" />
                                     <p>tokens</p>
                                 </div>
                                 <button className="pixel-btn-w">
+                                    <Image 
+                                        src={chipsImage}
+                                        alt="x"
+                                        width={30}
+                                        height={100}
+                                        className="object-cover object-center w-25 h-9" />
                                     chips
                                 </button>
                                 <button className="pixel-btn-w">
+                                    <Image 
+                                        src={stickerImage}
+                                        alt="x"
+                                        width={30}
+                                        height={100}
+                                        className="object-cover object-center w-25 h-9" />
                                     stickers
                                 </button>
                             </div>
