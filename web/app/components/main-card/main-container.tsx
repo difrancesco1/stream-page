@@ -85,32 +85,32 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                 duo tracker
                             </button>
                             <div className="absolute top-1 my-10 left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem]">
-                                <div className="pixel-btn-w flex flex-col items-center">
+                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden">
                                     <Image 
                                         src={tokenImage}
                                         alt="x"
-                                        width={30}
+                                        width={100}
                                         height={100}
                                         className="object-cover object-center w-25 h-9" />
                                     <p>tokens</p>
-                                </div>
-                                <button className="pixel-btn-w">
+                                </button>
+                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden relative">
                                     <Image 
                                         src={chipsImage}
                                         alt="x"
-                                        width={30}
+                                        width={100}
                                         height={100}
-                                        className="object-cover object-center w-25 h-9" />
-                                    chips
+                                        className="object-cover object-center w-25 h-13 scale-150 opacity-50" />
+                                    <p className="absolute">chips</p>
                                 </button>
-                                <button className="pixel-btn-w">
+                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden relative">
                                     <Image 
                                         src={stickerImage}
                                         alt="x"
-                                        width={30}
+                                        width={100}
                                         height={100}
-                                        className="object-cover object-center w-25 h-9" />
-                                    stickers
+                                        className="object-cover object-center w-25 h-13 scale-200 opacity-50" />
+                                    <p className="absolute">stickers</p>
                                 </button>
                             </div>
                             <a
