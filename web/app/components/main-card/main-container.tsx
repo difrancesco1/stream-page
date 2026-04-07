@@ -73,18 +73,18 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                 unoptimized={isBackendImage(profile?.featured_image)}
                             />
                             <button
-                                className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn-w text-xs w-[calc(100%-0.5rem)]"
+                                className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn-w text-xs w-[calc(100%-0.5rem)] opacity-90"
                                 onClick={() => onOpenCard?.("firstTracker")}
                             >
                                 first in stream
                             </button>
                             <button
-                                className="absolute top-1 my-6 left-1/2 -translate-x-1/2 z-10 pixel-btn-w text-xs w-[calc(100%-0.5rem)]"
+                                className="absolute top-1 my-6 left-1/2 -translate-x-1/2 z-10 pixel-btn-w text-xs w-[calc(100%-0.5rem)] opacity-90"
                                 onClick={() => onOpenCard?.("duoTracker")}
                             >
                                 duo tracker
                             </button>
-                            <div className="absolute top-1 my-10 left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem]">
+                            <div className="absolute top-1 my-10 left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem] opacity-90">
                                 <button className="pixel-btn-w flex flex-col items-center overflow-hidden">
                                     <Image 
                                         src={tokenImage}
@@ -94,23 +94,23 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                         className="object-cover object-center w-25 h-9" />
                                     <p>tokens</p>
                                 </button>
-                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden relative">
-                                    <Image 
-                                        src={chipsImage}
-                                        alt="x"
-                                        width={100}
-                                        height={100}
-                                        className="object-cover object-center w-25 h-13 scale-150 opacity-50" />
-                                    <p className="absolute">chips</p>
-                                </button>
-                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden relative">
+                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden">
                                     <Image 
                                         src={stickerImage}
                                         alt="x"
                                         width={100}
                                         height={100}
-                                        className="object-cover object-center w-25 h-13 scale-200 opacity-50" />
-                                    <p className="absolute">stickers</p>
+                                        className="object-cover object-center w-25 h-9" />
+                                    <p>stickers</p>
+                                </button>
+                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden">
+                                    <Image 
+                                        src={chipsImage}
+                                        alt="x"
+                                        width={100}
+                                        height={100}
+                                        className="object-cover object-center w-25 h-9" />
+                                    <p>chips</p>
                                 </button>
                             </div>
                             <a
