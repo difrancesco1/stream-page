@@ -70,13 +70,13 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                 unoptimized={isBackendImage(profile?.featured_image)}
                             />
                             <button
-                                className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn hover:animate-pulse text-xs w-[calc(100%-0.5rem)] opacity-70"
+                                className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn-white hover:animate-pulse text-xs w-[calc(100%-0.5rem)] opacity-70"
                                 onClick={() => onOpenCard?.("firstTracker")}
                             >
                                 first in stream
                             </button>
                             <button
-                                className="absolute top-1 my-6 left-1/2 -translate-x-1/2 z-10 pixel-btn hover:animate-pulse text-xs w-[calc(100%-0.5rem)] opacity-70"
+                                className="absolute top-1 my-6 left-1/2 -translate-x-1/2 z-10 pixel-btn-white hover:animate-pulse text-xs w-[calc(100%-0.5rem)] opacity-70"
                                 onClick={() => onOpenCard?.("duoTracker")}
                             >
                                 duo tracker

@@ -289,6 +289,34 @@ hr {
   transform: translateY(0.125rem);
 }
 
+.pixel-btn-white {
+  background: var(--foreground);
+  color: var(--border);
+  padding: 0.125rem 0.5rem;
+  font-size: var(--text-btn);
+  border: none;
+  cursor: pointer;
+  image-rendering: pixelated;
+  box-shadow: 
+    inset -0.125rem -0.125rem 0px 0px var(--border),
+    inset 0.125rem 0.125rem 0px 0px var(--background),
+    0px 0.0625rem 0px 0px var(--border);
+  transition: all 0.05s ease;
+}
+
+.pixel-btn-white:hover {
+  background: var(--accent);
+  color: var(--background);
+  box-shadow: 
+    inset -0.125rem -0.125rem 0px 0px var(--accent-shadow),
+    inset 0.125rem 0.125rem 0px 0px var(--background),
+    0px 0.0625rem 0px 0px var(--accent-shadow);
+}
+
+.pixel-btn-white:active {
+  transform: translateY(0.125rem);
+}
+
 .pixel-btn-sm {
   background: var(--border);
   color: var(--foreground);
