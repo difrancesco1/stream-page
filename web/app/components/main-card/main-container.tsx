@@ -44,6 +44,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
     
     const biography = profile?.biography || [];
     const featuredImage = getImageUrl(profile?.featured_image) || "/wide-rose.png";
+    const tokenImage = "/token.png";
     
     return (
         <div className="col-span-8 w-full h-full overflow-y-auto flex flex-col relative border-l-2 border-t-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -70,17 +71,34 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                 unoptimized={isBackendImage(profile?.featured_image)}
                             />
                             <button
-                                className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn-w hover:animate-pulse text-xs w-[calc(100%-0.5rem)]"
+                                className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn-w text-xs w-[calc(100%-0.5rem)]"
                                 onClick={() => onOpenCard?.("firstTracker")}
                             >
                                 first in stream
                             </button>
                             <button
-                                className="absolute top-1 my-6 left-1/2 -translate-x-1/2 z-10 pixel-btn-w hover:animate-pulse text-xs w-[calc(100%-0.5rem)]"
+                                className="absolute top-1 my-6 left-1/2 -translate-x-1/2 z-10 pixel-btn-w text-xs w-[calc(100%-0.5rem)]"
                                 onClick={() => onOpenCard?.("duoTracker")}
                             >
                                 duo tracker
                             </button>
+                            <div className="absolute top-1 my-12 left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.5rem)] px-[0.1rem] flex items-center h-[5rem]">
+                                <div className="pixel-btn-w flex flex-col">
+                                    <Image 
+                                        src={tokenImage}
+                                        alt="x"
+                                        width={40}
+                                        height={100}
+                                        className=""/>
+                                    <p>tokens</p>
+                                </div>
+                                <button className="pixel-btn-w">
+                                    chips
+                                </button>
+                                <button className="pixel-btn-w">
+                                    stickers
+                                </button>
+                            </div>
                             <a
                                 className="absolute alt-text bottom-0 right-0 mx-1"
                                 target="_blank"
