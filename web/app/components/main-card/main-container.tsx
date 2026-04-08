@@ -73,18 +73,18 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                 unoptimized={isBackendImage(profile?.featured_image)}
                             />
                             <button
-                                className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn text-xs w-[calc(100%-0.5rem)] opacity-90"
+                                className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn text-xs w-[calc(100%-0.5rem)] opacity-50 hover:opacity-90"
                                 onClick={() => onOpenCard?.("firstTracker")}
                             >
                                 first in stream
                             </button>
                             <button
-                                className="absolute top-1 my-6 left-1/2 -translate-x-1/2 z-10 pixel-btn text-xs w-[calc(100%-0.5rem)] opacity-90"
+                                className="absolute top-1 my-6 left-1/2 -translate-x-1/2 z-10 pixel-btn text-xs w-[calc(100%-0.5rem)] opacity-50 hover:opacity-90"
                                 onClick={() => onOpenCard?.("duoTracker")}
                             >
                                 duo tracker
                             </button>
-                            <div className="absolute top-1 my-[2.55rem] left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem] opacity-90">
+                            <div className="absolute top-1 my-[2.55rem] left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem] opacity-75 hover:opacity-90">
                                 <button className="pixel-btn-w flex flex-col items-center overflow-hidden">
                                     <Image 
                                         src={tokenImage}
