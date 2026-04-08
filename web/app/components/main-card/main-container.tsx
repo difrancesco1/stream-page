@@ -117,7 +117,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                 className="absolute alt-text-w bottom-0 right-0 mx-1"
                                 target="_blank"
                             >
-                                grand archive fan products
+                                grand archive TCG fan products
                             </a>
                         </div>
                     </div>
