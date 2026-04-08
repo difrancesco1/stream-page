@@ -231,6 +231,12 @@ html {
   opacity: 50%;
   font-size: 0.6875rem;
 }
+.alt-text-w{
+  letter-spacing: var(--letter-spacing);
+  color: var(--foreground);
+  opacity: 50%;
+  font-size: 0.6875rem;
+}
 
 /* ui additions */
 

@@ -114,7 +114,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                 </button>
                             </div>
                             <a
-                                className="absolute alt-text bottom-0 right-0 mx-1"
+                                className="absolute alt-text-w bottom-0 right-0 mx-1"
                                 target="_blank"
                             >
                                 grand archive fan products
