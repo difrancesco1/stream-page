@@ -92,7 +92,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                         width={100}
                                         height={100}
                                         className="object-cover object-center w-25 h-9" />
-                                    <p>tokens</p>
+                                    <p>cards</p>
                                 </button>
                                 <button className="pixel-btn-w flex flex-col items-center overflow-hidden">
                                     <Image 
@@ -110,7 +110,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                         width={100}
                                         height={100}
                                         className="object-cover object-center w-25 h-9" />
-                                    <p>chips</p>
+                                    <p>+more</p>
                                 </button>
                             </div>
                             <a
