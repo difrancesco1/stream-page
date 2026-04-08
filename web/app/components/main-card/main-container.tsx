@@ -84,7 +84,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                             >
                                 duo tracker
                             </button>
-                            <div className="absolute top-1 my-10 left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem] opacity-90">
+                            <div className="absolute top-1 my-[2.55rem] left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem] opacity-90">
                                 <button className="pixel-btn-w flex flex-col items-center overflow-hidden">
                                     <Image 
                                         src={tokenImage}
@@ -116,9 +116,8 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                             <a
                                 className="absolute alt-text bottom-0 right-0 mx-1"
                                 target="_blank"
-                                href="https://x.com/Fourdee2"
                             >
-                                @Fourdee
+                                grand archive fan products
                             </a>
                         </div>
                     </div>
