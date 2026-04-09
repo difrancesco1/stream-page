@@ -85,7 +85,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                 duo tracker
                             </button>
                             <div className="absolute top-1 my-[2.55rem] left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem] ">
-                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden hover:opacity-90">
+                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden opacity-50 hover:opacity-90">
                                     <Image 
                                         src={tokenImage}
                                         alt="x"
