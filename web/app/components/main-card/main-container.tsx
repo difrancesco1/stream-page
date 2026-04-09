@@ -84,8 +84,8 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                             >
                                 duo tracker
                             </button>
-                            <div className="absolute top-1 my-[2.55rem] left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem] opacity-50 hover:opacity-90">
-                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden">
+                            <div className="absolute top-1 my-[2.55rem] left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem] opacity-50 ">
+                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden hover:opacity-90">
                                     <Image 
                                         src={tokenImage}
                                         alt="x"
@@ -94,7 +94,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                         className="object-cover object-center w-25 h-9" />
                                     <p>cards</p>
                                 </button>
-                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden">
+                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden hover:opacity-90">
                                     <Image 
                                         src={stickerImage}
                                         alt="x"
@@ -103,7 +103,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                         className="object-cover object-center w-25 h-9" />
                                     <p>stickers</p>
                                 </button>
-                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden">
+                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden hover:opacity-90">
                                     <Image 
                                         src={chipsImage}
                                         alt="x"
