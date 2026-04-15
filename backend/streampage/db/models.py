@@ -1,14 +1,14 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, ForeignKey, Enum, Integer, DateTime, Boolean, Text
+from sqlalchemy import String, ForeignKey, Enum, Integer, DateTime, Boolean, Text, Numeric
 from sqlalchemy import LargeBinary
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, ARRAY, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from sqlalchemy import UniqueConstraint
 
-from streampage.db.enums import Platform, MediaCategory, QuestionType
+from streampage.db.enums import Platform, MediaCategory, QuestionType, ProductCategory, OrderStatus
 
 
 class Base(DeclarativeBase):
@@ -476,3 +476,69 @@ class DuoEntryAccount(Base):
     __table_args__ = (
         UniqueConstraint("entry_id", "summoner_name", name="uq_duo_entry_account_entry_name"),
     )
+
+
+class Product(Base):
+    __tablename__ = "product"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    category: Mapped[ProductCategory] = mapped_column(Enum(ProductCategory))
+    name: Mapped[str] = mapped_column(String(200))
+    slug: Mapped[str] = mapped_column(String(200), unique=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    price: Mapped[float] = mapped_column(Numeric(10, 2))
+    quantity: Mapped[int] = mapped_column(Integer, default=0)
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+
+class Order(Base):
+    __tablename__ = "order"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    paypal_order_id: Mapped[str | None] = mapped_column(String(200), unique=True, nullable=True)
+    status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus), default=OrderStatus.PENDING)
+    customer_name: Mapped[str] = mapped_column(String(200))
+    customer_email: Mapped[str] = mapped_column(String(254))
+    customer_phone: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    shipping_street: Mapped[str] = mapped_column(String(300))
+    shipping_city: Mapped[str] = mapped_column(String(100))
+    shipping_state: Mapped[str] = mapped_column(String(100))
+    shipping_zip: Mapped[str] = mapped_column(String(20))
+    shipping_country: Mapped[str] = mapped_column(String(100))
+    total_amount: Mapped[float] = mapped_column(Numeric(10, 2))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    items: Mapped[list["OrderItem"]] = relationship(
+        "OrderItem", back_populates="order", cascade="all, delete-orphan"
+    )
+
+
+class OrderItem(Base):
+    __tablename__ = "order_item"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    order_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("order.id", ondelete="CASCADE")
+    )
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("product.id")
+    )
+    quantity: Mapped[int] = mapped_column(Integer)
+    unit_price: Mapped[float] = mapped_column(Numeric(10, 2))
+
+    order: Mapped["Order"] = relationship("Order", back_populates="items")
+    product: Mapped["Product"] = relationship("Product", viewonly=True)

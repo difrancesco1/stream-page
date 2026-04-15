@@ -36,3 +36,18 @@ class QuestionType(PyEnum):
     DATE = "date"
     FILE_UPLOAD = "file_upload"
 
+
+class ProductCategory(PyEnum):
+    APPAREL = "apparel"
+    ACCESSORIES = "accessories"
+    PRINTS = "prints"
+    STICKERS = "stickers"
+    OTHER = "other"
+
+
+class OrderStatus(PyEnum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+

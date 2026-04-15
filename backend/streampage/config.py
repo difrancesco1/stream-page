@@ -37,6 +37,10 @@ SMTP_USER: Final[str] = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD: Final[str] = os.getenv("SMTP_PASSWORD", "")
 SMTP_FROM_EMAIL: Final[str] = os.getenv("SMTP_FROM_EMAIL", "")
 
+PAYPAL_CLIENT_ID: Final[str] = os.getenv("PAYPAL_CLIENT_ID", "")
+PAYPAL_CLIENT_SECRET: Final[str] = os.getenv("PAYPAL_CLIENT_SECRET", "")
+PAYPAL_SANDBOX: bool = os.getenv("PAYPAL_SANDBOX", "true").lower() in ("true", "1", "yes")
+
 _supabase_url = os.getenv("SUPABASE_URL", "")
 # Ensure trailing slash for Supabase storage API compatibility
 SUPABASE_URL: Final[str] = _supabase_url.rstrip("/") + "/" if _supabase_url else ""
