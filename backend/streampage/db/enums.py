@@ -38,11 +38,9 @@ class QuestionType(PyEnum):
 
 
 class ProductCategory(PyEnum):
-    APPAREL = "apparel"
-    ACCESSORIES = "accessories"
-    PRINTS = "prints"
+    TOKENS = "tokens"
     STICKERS = "stickers"
-    OTHER = "other"
+    ETC = "etc"
 
 
 class OrderStatus(PyEnum):

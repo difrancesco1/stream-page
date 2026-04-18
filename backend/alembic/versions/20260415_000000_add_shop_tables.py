@@ -4,6 +4,14 @@ Revision ID: d1e2f3a4b5c6
 Revises: c9d3e4f5a6b7
 Create Date: 2026-04-15 00:00:00.000000
 
+Creates the ``product``, ``order``, and ``order_item`` tables backing the shop.
+
+Enum storage note: ``productcategory`` uses the uppercase Python enum member
+names (``TOKENS``, ``STICKERS``, ``ETC``) because that is what SQLAlchemy's
+default ``Enum(ProductCategory)`` column persists. The API layer returns
+``ProductCategory.value`` (lowercase) to clients, so this is a DB-storage
+detail only. The declared order is also the intended shop display order, so
+the API can simply ``ORDER BY category``.
 """
 from typing import Sequence, Union
 
@@ -16,7 +24,7 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 product_category = sa.Enum(
-    'apparel', 'accessories', 'prints', 'stickers', 'other',
+    'TOKENS', 'STICKERS', 'ETC',
     name='productcategory',
 )
 
@@ -27,9 +35,6 @@ order_status = sa.Enum(
 
 
 def upgrade() -> None:
-    product_category.create(op.get_bind(), checkfirst=True)
-    order_status.create(op.get_bind(), checkfirst=True)
-
     op.create_table(
         'product',
         sa.Column('id', sa.UUID(), nullable=False),

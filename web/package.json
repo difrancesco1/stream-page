@@ -28,6 +28,7 @@
     "next": "^16.0.10",
     "pixel-borders": "^1.1.4",
     "pixelarticons": "^1.8.1",
+    "radix-ui": "^1.4.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-draggable": "^4.5.0",

@@ -110,7 +110,10 @@ def list_products(
     active_only: bool = Query(True),
 ):
     with get_db_session() as session:
-        stmt = select(Product).order_by(Product.created_at.desc())
+        stmt = select(Product).order_by(
+            Product.category,
+            Product.created_at.desc(),
+        )
         if category:
             stmt = stmt.where(Product.category == category)
         if active_only:
