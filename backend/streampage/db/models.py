@@ -2,13 +2,13 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import String, ForeignKey, Enum, Integer, DateTime, Boolean, Text, Numeric
-from sqlalchemy import LargeBinary
+from sqlalchemy import LargeBinary, text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, ARRAY, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, Index
 
-from streampage.db.enums import Platform, MediaCategory, QuestionType, ProductCategory, OrderStatus
+from streampage.db.enums import Platform, MediaCategory, QuestionType, ProductCategory, ProductMediaType, OrderStatus
 
 
 class Base(DeclarativeBase):
@@ -490,11 +490,53 @@ class Product(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     price: Mapped[float] = mapped_column(Numeric(10, 2))
     quantity: Mapped[int] = mapped_column(Integer, default=0)
-    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    media: Mapped[list["ProductMedia"]] = relationship(
+        "ProductMedia",
+        back_populates="product",
+        cascade="all, delete-orphan",
+        order_by="ProductMedia.display_order, ProductMedia.created_at",
+    )
+
+
+class ProductMedia(Base):
+    """Image or video asset attached to a product.
+
+    A product can have many media items. At most one row per product may have
+    is_featured=True (enforced by a partial unique index). Ordering follows
+    display_order ascending, ties broken by created_at.
+    """
+    __tablename__ = "product_media"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("product.id", ondelete="CASCADE"), index=True
+    )
+    url: Mapped[str] = mapped_column(String(500))
+    media_type: Mapped[ProductMediaType] = mapped_column(Enum(ProductMediaType))
+    display_order: Mapped[int] = mapped_column(Integer, default=0)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    product: Mapped["Product"] = relationship("Product", back_populates="media")
+
+    __table_args__ = (
+        Index(
+            "ux_product_media_one_featured",
+            "product_id",
+            unique=True,
+            postgresql_where=text("is_featured"),
+        ),
     )
 
 

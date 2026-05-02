@@ -1,71 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import CardHeader from "@/app/components/shared/card-header";
+import type { TopbarBackIcon } from "@/app/components/shared/topbar";
 
 import CartSection from "./cart-section";
-import ShopSection from "./shop-section";
+import { useCart } from "./cart-context";
 import type { ShopItem } from "./types";
 
-interface ShopModalProps {
+interface ShopShellProps {
   items: ShopItem[];
+  title?: string;
+  tabs?: { title: string }[];
+  activeTab?: { title: string };
+  setActiveTab?: (tab: { title: string }) => void;
+  backHref?: string;
+  backIcon?: TopbarBackIcon;
+  backLabel?: string;
+  children: React.ReactNode;
 }
 
-export default function ShopModal({ items }: ShopModalProps) {
-  const [cart, setCart] = useState<Record<string, number>>({});
-
-  const handleAdd = (item: ShopItem) => {
-    setCart((prev) => ({ ...prev, [item.id]: (prev[item.id] ?? 0) + 1 }));
-  };
-
-  const handleRemove = (itemId: string) => {
-    setCart((prev) => {
-      const next = { ...prev };
-      const current = next[itemId] ?? 0;
-      if (current <= 1) {
-        delete next[itemId];
-      } else {
-        next[itemId] = current - 1;
-      }
-      return next;
-    });
-  };
+export default function ShopShell({
+  items,
+  title = "shop",
+  tabs,
+  activeTab,
+  setActiveTab,
+  backHref,
+  backIcon,
+  backLabel,
+  children,
+}: ShopShellProps) {
+  const { cart, remove } = useCart();
 
   const handlePay = () => {
     // TODO: open customer-info modal and POST /shop/orders/create
     console.log("pay", cart);
   };
 
-  const sections: { category: string; items: ShopItem[] }[] = [];
-  for (const item of items) {
-    const last = sections[sections.length - 1];
-    if (last?.category === item.category) {
-      last.items.push(item);
-    } else {
-      sections.push({ category: item.category, items: [item] });
-    }
-  }
+  const showTabs = Boolean(tabs && activeTab && setActiveTab);
 
   return (
     <div
-      className="relative pixel-borders pixel-card w-full
-      sm:max-w-[26rem] md:max-w-[30rem] lg:max-w-[34rem]
-      h-auto min-h-[70dvh] sm:min-h-[18rem] md:min-h-[20rem]
-      bg-foreground flex flex-col gap-[var(--spacing-sm)] p-[var(--spacing-sm)]"
+      className="relative wrapper pixel-borders pixel-card w-full
+      sm:max-w-[64rem] md:max-w-[72rem] lg:max-w-[55rem]
+      h-full bg-foreground overflow-hidden"
     >
-      {sections.map((section) => (
-        <ShopSection
-          key={section.category}
-          title={section.category}
-          items={section.items}
-          onAddToCart={handleAdd}
-        />
-      ))}
-      <CartSection
-        items={items}
-        cart={cart}
-        onRemove={handleRemove}
-        onPay={handlePay}
-      />
+      <CardHeader
+        title={title}
+        variant="section"
+        showTabs={showTabs}
+        tabs={tabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        backHref={backHref}
+        backIcon={backIcon}
+        backLabel={backLabel}
+      >
+        <div className="flex-1 min-h-0 flex">
+          {children}
+        </div>
+        <div className="shrink-0 px-[var(--spacing-sm)] pb-[var(--spacing-sm)] pt-[var(--spacing-sm)]">
+          <CartSection
+            items={items}
+            cart={cart}
+            onRemove={remove}
+            onPay={handlePay}
+          />
+        </div>
+      </CardHeader>
     </div>
   );
 }

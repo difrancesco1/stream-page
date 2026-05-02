@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import type { ShopItem } from "./types";
+import { featuredMedia, type ShopItem } from "./types";
 
 interface CartSectionProps {
   items: ShopItem[];
@@ -90,7 +90,9 @@ export default function CartSection({
             </div>
           ) : (
             <ul className="flex flex-row flex-wrap gap-[var(--spacing-sm)]">
-              {cartEntries.map(({ item, qty }) => (
+              {cartEntries.map(({ item, qty }) => {
+                const featured = featuredMedia(item);
+                return (
                 <li
                   key={item.id}
                   className="relative flex flex-col w-[3.5rem] md:w-[4rem]
@@ -101,14 +103,23 @@ export default function CartSection({
                     type="button"
                     aria-label={`Remove one ${item.name} from cart`}
                     onClick={() => onRemove?.(item.id)}
-                    className="relative w-full aspect-square cursor-pointer"
+                    className="relative w-full aspect-square cursor-pointer overflow-hidden"
                   >
-                    {item.image_url && (
+                    {featured?.media_type === "image" && (
                       <Image
-                        src={item.image_url}
+                        src={featured.url}
                         alt={item.name}
                         fill
                         className="object-contain p-1"
+                      />
+                    )}
+                    {featured?.media_type === "video" && (
+                      <video
+                        src={featured.url}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full object-cover"
                       />
                     )}
                   </button>
@@ -124,7 +135,8 @@ export default function CartSection({
                     </span>
                   )}
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </div>

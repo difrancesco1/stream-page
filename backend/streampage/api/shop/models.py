@@ -20,6 +20,30 @@ class ProductUpdate(BaseModel):
     quantity: int | None = None
     is_active: bool | None = None
 
+
+class ProductMediaResponse(BaseModel):
+    id: str
+    url: str
+    media_type: str
+    display_order: int
+    is_featured: bool
+    created_at: datetime
+
+
+class ProductMediaUpdate(BaseModel):
+    is_featured: bool | None = None
+    display_order: int | None = None
+
+
+class MediaOrderEntry(BaseModel):
+    id: str
+    display_order: int
+
+
+class ProductMediaReorderRequest(BaseModel):
+    order: list[MediaOrderEntry]
+
+
 class ProductResponse(BaseModel):
     id: str
     category: str
@@ -28,7 +52,7 @@ class ProductResponse(BaseModel):
     description: str | None
     price: float
     quantity: int
-    image_url: str | None
+    media: list[ProductMediaResponse]
     is_active: bool
     created_at: datetime
     updated_at: datetime

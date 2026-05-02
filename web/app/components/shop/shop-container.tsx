@@ -1,14 +1,10 @@
 import Image from "next/image";
 
-import ShopModal from "./shop-modal";
-import type { ShopItem } from "./types";
-
 interface ShopContainerProps {
-  items: ShopItem[];
   children?: React.ReactNode;
 }
 
-export default function ShopContainer({ items, children }: ShopContainerProps) {
+export default function ShopContainer({ children }: ShopContainerProps) {
   return (
     <div className="w-full h-full bg-card p-[0.125rem] rounded-lg shadow-md relative flex items-center justify-center py-2">
       <Image
@@ -20,7 +16,6 @@ export default function ShopContainer({ items, children }: ShopContainerProps) {
         priority
       />
       {children}
-      <ShopModal items={items} />
     </div>
   );
 }

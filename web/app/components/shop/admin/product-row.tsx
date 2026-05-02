@@ -4,7 +4,12 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { useAuth } from "@/app/context/auth-context";
-import { deleteProduct, type Product } from "@/app/api/shop/actions";
+import {
+  deactivateProduct,
+  deleteProduct,
+  type Product,
+} from "@/app/api/shop/actions";
+import { featuredMedia } from "@/app/components/shop/types";
 
 import ProductForm from "./product-form";
 
@@ -23,19 +28,45 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
 export default function ProductRow({ product, onChanged }: ProductRowProps) {
   const { token } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [busy, setBusy] = useState<"deactivate" | "delete" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDelete = async () => {
+  const handleDeactivate = async () => {
     if (!token) return;
-    if (!confirm(`Deactivate "${product.name}"? It will be hidden from the public shop.`)) {
+    if (
+      !confirm(
+        `Deactivate "${product.name}"? It will be hidden from the public shop but keep its data and media.`,
+      )
+    ) {
       return;
     }
 
     setError(null);
-    setIsDeleting(true);
+    setBusy("deactivate");
+    const result = await deactivateProduct(token, product.id);
+    setBusy(null);
+
+    if (result.success) {
+      onChanged();
+    } else {
+      setError(result.error || "Failed to deactivate product");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!token) return;
+    if (
+      !confirm(
+        `Permanently delete "${product.name}"?\n\nThis removes the product and all of its images and videos. This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    setError(null);
+    setBusy("delete");
     const result = await deleteProduct(token, product.id);
-    setIsDeleting(false);
+    setBusy(null);
 
     if (result.success) {
       onChanged();
@@ -58,15 +89,26 @@ export default function ProductRow({ product, onChanged }: ProductRowProps) {
     );
   }
 
+  const featured = featuredMedia(product);
+
   return (
     <div className="pixel-borders bg-foreground p-[var(--spacing-sm)] flex items-center gap-[var(--spacing-sm)]">
-      <div className="relative w-[3rem] h-[3rem] md:w-[3.5rem] md:h-[3.5rem] bg-white pixel-borders shrink-0">
-        {product.image_url && (
+      <div className="relative w-[3rem] h-[3rem] md:w-[3.5rem] md:h-[3.5rem] bg-white pixel-borders shrink-0 overflow-hidden">
+        {featured?.media_type === "image" && (
           <Image
-            src={product.image_url}
+            src={featured.url}
             alt={product.name}
             fill
             className="object-contain p-1"
+          />
+        )}
+        {featured?.media_type === "video" && (
+          <video
+            src={featured.url}
+            muted
+            playsInline
+            preload="metadata"
+            className="w-full h-full object-cover"
           />
         )}
       </div>
@@ -101,7 +143,7 @@ export default function ProductRow({ product, onChanged }: ProductRowProps) {
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          disabled={isDeleting}
+          disabled={busy !== null}
           className="pixel-borders pixel-btn-border px-2 py-1 text-[0.75rem] cursor-pointer
             disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -109,13 +151,27 @@ export default function ProductRow({ product, onChanged }: ProductRowProps) {
         </button>
         <button
           type="button"
-          onClick={handleDelete}
-          disabled={isDeleting || !product.is_active}
+          onClick={handleDeactivate}
+          disabled={busy !== null || !product.is_active}
           className="pixel-borders pixel-btn-border px-2 py-1 text-[0.75rem] cursor-pointer
             disabled:opacity-50 disabled:cursor-not-allowed"
-          title={product.is_active ? "Deactivate product" : "Already inactive"}
+          title={
+            product.is_active
+              ? "Hide from the public shop without deleting"
+              : "Already inactive"
+          }
         >
-          {isDeleting ? "..." : "Delete"}
+          {busy === "deactivate" ? "..." : "Deactivate"}
+        </button>
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={busy !== null}
+          className="pixel-borders pixel-btn-border px-2 py-1 text-[0.75rem] cursor-pointer
+            text-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Permanently delete product and all media"
+        >
+          {busy === "delete" ? "..." : "Delete"}
         </button>
       </div>
     </div>

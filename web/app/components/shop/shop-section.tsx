@@ -1,22 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-
-import Topbar from "../shared/topbar";
-import ItemDetailsModal from "./item-details-modal";
-import type { ShopItem } from "./types";
+import { useCart } from "./cart-context";
+import { featuredMedia, type ShopItem } from "./types";
 
 interface ShopSectionProps {
-  title: string;
   items: ShopItem[];
-  onAddToCart?: (item: ShopItem) => void;
 }
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
@@ -26,85 +17,75 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
-export default function ShopSection({
-  title,
-  items,
-  onAddToCart,
-}: ShopSectionProps) {
+export default function ShopSection({ items }: ShopSectionProps) {
+  const { add } = useCart();
+
   return (
-    <section className="flex flex-col gap-[var(--spacing-xs)] flex-1 min-h-0">
-      <Topbar title={title} />
-      <div className="flex-1 min-h-0 pixel-borders p-[var(--spacing-md)] overflow-auto">
-        <ul className="flex flex-row flex-wrap gap-[var(--spacing-md)]">
-          {items.map((item) => (
-            <HoverCard key={item.id} openDelay={150} closeDelay={80}>
-              <HoverCardTrigger asChild>
-                <li
-                  className="relative flex flex-col w-[5.5rem] sm:w-[5.5rem] md:w-[6rem] lg:w-[6.5rem]
-                    bg-white pixel-borders"
-                >
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <button
-                        type="button"
-                        aria-label={`View details for ${item.name}`}
-                        className="relative w-full aspect-square cursor-pointer"
-                      >
-                        {item.image_url && (
-                          <Image
-                            src={item.image_url}
-                            alt={item.name}
-                            fill
-                            className="object-contain p-1"
-                          />
-                        )}
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent className="pixel-borders bg-foreground">
-                      <ItemDetailsModal item={item} onAddToCart={onAddToCart} />
-                    </DialogContent>
-                  </Dialog>
-                  <div
-                    className="border-t-[length:var(--border-width)] border-[color:var(--border)]
-                      px-[var(--spacing-sm)] py-[var(--spacing-xs)]
-                      text-center text-[0.75rem] md:text-[0.75rem]
-                      text-[color:var(--border)] leading-none"
-                  >
-                    {priceFormatter.format(item.price)}
-                  </div>
-                  <button
-                    type="button"
-                    aria-label={`Add ${item.name} to cart`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAddToCart?.(item);
-                    }}
-                    className="hidden lg:flex absolute -top-1.5 -right-1.5
-                      w-5 h-5 items-center justify-center rounded-full
-                      bg-[color:var(--accent)] text-[color:var(--background)]
-                      border-[length:var(--border-width)] border-[color:var(--border)]
-                      text-[0.75rem] leading-none font-bold
-                      hover:bg-[color:var(--accent-shadow)] transition-colors z-10 cursor-pointer"
-                  >
-                    +
-                  </button>
-                </li>
-              </HoverCardTrigger>
-              <HoverCardContent
-                side="top"
-                align="center"
-                className="pixel-borders bg-foreground w-64
-                  flex flex-col gap-[var(--spacing-xs)]"
+    <section className="flex flex-col gap-[var(--spacing-xs)] flex-1 min-h-0 w-full">
+      <div className="py-2 flex-1 min-h-0 overflow-auto border-b-2">
+        <ul className="grid grid-cols-3 justify-items-center gap-4 w-full pt-1">
+          {items.map((item) => {
+            const featured = featuredMedia(item);
+            return (
+              <li
+                key={item.id}
+                className="relative flex flex-col w-[14.65rem]
+                  bg-white pixel-borders"
               >
-                <div className="main-text text-[0.875rem] leading-tight">
-                  {item.name}
+                <Link
+                  href={`/shop/${item.slug}`}
+                  prefetch
+                  aria-label={`View details for ${item.name}`}
+                  className="relative w-full aspect-[65/91] cursor-pointer block"
+                >
+                  {featured?.media_type === "image" && (
+                    <Image
+                      src={featured.url}
+                      alt={item.name}
+                      fill
+                      className="object-contain"
+                    />
+                  )}
+                  {featured?.media_type === "video" && (
+                    <video
+                      src={featured.url}
+                      muted
+                      loop
+                      playsInline
+                      autoPlay
+                      preload="metadata"
+                      className="absolute inset-0 w-full h-full object-contain"
+                    />
+                  )}
+                </Link>
+                <div
+                  className="border-t-[length:var(--border-width)] border-[color:var(--border)]
+                    px-[var(--spacing-sm)]
+                    text-center text-[1.2rem] py-2
+                    text-[color:var(--border)] leading-none"
+                >
+                  {priceFormatter.format(item.price)}
                 </div>
-                <div className="text-[0.75rem] text-[color:var(--border)] opacity-80 leading-snug">
-                  {item.description?.trim() || "No description available."}
-                </div>
-              </HoverCardContent>
-            </HoverCard>
-          ))}
+                <button
+                  type="button"
+                  aria-label={`Add ${item.name} to cart`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    add(item);
+                  }}
+                  className="hidden lg:flex absolute -top-2.5 -right-2.5
+                    w-7 h-7 items-center justify-center rounded-full
+                    bg-[color:var(--accent)] text-[color:var(--background)]
+                    border-[length:var(--border-width)] border-[color:var(--border)]
+                    text-[1rem] leading-none font-bold
+                    hover:bg-[color:var(--accent-shadow)] transition-colors z-10 cursor-pointer "
+                >
+                  +
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>

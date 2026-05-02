@@ -43,6 +43,11 @@ class ProductCategory(PyEnum):
     ETC = "etc"
 
 
+class ProductMediaType(PyEnum):
+    IMAGE = "image"
+    VIDEO = "video"
+
+
 class OrderStatus(PyEnum):
     PENDING = "pending"
     COMPLETED = "completed"
