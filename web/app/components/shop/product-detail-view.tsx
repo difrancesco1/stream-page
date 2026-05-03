@@ -82,11 +82,11 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
                   ${item.price}
                 </span>
 <div className=" flex justify-end items-center  text-white px-1">
-                <span> In stock: {item.quantity}</span>
+                <span> {item.quantity > 0 ? "in stock" : "out of stock"} </span>
               </div> </div>
             
             {ordered.length > 1 && (
-              <ul className="flex justify-start">
+              <ul className="flex justify-start gap-1">
                 {ordered.map((m) => {
                   const isActive = m.id === active?.id;
                   return (
@@ -174,9 +174,16 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
                 >
                   {inStock ? "Add to cart" : "Out of stock"}
                 </button>
+                <div className="text-border opacity-30">payments done through paypal. </div>
+                <div className="text-border opacity-30">tokens/cards are delayed due to manufacture issues. order at your own risk. money will be refunded at request after 3+ months.</div>
+                <div className="text-border opacity-30">please contact @ros.e on discord for any issues.</div>
+                <div className="text-border opacity-30">we cannot resend any items if they get lost in the mail due to low stock :(</div>
           </div>
+          
         </div>
+        
       </div>
+      
     </section>
   );
 }
