@@ -26,6 +26,7 @@ export default function ShopSection({ items }: ShopSectionProps) {
         <ul className="grid grid-cols-4 justify-items-center gap-2 w-full">
           {items.map((item) => {
             const featured = featuredMedia(item);
+            const category = item.category;
             return (
               <li
                 key={item.id}
@@ -36,7 +37,9 @@ export default function ShopSection({ items }: ShopSectionProps) {
                   href={`/shop/${item.slug}`}
                   prefetch
                   aria-label={`View details for ${item.name}`}
-                  className="relative w-full aspect-[65/91] cursor-pointer block"
+                  className={`relative w-full cursor-pointer block ${
+                    category !== "tokens" ? "aspect-[100/91]" : "aspect-[65/91]"
+                  }`}
                 >
                   {featured?.media_type === "image" && (
                     <Image
