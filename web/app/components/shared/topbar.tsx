@@ -26,13 +26,13 @@ export default function Topbar({
 }: TopbarProps) {
   const containerCls =
     variant === "section"
-      ? `bg-background h-6 pl-[1] pr-[1] pixel-borders border-accent
+      ? `bg-background h-6 pr-[1] pixel-borders border-accent
          flex items-center justify-between`
       : `drag-handle bg-background h-5 pl-1 pixel-borders border-accent
          flex items-center justify-between cursor-grab active:cursor-grabbing`;
 
   const titleCls =
-    variant === "section" ? "main-text !text-[1.1rem]" : "main-text";
+    variant === "section" ? "main-text !text-[1.1rem] pb-[1.5]" : "main-text";
 
   const showIcon = Boolean(backHref || backIcon);
   const effectiveIcon: TopbarBackIcon = backIcon ?? "arrow";
@@ -58,13 +58,16 @@ export default function Topbar({
             </Link>
           ) : (
             <span
-              className={`${baseIconCls} bg-background text-[color:var(--border)] pointer-events-none`}
+              className={`pl-1 pr-[2] bg-background text-[color:var(--border)] pointer-events-none`}
               aria-hidden="true"
             >
               <Icon className="w-[0.875rem] h-[0.875rem]" strokeWidth={2.5} />
             </span>
           ))}
-        <span className={`${titleCls} truncate`}>{title}</span>
+          {title !== "shop" &&
+          <span className={`${titleCls} truncate`}>{title}</span>
+           }
+        
       </div>
       {variant === "window" && exitbtn && (
         <button

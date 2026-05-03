@@ -34,10 +34,10 @@ export default function CardHeader({
   children,
 }: CardHeaderProps) {
   const isSection = variant === "section";
-  const decoFrameTop = isSection ? "top-[1.625rem]" : "top-[1.125rem]";
-  const decoBottomLine = isSection ? "top-[3.28rem]" : "top-[2.78rem]";
+  const decoFrameTop = isSection ? "top-[1.355rem]" : "top-[1.125rem]";
+  const decoBottomLine = isSection ? "top-[3rem]" : "top-[2.78rem]";
   const decoTopBorderHeight = isSection ? "h-[3.47rem]" : "h-[2.97rem]";
-  const gapBetween = isSection ? 'gap-[0.39rem]' : 'gap-[0.1875rem]';
+  const gapBetween = isSection ? 'gap-[0.21rem]' : 'gap-[0.1875rem]';
 
   return (
     <>
