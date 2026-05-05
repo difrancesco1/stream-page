@@ -1,14 +1,14 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, ForeignKey, Enum, Integer, DateTime, Boolean, Text
-from sqlalchemy import LargeBinary
+from sqlalchemy import String, ForeignKey, Enum, Integer, DateTime, Boolean, Text, Numeric
+from sqlalchemy import LargeBinary, text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, ARRAY, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, Index
 
-from streampage.db.enums import Platform, MediaCategory, QuestionType
+from streampage.db.enums import Platform, MediaCategory, QuestionType, ProductCategory, ProductMediaType, OrderStatus
 
 
 class Base(DeclarativeBase):
@@ -476,3 +476,123 @@ class DuoEntryAccount(Base):
     __table_args__ = (
         UniqueConstraint("entry_id", "summoner_name", name="uq_duo_entry_account_entry_name"),
     )
+
+
+class Product(Base):
+    __tablename__ = "product"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    category: Mapped[ProductCategory] = mapped_column(Enum(ProductCategory))
+    name: Mapped[str] = mapped_column(String(200))
+    slug: Mapped[str] = mapped_column(String(200), unique=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    price: Mapped[float] = mapped_column(Numeric(10, 2))
+    quantity: Mapped[int] = mapped_column(Integer, default=0)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    media: Mapped[list["ProductMedia"]] = relationship(
+        "ProductMedia",
+        back_populates="product",
+        cascade="all, delete-orphan",
+        order_by="ProductMedia.display_order, ProductMedia.created_at",
+    )
+
+
+class ProductMedia(Base):
+    """Image or video asset attached to a product.
+
+    A product can have many media items. At most one row per product may have
+    is_featured=True (enforced by a partial unique index). Ordering follows
+    display_order ascending, ties broken by created_at.
+    """
+    __tablename__ = "product_media"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("product.id", ondelete="CASCADE"), index=True
+    )
+    url: Mapped[str] = mapped_column(String(500))
+    media_type: Mapped[ProductMediaType] = mapped_column(Enum(ProductMediaType))
+    display_order: Mapped[int] = mapped_column(Integer, default=0)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    product: Mapped["Product"] = relationship("Product", back_populates="media")
+
+    __table_args__ = (
+        Index(
+            "ux_product_media_one_featured",
+            "product_id",
+            unique=True,
+            postgresql_where=text("is_featured"),
+        ),
+    )
+
+
+class Order(Base):
+    __tablename__ = "order"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    paypal_order_id: Mapped[str | None] = mapped_column(String(200), unique=True, nullable=True)
+    status: Mapped[OrderStatus] = mapped_column(
+        Enum(
+            OrderStatus,
+            name="orderstatus",
+            values_callable=lambda enum_cls: [m.value for m in enum_cls],
+        ),
+        default=OrderStatus.PENDING,
+    )
+    customer_first_name: Mapped[str] = mapped_column(String(100))
+    customer_last_name: Mapped[str] = mapped_column(String(100))
+    customer_email: Mapped[str] = mapped_column(String(254))
+    customer_phone: Mapped[str] = mapped_column(String(30))
+    shipping_street: Mapped[str] = mapped_column(String(300))
+    shipping_city: Mapped[str] = mapped_column(String(100))
+    shipping_state: Mapped[str] = mapped_column(String(100))
+    shipping_zip: Mapped[str] = mapped_column(String(20))
+    shipping_country: Mapped[str] = mapped_column(String(100))
+    total_amount: Mapped[float] = mapped_column(Numeric(10, 2))
+    tracking_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    tracking_carrier: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    tracking_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    shipped_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    items: Mapped[list["OrderItem"]] = relationship(
+        "OrderItem", back_populates="order", cascade="all, delete-orphan"
+    )
+
+
+class OrderItem(Base):
+    __tablename__ = "order_item"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    order_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("order.id", ondelete="CASCADE")
+    )
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("product.id")
+    )
+    quantity: Mapped[int] = mapped_column(Integer)
+    unit_price: Mapped[float] = mapped_column(Numeric(10, 2))
+
+    order: Mapped["Order"] = relationship("Order", back_populates="items")
+    product: Mapped["Product"] = relationship("Product", viewonly=True)

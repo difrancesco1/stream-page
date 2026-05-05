@@ -21,6 +21,7 @@ from streampage.api.page.page import page_router
 from streampage.api.forms.forms import forms_router
 from streampage.api.first.first import first_router
 from streampage.api.duo.duo import duo_router
+from streampage.api.shop.shop import shop_router
 from streampage.api.user.auth import hash_password
 from streampage.config import FRONTEND_URL, IS_RAILWAY
 from streampage.db.engine import get_db, get_db_session
@@ -123,3 +124,4 @@ app.include_router(page_router, prefix="/page")
 app.include_router(forms_router, prefix="/forms")
 app.include_router(first_router, prefix="/firsts")
 app.include_router(duo_router, prefix="/duos")
+app.include_router(shop_router, prefix="/shop")

@@ -36,3 +36,23 @@ class QuestionType(PyEnum):
     DATE = "date"
     FILE_UPLOAD = "file_upload"
 
+
+class ProductCategory(PyEnum):
+    TOKENS = "tokens"
+    STICKERS = "stickers"
+    ETC = "etc"
+
+
+class ProductMediaType(PyEnum):
+    IMAGE = "image"
+    VIDEO = "video"
+
+
+class OrderStatus(PyEnum):
+    PENDING = "pending"
+    PAID = "paid"
+    SHIPPED = "shipped"
+    DELIVERED = "delivered"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+
