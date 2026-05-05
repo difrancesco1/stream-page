@@ -36,7 +36,7 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
           <div className="flex gap-2 w-full md:flex-row lg:flex-row sm:flex-col h-full">
             <div
               className="relative w-full flex-1 min-h-0 h-full
-                bg-white pixel-borders"
+                bg-foreground pixel-borders"
             >
               {active ? (
                 active.media_type === "image" ? (
@@ -78,9 +78,15 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
               </p>
 
             </div>
-
+            <div className="flex justify-between"><span className="main-text !text-[1.5rem]">
+                  ${item.price}
+                </span>
+<div className=" flex justify-end items-center  text-white px-1">
+                <span> {item.quantity > 0 ? "in stock" : "out of stock"} </span>
+              </div> </div>
+            
             {ordered.length > 1 && (
-              <ul className="flex justify-start">
+              <ul className="flex justify-start gap-1">
                 {ordered.map((m) => {
                   const isActive = m.id === active?.id;
                   return (
@@ -90,9 +96,9 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
                         onClick={() => setActiveId(m.id)}
                         aria-label="View media item"
                         aria-current={isActive ? "true" : undefined}
-                        className={`relative w-[5.75rem] h-[5.75rem] bg-white overflow-hidden cursor-pointer transition-opacity ${
+                        className={`relative w-[5.75rem] h-[5.75rem] bg-foreground overflow-hidden cursor-pointer transition-opacity ${
                           isActive
-                            ? "opacity-100 pixel-borders-accent"
+                            ? "opacity-100 pixel-borders-accent bg-white"
                             : "opacity-60 hover:opacity-90 pixel-borders"
                         }`}
                       >
@@ -119,13 +125,8 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
               </ul>
             )}
 
-            <div className="pixel-borders">
-              <div className="flex justify-between items-center px-2">
-                <span className="main-text !text-[1.5rem]">
-                  ${item.price}
-                </span>
-                <span> In stock: ${item.quantity}</span>
-              </div> 
+            <div className="pixel-borders p-1 justify-center flex">
+              
                <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
                   <button
@@ -135,14 +136,14 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
                     aria-label="Decrease quantity"
                     className="pixel-borders pixel-btn-border
                       disabled:opacity-50 disabled:cursor-not-allowed
-                      cursor-pointer px-2 py-1.5 text-[0.875rem] leading-none"
+                      cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
                   >
                     -
                   </button>
                   <span
                     aria-live="polite"
                     aria-label="Quantity"
-                    className="main-text text-[0.875rem] min-w-[1.5rem] text-center"
+                    className="main-text min-w-[1.5rem] text-center"
                   >
                     {clampedQty}
                   </span>
@@ -153,27 +154,36 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
                     aria-label="Increase quantity"
                     className="pixel-borders pixel-btn-border
                       disabled:opacity-50 disabled:cursor-not-allowed
-                      cursor-pointer px-2 py-1.5 text-[0.875rem] leading-none"
+                      cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
                   >
                     +
                   </button>
                 </div>
-                <button
+                
+              </div>
+              
+            </div>
+            <button
                   type="button"
                   onClick={handleAdd}
                   disabled={!inStock}
                   aria-label={`Add ${item.name} to cart`}
                   className="pixel-borders pixel-btn-border
                     disabled:opacity-50 disabled:cursor-not-allowed
-                    cursor-pointer px-3 py-1.5 text-[0.875rem]"
+                    cursor-pointer px-3 py-1.5 text-[0.875rem] w-full"
                 >
                   {inStock ? "Add to cart" : "Out of stock"}
                 </button>
-              </div>
-            </div>
+                <div className="text-border opacity-30">payments done through paypal. </div>
+                <div className="text-border opacity-30">tokens/cards are delayed due to manufacture issues. order at your own risk. money will be refunded at request after 3+ months.</div>
+                <div className="text-border opacity-30">please contact @ros.e on discord for any issues.</div>
+                <div className="text-border opacity-30">we cannot resend any items if they get lost in the mail due to low stock :(</div>
           </div>
+          
         </div>
+        
       </div>
+      
     </section>
   );
 }
