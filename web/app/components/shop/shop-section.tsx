@@ -23,7 +23,7 @@ export default function ShopSection({ items }: ShopSectionProps) {
   return (
     <section className="flex flex-col gap-[var(--spacing-xs)] flex-1 min-h-0 w-full">
       <div className="pt-1 flex-1 min-h-0 overflow-auto border-b-2">
-        <ul className="grid grid-cols-4 justify-items-center gap-2 w-full">
+        <ul className="grid lg:grid-cols-4 grid-cols-2 justify-items-center gap-2 w-full">
           {items.map((item) => {
             const featured = featuredMedia(item);
             const category = item.category;
@@ -77,7 +77,7 @@ export default function ShopSection({ items }: ShopSectionProps) {
                     e.stopPropagation();
                     add(item);
                   }}
-                  className="hidden lg:flex absolute top-1 right-1
+                  className="lg:flex absolute top-1 right-1
                     w-7 h-7 items-center justify-center rounded-full
                     bg-[color:var(--accent)] text-[color:var(--background)]
                     border-[length:var(--border-width)] border-[color:var(--border)]

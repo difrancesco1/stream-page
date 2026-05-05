@@ -60,7 +60,7 @@ export default function ShopBrowser({ items }: ShopBrowserProps) {
       setActiveTab={onChange}
       backIcon="home"
     >
-      <ShopSection items={filtered} currentTab={active.title} />
+      <ShopSection items={filtered} />
     </ShopShell>
   );
 }

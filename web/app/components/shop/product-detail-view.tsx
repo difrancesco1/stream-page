@@ -32,40 +32,37 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
   return (
     <section className="flex flex-col gap-[var(--spacing-sm)] flex-1 min-h-0 w-full">
       <div className="pixel-borders flex-1 min-h-0 overflow-auto p-[var(--spacing-sm)]">
-        <div className="sm:grid-cols-1 md:grid md:grid-cols-2 lg:grid-cols-2 lg:grid gap-2 h-full">
-          <div className="flex gap-2 w-full md:flex-row lg:flex-row sm:flex-col h-full">
-            <div
-              className="relative w-full flex-1 min-h-0 h-full
-                bg-foreground pixel-borders"
-            >
-              {active ? (
-                active.media_type === "image" ? (
-                  <Image
-                    src={active.url}
-                    alt={item.name}
-                    fill
-                    className="object-contain p-2"
-                  />
-                ) : (
-                  <video
-                    key={active.id}
-                    src={active.url}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    className="absolute inset-0 w-full h-full object-contain p-1 bg-black"
-                  />
-                )
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:h-full">
+          <div
+            className="relative w-full aspect-square max-h-[32vh] bg-foreground pixel-borders
+              md:aspect-auto md:max-h-none md:h-full"
+          >
+            {active ? (
+              active.media_type === "image" ? (
+                <Image
+                  src={active.url}
+                  alt={item.name}
+                  fill
+                  className="object-contain p-2"
+                />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[color:var(--border)] opacity-50 text-[0.75rem]">
-                  No media
-                </div>
-              )}
-            </div>
-
+                <video
+                  key={active.id}
+                  src={active.url}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="absolute inset-0 w-full h-full object-contain p-1 bg-black"
+                />
+              )
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[color:var(--border)] opacity-50 text-[0.75rem]">
+                No media
+              </div>
+            )}
           </div>
 
-          <div className="flex-1 min-w-0 flex flex-col gap-[var(--spacing-sm)] h-full">
+          <div className="min-w-0 flex flex-col gap-[var(--spacing-sm)] md:h-full">
             <div className="flex flex-col">
               <h1 className="main-text !text-[1.325rem] leading-tight">
                 {item.name}
