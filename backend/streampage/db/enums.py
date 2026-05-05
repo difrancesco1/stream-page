@@ -50,7 +50,9 @@ class ProductMediaType(PyEnum):
 
 class OrderStatus(PyEnum):
     PENDING = "pending"
-    COMPLETED = "completed"
+    PAID = "paid"
+    SHIPPED = "shipped"
+    DELIVERED = "delivered"
     FAILED = "failed"
     REFUNDED = "refunded"
 

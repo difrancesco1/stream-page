@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from streampage.db.enums import ProductCategory
+from streampage.db.enums import OrderStatus, ProductCategory
 
 
 class ProductCreate(BaseModel):
@@ -85,6 +85,59 @@ class OrderCaptureResponse(BaseModel):
     order_id: str
     status: str
     message: str
+
+
+class OrderItemResponse(BaseModel):
+    product_id: str
+    product_name: str
+    quantity: int
+    unit_price: float
+    line_total: float
+
+
+class OrderSummary(BaseModel):
+    """Compact representation of an order for list views."""
+    id: str
+    status: str
+    customer_first_name: str
+    customer_last_name: str
+    customer_email: str
+    total_amount: float
+    item_count: int
+    tracking_number: str | None
+    created_at: datetime
+
+
+class OrderDetail(BaseModel):
+    """Full order payload returned by detail endpoints."""
+    id: str
+    status: str
+    customer_first_name: str
+    customer_last_name: str
+    customer_email: str
+    customer_phone: str
+    shipping_street: str
+    shipping_city: str
+    shipping_state: str
+    shipping_zip: str
+    shipping_country: str
+    total_amount: float
+    items: list[OrderItemResponse]
+    tracking_number: str | None
+    tracking_carrier: str | None
+    tracking_url: str | None
+    shipped_at: datetime | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class OrderUpdateRequest(BaseModel):
+    status: OrderStatus | None = None
+    tracking_number: str | None = None
+    tracking_carrier: str | None = None
+    tracking_url: str | None = None
+    shipped_at: datetime | None = None
+
 
 class ResponseMessage(BaseModel):
     message: str

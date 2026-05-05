@@ -341,7 +341,7 @@ export default function CheckoutModal({
                         setError(captured.error);
                         return;
                       }
-                      if (captured.status !== "completed") {
+                      if (captured.status !== "paid") {
                         setError(
                           captured.message || "Payment was not completed",
                         );
@@ -388,7 +388,7 @@ export default function CheckoutModal({
                       setError(result.error);
                       return;
                     }
-                    if (result.status !== "completed") {
+                    if (result.status !== "paid") {
                       setError(
                         result.message || "Payment was not completed",
                       );

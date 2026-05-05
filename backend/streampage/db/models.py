@@ -565,6 +565,10 @@ class Order(Base):
     shipping_zip: Mapped[str] = mapped_column(String(20))
     shipping_country: Mapped[str] = mapped_column(String(100))
     total_amount: Mapped[float] = mapped_column(Numeric(10, 2))
+    tracking_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    tracking_carrier: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    tracking_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    shipped_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow

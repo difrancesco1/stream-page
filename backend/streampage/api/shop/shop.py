@@ -1,6 +1,7 @@
 import logging
 import re
 import uuid
+from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query
@@ -8,7 +9,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session, selectinload
 
 from streampage.api.middleware.authenticator import require_creator
-from streampage.config import SHOP_ADMIN_EMAIL
+from streampage.config import FRONTEND_URL, SHOP_ADMIN_EMAIL
 from streampage.api.shop.models import (
     ProductResponse,
     ProductMediaResponse,
@@ -17,6 +18,10 @@ from streampage.api.shop.models import (
     OrderCreateRequest,
     OrderCreateResponse,
     OrderCaptureResponse,
+    OrderDetail,
+    OrderItemResponse,
+    OrderSummary,
+    OrderUpdateRequest,
     ResponseMessage,
 )
 from streampage.db.engine import get_db_session
@@ -420,6 +425,178 @@ def reorder_product_media(
 # Orders
 # ---------------------------------------------------------------------------
 
+def _parse_order_uuid(order_id: str) -> uuid.UUID:
+    """Parse an order id from a path param. Anything malformed becomes a 404
+    so admins/customers don't accidentally probe enumeration via 422 errors."""
+    try:
+        return uuid.UUID(order_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(status_code=404, detail="Order not found")
+
+
+def _order_to_summary(order: Order, item_count: int) -> OrderSummary:
+    return OrderSummary(
+        id=str(order.id),
+        status=order.status.value,
+        customer_first_name=order.customer_first_name,
+        customer_last_name=order.customer_last_name,
+        customer_email=order.customer_email,
+        total_amount=float(order.total_amount),
+        item_count=item_count,
+        tracking_number=order.tracking_number,
+        created_at=order.created_at,
+    )
+
+
+def _order_to_detail(
+    order: Order,
+    items: list[OrderItem],
+    product_map: dict[uuid.UUID, Product],
+) -> OrderDetail:
+    return OrderDetail(
+        id=str(order.id),
+        status=order.status.value,
+        customer_first_name=order.customer_first_name,
+        customer_last_name=order.customer_last_name,
+        customer_email=order.customer_email,
+        customer_phone=order.customer_phone,
+        shipping_street=order.shipping_street,
+        shipping_city=order.shipping_city,
+        shipping_state=order.shipping_state,
+        shipping_zip=order.shipping_zip,
+        shipping_country=order.shipping_country,
+        total_amount=float(order.total_amount),
+        items=[
+            OrderItemResponse(
+                product_id=str(item.product_id),
+                product_name=(
+                    product_map[item.product_id].name
+                    if item.product_id in product_map
+                    else "Unknown product"
+                ),
+                quantity=item.quantity,
+                unit_price=float(item.unit_price),
+                line_total=float(item.unit_price) * item.quantity,
+            )
+            for item in items
+        ],
+        tracking_number=order.tracking_number,
+        tracking_carrier=order.tracking_carrier,
+        tracking_url=order.tracking_url,
+        shipped_at=order.shipped_at,
+        created_at=order.created_at,
+        updated_at=order.updated_at,
+    )
+
+
+@shop_router.get("/orders", response_model=list[OrderSummary])
+def list_orders(
+    status: OrderStatus | None = Query(None),
+    user: User = Depends(require_creator),
+):
+    """List every order for admin fulfillment. Newest first."""
+    with get_db_session() as session:
+        stmt = select(Order).order_by(Order.created_at.desc())
+        if status is not None:
+            stmt = stmt.where(Order.status == status)
+
+        orders = session.execute(stmt).scalars().all()
+        if not orders:
+            return []
+
+        order_ids = [o.id for o in orders]
+        count_rows = session.execute(
+            select(OrderItem.order_id, func.count(OrderItem.id))
+            .where(OrderItem.order_id.in_(order_ids))
+            .group_by(OrderItem.order_id)
+        ).all()
+        count_map = {row[0]: row[1] for row in count_rows}
+
+        return [_order_to_summary(o, count_map.get(o.id, 0)) for o in orders]
+
+
+@shop_router.get("/orders/{order_id}", response_model=OrderDetail)
+def get_order(order_id: str):
+    """Return a single order by its internal UUID.
+
+    Public endpoint: the UUID itself acts as an unguessable bearer token so the
+    customer can view their order from a link in the receipt email. We never
+    expose a list/search variant of this, so enumeration would require guessing
+    a v4 UUID.
+    """
+    order_uuid = _parse_order_uuid(order_id)
+    with get_db_session() as session:
+        order = session.execute(
+            select(Order).where(Order.id == order_uuid)
+        ).scalar_one_or_none()
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+
+        items = session.execute(
+            select(OrderItem).where(OrderItem.order_id == order.id)
+        ).scalars().all()
+
+        product_ids = {item.product_id for item in items}
+        product_map: dict[uuid.UUID, Product] = {}
+        if product_ids:
+            products = session.execute(
+                select(Product).where(Product.id.in_(product_ids))
+            ).scalars().all()
+            product_map = {p.id: p for p in products}
+
+        return _order_to_detail(order, items, product_map)
+
+
+@shop_router.patch("/orders/{order_id}", response_model=OrderDetail)
+def update_order(
+    order_id: str,
+    body: OrderUpdateRequest,
+    user: User = Depends(require_creator),
+):
+    """Admin update for status and shipping/tracking fields."""
+    order_uuid = _parse_order_uuid(order_id)
+    with get_db_session() as session:
+        order = session.execute(
+            select(Order).where(Order.id == order_uuid)
+        ).scalar_one_or_none()
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+
+        if body.status is not None:
+            order.status = body.status
+            # Auto-stamp shipped_at the first time the order moves to SHIPPED so
+            # admins don't have to fill it in manually. Explicit shipped_at in
+            # the same payload still wins (handled below).
+            if body.status == OrderStatus.SHIPPED and order.shipped_at is None:
+                order.shipped_at = datetime.utcnow()
+
+        if body.tracking_number is not None:
+            order.tracking_number = body.tracking_number or None
+        if body.tracking_carrier is not None:
+            order.tracking_carrier = body.tracking_carrier or None
+        if body.tracking_url is not None:
+            order.tracking_url = body.tracking_url or None
+        if body.shipped_at is not None:
+            order.shipped_at = body.shipped_at
+
+        session.commit()
+        session.refresh(order)
+
+        items = session.execute(
+            select(OrderItem).where(OrderItem.order_id == order.id)
+        ).scalars().all()
+
+        product_ids = {item.product_id for item in items}
+        product_map: dict[uuid.UUID, Product] = {}
+        if product_ids:
+            products = session.execute(
+                select(Product).where(Product.id.in_(product_ids))
+            ).scalars().all()
+            product_map = {p.id: p for p in products}
+
+        return _order_to_detail(order, items, product_map)
+
+
 @shop_router.post("/orders/create", response_model=OrderCreateResponse)
 async def create_order(request: OrderCreateRequest):
     if not request.items:
@@ -561,10 +738,15 @@ async def capture_order(paypal_order_id: str):
                 )
             product.quantity -= item.quantity
 
-        order.status = OrderStatus.COMPLETED
+        order.status = OrderStatus.PAID
         session.commit()
 
         try:
+            order_url = (
+                f"{FRONTEND_URL.rstrip('/')}/shop/orders/{order.id}"
+                if FRONTEND_URL
+                else None
+            )
             email_ctx = OrderEmailContext(
                 order_id_short=str(order.id)[:8],
                 customer_first_name=order.customer_first_name,
@@ -586,6 +768,7 @@ async def capture_order(paypal_order_id: str):
                     )
                     for item in items
                 ],
+                order_url=order_url,
             )
 
             if order.customer_email:
@@ -615,6 +798,6 @@ async def capture_order(paypal_order_id: str):
 
         return OrderCaptureResponse(
             order_id=str(order.id),
-            status="completed",
+            status="paid",
             message="Payment successful, order confirmed",
         )

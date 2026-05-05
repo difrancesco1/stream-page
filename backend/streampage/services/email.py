@@ -120,6 +120,7 @@ class OrderEmailContext:
     total_amount: float
     shipping_address_lines: list[str]
     items: list[OrderEmailLineItem] = field(default_factory=list)
+    order_url: str | None = None
 
 
 def _format_money(value: float) -> str:
@@ -174,10 +175,20 @@ def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
     full_name = f"{order.customer_first_name} {order.customer_last_name}".strip()
     total = _format_money(order.total_amount)
 
+    track_text = (
+        f"Track your order: {order.order_url}\n\n" if order.order_url else ""
+    )
+    track_html = (
+        f"<p><a href=\"{escape(order.order_url)}\">Track your order</a></p>"
+        if order.order_url
+        else ""
+    )
+
     body_text = (
         f"Hi {order.customer_first_name},\n\n"
         f"Thanks for your order! Your payment was received and your order "
         f"#{order.order_id_short} is confirmed.\n\n"
+        f"{track_text}"
         f"Items:\n{_items_text(order.items)}\n\n"
         f"Order total: {total}\n\n"
         f"Shipping to:\n{full_name}\n{_shipping_text(order.shipping_address_lines)}\n\n"
@@ -189,6 +200,7 @@ def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
         f"<h2>Order #{escape(order.order_id_short)} confirmed</h2>"
         f"<p>Hi {escape(order.customer_first_name)},</p>"
         "<p>Thanks for your order! Your payment was received and your order is confirmed.</p>"
+        f"{track_html}"
         f"{_items_html(order.items)}"
         f"<p style=\"margin-top:16px;\"><strong>Order total: {total}</strong></p>"
         "<h3 style=\"margin-bottom:4px;\">Shipping to</h3>"
@@ -210,10 +222,20 @@ def send_order_admin_notification_email(to_email: str, order: OrderEmailContext)
     subject = f"New order #{order.order_id_short} - {total}"
     full_name = f"{order.customer_first_name} {order.customer_last_name}".strip()
 
+    track_text = (
+        f"View order: {order.order_url}\n\n" if order.order_url else ""
+    )
+    track_html = (
+        f"<p><a href=\"{escape(order.order_url)}\">View order</a></p>"
+        if order.order_url
+        else ""
+    )
+
     body_text = (
         f"New order received\n\n"
         f"Order: #{order.order_id_short}\n"
         f"Total: {total}\n\n"
+        f"{track_text}"
         f"Customer:\n"
         f"  {full_name}\n"
         f"  {order.customer_email}\n"
@@ -226,6 +248,7 @@ def send_order_admin_notification_email(to_email: str, order: OrderEmailContext)
         "<html><body>"
         f"<h2>New order #{escape(order.order_id_short)}</h2>"
         f"<p><strong>Total: {total}</strong></p>"
+        f"{track_html}"
         "<h3 style=\"margin-bottom:4px;\">Customer</h3>"
         "<p style=\"margin-top:0;\">"
         f"{escape(full_name)}<br>"

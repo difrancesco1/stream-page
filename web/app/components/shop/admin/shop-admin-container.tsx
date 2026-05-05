@@ -9,6 +9,7 @@ import {
   type ProductCategory,
 } from "@/app/api/shop/actions";
 
+import AdminTabs from "./admin-tabs";
 import ProductForm from "./product-form";
 import ProductRow from "./product-row";
 
@@ -61,6 +62,8 @@ export default function ShopAdminContainer() {
           back to shop
         </Link>
       </div>
+
+      <AdminTabs active="products" />
 
       <ProductForm mode="create" onSuccess={() => fetchProducts()} />
 
