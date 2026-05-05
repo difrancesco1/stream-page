@@ -547,10 +547,18 @@ class Order(Base):
         PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     paypal_order_id: Mapped[str | None] = mapped_column(String(200), unique=True, nullable=True)
-    status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus), default=OrderStatus.PENDING)
-    customer_name: Mapped[str] = mapped_column(String(200))
+    status: Mapped[OrderStatus] = mapped_column(
+        Enum(
+            OrderStatus,
+            name="orderstatus",
+            values_callable=lambda enum_cls: [m.value for m in enum_cls],
+        ),
+        default=OrderStatus.PENDING,
+    )
+    customer_first_name: Mapped[str] = mapped_column(String(100))
+    customer_last_name: Mapped[str] = mapped_column(String(100))
     customer_email: Mapped[str] = mapped_column(String(254))
-    customer_phone: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    customer_phone: Mapped[str] = mapped_column(String(30))
     shipping_street: Mapped[str] = mapped_column(String(300))
     shipping_city: Mapped[str] = mapped_column(String(100))
     shipping_state: Mapped[str] = mapped_column(String(100))

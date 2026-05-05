@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
+
 import CardHeader from "@/app/components/shared/card-header";
 import type { TopbarBackIcon } from "@/app/components/shared/topbar";
 
 import CartSection from "./cart-section";
 import { useCart } from "./cart-context";
+import CheckoutModal from "./checkout-modal";
 import type { ShopItem } from "./types";
 
 interface ShopShellProps {
@@ -31,11 +34,9 @@ export default function ShopShell({
   children,
 }: ShopShellProps) {
   const { cart, remove } = useCart();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
-  const handlePay = () => {
-    // TODO: open customer-info modal and POST /shop/orders/create
-    console.log("pay", cart);
-  };
+  const handlePay = () => setCheckoutOpen(true);
 
   const showTabs = Boolean(tabs && activeTab && setActiveTab);
 
@@ -68,6 +69,11 @@ export default function ShopShell({
           />
         </div>
       </CardHeader>
+      <CheckoutModal
+        open={checkoutOpen}
+        onOpenChange={setCheckoutOpen}
+        items={items}
+      />
     </div>
   );
 }

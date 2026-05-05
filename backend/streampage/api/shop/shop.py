@@ -8,6 +8,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session, selectinload
 
 from streampage.api.middleware.authenticator import require_creator
+from streampage.config import SHOP_ADMIN_EMAIL
 from streampage.api.shop.models import (
     ProductResponse,
     ProductMediaResponse,
@@ -21,6 +22,12 @@ from streampage.api.shop.models import (
 from streampage.db.engine import get_db_session
 from streampage.db.enums import ProductCategory, ProductMediaType, OrderStatus
 from streampage.db.models import Product, ProductMedia, Order, OrderItem, User
+from streampage.services.email import (
+    OrderEmailContext,
+    OrderEmailLineItem,
+    send_order_admin_notification_email,
+    send_order_receipt_email,
+)
 from streampage.services.paypal import paypal_service
 from streampage.services.storage import (
     storage_service,
@@ -456,8 +463,9 @@ async def create_order(request: OrderCreateRequest):
             })
 
         cust = request.customer
+        full_name = f"{cust.first_name} {cust.last_name}".strip()
         shipping = {
-            "name": {"full_name": cust.name},
+            "name": {"full_name": full_name},
             "address": {
                 "address_line_1": cust.shipping_street,
                 "admin_area_2": cust.shipping_city,
@@ -477,7 +485,8 @@ async def create_order(request: OrderCreateRequest):
         order = Order(
             paypal_order_id=paypal_order_id,
             status=OrderStatus.PENDING,
-            customer_name=cust.name,
+            customer_first_name=cust.first_name,
+            customer_last_name=cust.last_name,
             customer_email=cust.email,
             customer_phone=cust.phone,
             shipping_street=cust.shipping_street,
@@ -554,6 +563,55 @@ async def capture_order(paypal_order_id: str):
 
         order.status = OrderStatus.COMPLETED
         session.commit()
+
+        try:
+            email_ctx = OrderEmailContext(
+                order_id_short=str(order.id)[:8],
+                customer_first_name=order.customer_first_name,
+                customer_last_name=order.customer_last_name,
+                customer_email=order.customer_email,
+                customer_phone=order.customer_phone,
+                total_amount=float(order.total_amount),
+                shipping_address_lines=[
+                    order.shipping_street,
+                    f"{order.shipping_city}, {order.shipping_state} {order.shipping_zip}",
+                    order.shipping_country,
+                ],
+                items=[
+                    OrderEmailLineItem(
+                        name=product_map[item.product_id].name,
+                        quantity=item.quantity,
+                        unit_price=float(item.unit_price),
+                        line_total=float(item.unit_price) * item.quantity,
+                    )
+                    for item in items
+                ],
+            )
+
+            if order.customer_email:
+                send_order_receipt_email(order.customer_email, email_ctx)
+
+            admin_email = SHOP_ADMIN_EMAIL
+            if not admin_email:
+                creator = session.execute(
+                    select(User).where(func.lower(User.username) == "rosie")
+                ).scalar_one_or_none()
+                if creator and creator.email:
+                    admin_email = creator.email
+            if admin_email:
+                send_order_admin_notification_email(admin_email, email_ctx)
+            else:
+                logger.warning(
+                    "No admin email configured (set SHOP_ADMIN_EMAIL); "
+                    "skipping admin notification for order %s",
+                    order.id,
+                )
+        except Exception:
+            logger.warning(
+                "Failed to dispatch order confirmation emails for order %s",
+                order.id,
+                exc_info=True,
+            )
 
         return OrderCaptureResponse(
             order_id=str(order.id),

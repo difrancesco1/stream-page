@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 from streampage.db.enums import ProductCategory
 
@@ -63,9 +63,10 @@ class CartItem(BaseModel):
     quantity: int
 
 class CustomerInfo(BaseModel):
-    name: str
+    first_name: str
+    last_name: str
     email: str
-    phone: str | None = None
+    phone: str
     shipping_street: str
     shipping_city: str
     shipping_state: str

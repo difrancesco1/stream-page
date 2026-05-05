@@ -112,12 +112,15 @@ The API will be available at: **http://localhost:8000**
 
 The backend uses these environment variables (with defaults for local development):
 
-| Variable       | Default                                                    | Description                  |
-| -------------- | ---------------------------------------------------------- | ---------------------------- |
-| `DATABASE_URL` | `postgresql://postgres:postgres@localhost:5432/streampage` | PostgreSQL connection string |
-| `FRONTEND_URL` | `http://localhost:3000`                                    | Frontend URL for CORS        |
-| `SECRET_KEY`   | (dev default)                                              | JWT signing key              |
-| `RIOT_API_KEY` | (dev default)                                              | Riot Games API key           |
+| Variable               | Default                                                    | Description                                          |
+| ---------------------- | ---------------------------------------------------------- | ---------------------------------------------------- |
+| `DATABASE_URL`         | `postgresql://postgres:postgres@localhost:5432/streampage` | PostgreSQL connection string                         |
+| `FRONTEND_URL`         | `http://localhost:3000`                                    | Frontend URL for CORS                                |
+| `SECRET_KEY`           | (dev default)                                              | JWT signing key                                      |
+| `RIOT_API_KEY`         | (dev default)                                              | Riot Games API key                                   |
+| `PAYPAL_CLIENT_ID`     | (empty)                                                    | PayPal REST app client id (sandbox or live)          |
+| `PAYPAL_CLIENT_SECRET` | (empty)                                                    | PayPal REST app secret (sandbox or live)             |
+| `PAYPAL_SANDBOX`       | `true`                                                     | Use PayPal sandbox API; set `false` for production   |
 
 ### API Health Check Endpoints
 
@@ -155,9 +158,48 @@ The frontend will be available at: **http://localhost:3000**
 
 Create a `.env.local` file in `web/` if you need to override defaults:
 
-| Variable              | Default                 | Description     |
-| --------------------- | ----------------------- | --------------- |
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Backend API URL |
+| Variable                       | Default                 | Description                                  |
+| ------------------------------ | ----------------------- | -------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`          | `http://localhost:8000` | Backend API URL                              |
+| `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | (empty)                 | PayPal client id used by the JS SDK Buttons  |
+
+---
+
+## 💳 PayPal Setup (Sandbox)
+
+Checkout uses PayPal Orders v2. To run an end-to-end sandbox test:
+
+### 1. Create a sandbox app
+
+1. Sign in at [developer.paypal.com](https://developer.paypal.com).
+2. Go to **Apps & Credentials** -> **Sandbox** tab -> **Create App**.
+3. Name it `streampage-sandbox`, then copy the **Client ID** and **Secret**.
+
+### 2. Set env vars
+
+In `backend/.env`:
+
+```
+PAYPAL_SANDBOX=true
+PAYPAL_CLIENT_ID=<sandbox client id>
+PAYPAL_CLIENT_SECRET=<sandbox secret>
+```
+
+In `web/.env.local`:
+
+```
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=<sandbox client id>
+```
+
+Restart both servers after changing env files.
+
+### 3. Test buyer accounts
+
+Sandbox -> **Accounts** in the developer dashboard auto-generates a buyer account. Use that email and password in the PayPal popup during checkout.
+
+### 4. Going to production later
+
+Same code works for live. Create a Live app under the **Live** tab (requires a verified PayPal Business account), swap the three env values, and set `PAYPAL_SANDBOX=false`. No code changes needed.
 
 ---
 

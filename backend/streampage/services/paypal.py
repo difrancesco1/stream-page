@@ -1,10 +1,16 @@
 import logging
 import time
+import uuid
 from dataclasses import dataclass
 
 import httpx
 
-from streampage.config import PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_SANDBOX
+from streampage.config import (
+    PAYPAL_CLIENT_ID,
+    PAYPAL_CLIENT_SECRET,
+    PAYPAL_SANDBOX,
+    PAYPAL_TEST_MODE,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +69,11 @@ class PayPalService:
         Returns:
             The PayPal order ID.
         """
+        if PAYPAL_TEST_MODE:
+            fake_id = f"TEST-{uuid.uuid4().hex[:16].upper()}"
+            logger.info("PayPal TEST_MODE: synthesized order %s (total=%s %s)", fake_id, total, currency)
+            return fake_id
+
         token = await self._get_access_token()
 
         item_total = sum(
@@ -110,6 +121,10 @@ class PayPalService:
         Returns:
             The full capture response dict from PayPal.
         """
+        if PAYPAL_TEST_MODE:
+            logger.info("PayPal TEST_MODE: synthesized capture for %s", paypal_order_id)
+            return {"status": "COMPLETED", "id": paypal_order_id, "test_mode": True}
+
         token = await self._get_access_token()
 
         async with httpx.AsyncClient() as client:
