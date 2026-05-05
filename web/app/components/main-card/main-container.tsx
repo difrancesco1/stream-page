@@ -2,6 +2,7 @@
 import Image from "next/image"
 import { useProfile } from "@/app/context/profile-context";
 import { getImageUrl, isBackendImage } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures" | "duoTracker" | "firstTracker";
 
@@ -41,7 +42,7 @@ function extractTwitterHandle(socialLinks: Array<{ platform: string; url: string
 
 export default function MainContainer({ onOpenCard }: MainContainerProps) {
     const { profile, isLoading } = useProfile();
-    
+    const router = useRouter();
     const biography = profile?.biography || [];
     const featuredImage = getImageUrl(profile?.featured_image) || "/wide-rose.png";
     const tokenImage = "/token.png";
@@ -85,7 +86,10 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                 duo tracker
                             </button>
                             <div className="absolute top-1 my-[2.55rem] left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem] ">
-                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden opacity-50 hover:opacity-90">
+                                <button 
+                                className="pixel-btn-w flex flex-col items-center overflow-hidden opacity-50 hover:opacity-90"
+                                onClick={() => router.push("/shop?tab=tokens")}
+                                >
                                     <Image 
                                         src={tokenImage}
                                         alt="x"
@@ -94,7 +98,10 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                         className="object-cover object-center w-25 h-9" />
                                     <p>cards</p>
                                 </button>
-                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden  opacity-50 hover:opacity-90">
+                                <button 
+                                className="pixel-btn-w flex flex-col items-center overflow-hidden  opacity-50 hover:opacity-90"
+                                onClick={() => router.push("/shop?tab=stickers")}
+                                >
                                     <Image 
                                         src={stickerImage}
                                         alt="x"
@@ -103,7 +110,9 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                         className="object-cover object-center w-25 h-9" />
                                     <p>stickers</p>
                                 </button>
-                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden  opacity-50 hover:opacity-90">
+                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden  opacity-50 hover:opacity-90"
+                                onClick={() => router.push("/shop?tab=etc")}
+                                >
                                     <Image 
                                         src={chipsImage}
                                         alt="x"
