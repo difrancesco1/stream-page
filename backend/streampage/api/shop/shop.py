@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, selectinload
 from streampage.api.middleware.authenticator import require_creator
 from streampage.config import FRONTEND_URL, SHOP_ADMIN_EMAIL
 from streampage.api.shop.models import (
+    ContactRequest,
     ProductResponse,
     ProductMediaResponse,
     ProductMediaUpdate,
@@ -30,6 +31,7 @@ from streampage.db.models import Product, ProductMedia, Order, OrderItem, User
 from streampage.services.email import (
     OrderEmailContext,
     OrderEmailLineItem,
+    send_contact_email,
     send_order_admin_notification_email,
     send_order_receipt_email,
 )
@@ -801,3 +803,31 @@ async def capture_order(paypal_order_id: str):
             status="paid",
             message="Payment successful, order confirmed",
         )
+
+
+# ---------------------------------------------------------------------------
+# Contact
+# ---------------------------------------------------------------------------
+
+@shop_router.post("/contact", response_model=ResponseMessage)
+def submit_contact(body: ContactRequest):
+    """Public endpoint: send a contact message to the shop admin."""
+    admin_email = SHOP_ADMIN_EMAIL
+    if not admin_email:
+        with get_db_session() as session:
+            creator = session.execute(
+                select(User).where(func.lower(User.username) == "rosie")
+            ).scalar_one_or_none()
+            if creator and creator.email:
+                admin_email = creator.email
+
+    if not admin_email:
+        logger.warning(
+            "No admin email configured (set SHOP_ADMIN_EMAIL); "
+            "dropping contact message from %s",
+            body.email,
+        )
+        return ResponseMessage(message="Message sent")
+
+    send_contact_email(admin_email, body.name, body.email, body.message)
+    return ResponseMessage(message="Message sent")

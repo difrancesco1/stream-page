@@ -212,6 +212,41 @@ def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
     _send_async(to_email, subject, body_text, body_html)
 
 
+def send_contact_email(
+    to_email: str,
+    sender_name: str,
+    sender_email: str,
+    message: str,
+) -> None:
+    """Forward a shop contact-form submission to the admin.
+
+    Sends on a background thread so the HTTP response is not blocked.
+    """
+    subject = f"Shop contact from {sender_name}"
+
+    body_text = (
+        f"New contact message\n\n"
+        f"From: {sender_name} ({sender_email})\n\n"
+        f"Message:\n{message}"
+    )
+
+    safe_name = escape(sender_name)
+    safe_email = escape(sender_email)
+    safe_message = escape(message).replace("\n", "<br>")
+
+    body_html = (
+        "<html><body>"
+        "<h2>New contact message</h2>"
+        f"<p><strong>From:</strong> {safe_name} "
+        f"(<a href=\"mailto:{safe_email}\">{safe_email}</a>)</p>"
+        f"<p><strong>Message:</strong></p>"
+        f"<p>{safe_message}</p>"
+        "</body></html>"
+    )
+
+    _send_async(to_email, subject, body_text, body_html)
+
+
 def send_order_admin_notification_email(to_email: str, order: OrderEmailContext) -> None:
     """Notify the creator/admin of a newly captured order.
 
