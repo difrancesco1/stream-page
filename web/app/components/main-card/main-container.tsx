@@ -74,20 +74,20 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                 unoptimized={isBackendImage(profile?.featured_image)}
                             />
                             <button
-                                className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn text-xs w-[calc(100%-0.5rem)] opacity-50 hover:opacity-90"
+                                className="absolute top-1 left-1/2 -translate-x-1/2 z-10 pixel-btn text-xs w-[calc(100%-0.5rem)] opacity-75 hover:opacity-90"
                                 onClick={() => onOpenCard?.("firstTracker")}
                             >
                                 first in stream
                             </button>
                             <button
-                                className="absolute top-1 my-6 left-1/2 -translate-x-1/2 z-10 pixel-btn text-xs w-[calc(100%-0.5rem)] opacity-50 hover:opacity-90"
+                                className="absolute top-1 my-6 left-1/2 -translate-x-1/2 z-10 pixel-btn text-xs w-[calc(100%-0.5rem)] opacity-75 hover:opacity-90"
                                 onClick={() => onOpenCard?.("duoTracker")}
                             >
                                 duo tracker
                             </button>
                             <div className="absolute top-1 my-[2.55rem] left-1/2 -translate-x-1/2 z-10 text-xs w-[calc(100%-0.3rem)] px-[0.1rem] flex items-center h-[4.5rem] ">
                                 <button 
-                                className="pixel-btn-w flex flex-col items-center overflow-hidden opacity-50 hover:opacity-90"
+                                className="pixel-btn-w flex flex-col items-center overflow-hidden opacity-75 hover:opacity-90"
                                 onClick={() => router.push("/shop?tab=tokens")}
                                 >
                                     <Image 
@@ -99,7 +99,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                     <p>cards</p>
                                 </button>
                                 <button 
-                                className="pixel-btn-w flex flex-col items-center overflow-hidden  opacity-50 hover:opacity-90"
+                                className="pixel-btn-w flex flex-col items-center overflow-hidden  opacity-75 hover:opacity-90"
                                 onClick={() => router.push("/shop?tab=stickers")}
                                 >
                                     <Image 
@@ -110,7 +110,7 @@ export default function MainContainer({ onOpenCard }: MainContainerProps) {
                                         className="object-cover object-center w-25 h-9" />
                                     <p>stickers</p>
                                 </button>
-                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden  opacity-50 hover:opacity-90"
+                                <button className="pixel-btn-w flex flex-col items-center overflow-hidden  opacity-75 hover:opacity-90"
                                 onClick={() => router.push("/shop?tab=etc")}
                                 >
                                     <Image 
