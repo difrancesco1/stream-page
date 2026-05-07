@@ -58,6 +58,7 @@ export default function ShopBrowser({ items }: ShopBrowserProps) {
       tabs={TABS}
       activeTab={active}
       setActiveTab={onChange}
+      backHref="/"
       backIcon="home"
     >
       <ShopSection items={filtered} />

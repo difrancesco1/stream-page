@@ -32,7 +32,7 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
   return (
     <section className="flex flex-col gap-[var(--spacing-sm)] flex-1 min-h-0 w-full">
       <div className="pixel-borders flex-1 min-h-0 overflow-auto p-[var(--spacing-sm)]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:h-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 h-full">
           <div
             className="relative w-full aspect-square max-h-[32vh] bg-foreground pixel-borders
               md:aspect-auto md:max-h-none md:h-full"
@@ -62,7 +62,7 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
             )}
           </div>
 
-          <div className="min-w-0 flex flex-col gap-[var(--spacing-sm)] md:h-full">
+          <div className="min-w-0 flex flex-col gap-[var(--spacing-sm)] md:h-full relative">
             <div className="flex flex-col">
               <h1 className="main-text !text-[1.325rem] leading-tight">
                 {item.name}
@@ -78,7 +78,7 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
             <div className="flex justify-between"><span className="main-text !text-[1.5rem]">
                   ${item.price}
                 </span>
-<div className=" flex justify-end items-center  text-white px-1">
+            <div className=" flex justify-end items-center  text-white px-1">
                 <span> {item.quantity > 0 ? "in stock" : "out of stock"} </span>
               </div> </div>
             
@@ -122,63 +122,68 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
               </ul>
             )}
 
-            <div className="pixel-borders p-1 justify-center flex">
-              
-               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={decrement}
-                    disabled={!inStock || clampedQty <= 1}
-                    aria-label="Decrease quantity"
-                    className="pixel-borders pixel-btn-border
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                      cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
-                  >
-                    -
-                  </button>
-                  <span
-                    aria-live="polite"
-                    aria-label="Quantity"
-                    className="main-text min-w-[1.5rem] text-center"
-                  >
-                    {clampedQty}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={increment}
-                    disabled={!inStock || clampedQty >= maxQty}
-                    aria-label="Increase quantity"
-                    className="pixel-borders pixel-btn-border
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                      cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
-                  >
-                    +
-                  </button>
-                </div>
+
                 
+                
+                
+                <div className="flex flex-col gap-2 items-center absolute bottom-0 left-0 right-0">
+                
+                <div className="flex items-center gap-2 pixel-borders p-1 justify-center flex w-full">
+                  <div className="flex items-center gap-1">
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={decrement}
+                        disabled={!inStock || clampedQty <= 1}
+                        aria-label="Decrease quantity"
+                        className="pixel-borders pixel-btn-border
+                          disabled:opacity-50 disabled:cursor-not-allowed
+                          cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
+                      >
+                        -
+                      </button>
+                      <span
+                        aria-live="polite"
+                        aria-label="Quantity"
+                        className="main-text min-w-[1.5rem] text-center"
+                      >
+                      {clampedQty}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={increment}
+                      disabled={!inStock || clampedQty >= maxQty}
+                      aria-label="Increase quantity"
+                      className="pixel-borders pixel-btn-border
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
+                    >
+                      +
+                    </button>
+                      </div>  
+                  </div>
+                </div>
               </div>
-              
-            </div>
-            <button
-                  type="button"
-                  onClick={handleAdd}
-                  disabled={!inStock}
-                  aria-label={`Add ${item.name} to cart`}
-                  className="pixel-borders pixel-btn-border
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    cursor-pointer px-3 py-1.5 text-[0.875rem] w-full"
-                >
-                  {inStock ? "Add to cart" : "Out of stock"}
+              <button
+                    type="button"
+                    onClick={handleAdd}
+                    disabled={!inStock}
+                    aria-label={`Add ${item.name} to cart`}
+                    className="pixel-borders pixel-btn-border
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      cursor-pointer px-3 py-1.5 !text-[0.875rem] w-full"
+                  >
+                    {inStock ? "Add to cart" : "Out of stock"}
                 </button>
-                <div className="text-border opacity-30">payments done through paypal. </div>
-                <div className="text-border opacity-30">tokens/cards are delayed due to manufacture issues. order at your own risk. money will be refunded at request after 3+ months.</div>
-                <div className="text-border opacity-30">please contact @ros.e on discord for any issues.</div>
-                <div className="text-border opacity-30">we cannot resend any items if they get lost in the mail due to low stock :(</div>
+                <div className="text-border opacity-30">payments done through paypal </div>
+              <div/>
           </div>
           
+          
         </div>
-        
+        </div>
+
       </div>
       
     </section>

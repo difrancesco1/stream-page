@@ -23,22 +23,21 @@ export default function ShopSection({ items }: ShopSectionProps) {
   return (
     <section className="flex flex-col gap-[var(--spacing-xs)] flex-1 min-h-0 w-full">
       <div className="pt-1 flex-1 min-h-0 overflow-auto border-b-2">
-        <ul className="grid lg:grid-cols-4 grid-cols-2 justify-items-center gap-2 w-full">
+        <ul className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 justify-items-center items-start gap-2 w-full">
           {items.map((item) => {
             const featured = featuredMedia(item);
             const category = item.category;
             return (
               <li
                 key={item.id}
-                className="relative flex flex-col w-[12rem]
-                  bg-foreground pixel-borders"
+                className="relative flex flex-col w-[90%] bg-foreground pixel-borders self-start"
               >
                 <Link
                   href={`/shop/${item.slug}`}
                   prefetch
                   aria-label={`View details for ${item.name}`}
                   className={`relative w-full cursor-pointer block ${
-                    category !== "tokens" ? "aspect-[100/91]" : "aspect-[65/91]"
+                    category !== "tokens" ? "aspect-[3/2]" : "aspect-[65/91]"
                   }`}
                 >
                   {featured?.media_type === "image" && (

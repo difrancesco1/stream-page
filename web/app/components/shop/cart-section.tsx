@@ -9,6 +9,7 @@ interface CartSectionProps {
   cart: Record<string, number>;
   onRemove?: (itemId: string) => void;
   onPay?: () => void;
+  onContact?: () => void;
 }
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
@@ -43,6 +44,7 @@ export default function CartSection({
   cart,
   onRemove,
   onPay,
+  onContact,
 }: CartSectionProps) {
   const itemMap = new Map(items.map((item) => [item.id, item]));
 
@@ -123,6 +125,19 @@ export default function CartSection({
                       />
                     )}
                   </button>
+                  <button
+                    type="button"
+                    aria-label={`Remove one ${item.name} from cart`}
+                    onClick={() => onRemove?.(item.id)}
+                    className="absolute -top-1.5 -right-1.5
+                      w-5 h-5 flex items-center justify-center rounded-full
+                      bg-[color:var(--accent)] text-[color:var(--background)]
+                      border-[length:var(--border-width)] border-[color:var(--border)]
+                      text-[0.75rem] leading-none font-bold
+                      hover:bg-[color:var(--accent-shadow)] transition-colors z-10 cursor-pointer"
+                  >
+                    −
+                  </button>
                   {qty > 1 && (
                     <span
                       className="absolute -bottom-1.5 -right-1.5
@@ -156,16 +171,26 @@ export default function CartSection({
               {priceFormatter.format(totalCost)}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => onPay?.()}
-            disabled={isEmpty}
-            className="pixel-borders pixel-btn-border
-              disabled:opacity-50 disabled:cursor-not-allowed
-              cursor-pointer px-3 py-1.5 text-[0.875rem]"
-          >
-            Pay
-          </button>
+          <div className="flex gap-[var(--spacing-xs)]">
+            <button
+              type="button"
+              onClick={() => onContact?.()}
+              className="pixel-borders pixel-btn-border
+                cursor-pointer px-3 py-1.5 text-[0.875rem]"
+            >
+              Contact
+            </button>
+            <button
+              type="button"
+              onClick={() => onPay?.()}
+              disabled={isEmpty}
+              className="pixel-borders pixel-btn-border
+                disabled:opacity-50 disabled:cursor-not-allowed
+                cursor-pointer px-3 py-1.5 text-[0.875rem]"
+            >
+              Pay
+            </button>
+          </div>
         </div>
       </div>
     </section>

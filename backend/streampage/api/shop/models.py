@@ -139,5 +139,11 @@ class OrderUpdateRequest(BaseModel):
     shipped_at: datetime | None = None
 
 
+class ContactRequest(BaseModel):
+    name: str
+    email: str
+    message: str
+
+
 class ResponseMessage(BaseModel):
     message: str
