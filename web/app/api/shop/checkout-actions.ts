@@ -19,6 +19,7 @@ export type CheckoutCustomerInfo = {
     shipping_state: string;
     shipping_zip: string;
     shipping_country: string;
+    notes?: string | null;
 };
 
 export type CreateOrderResult =

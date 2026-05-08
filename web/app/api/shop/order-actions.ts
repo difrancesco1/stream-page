@@ -48,6 +48,7 @@ export type OrderDetail = {
     tracking_number: string | null;
     tracking_carrier: string | null;
     tracking_url: string | null;
+    notes: string | null;
     shipped_at: string | null;
     created_at: string;
     updated_at: string;
@@ -58,6 +59,7 @@ export type OrderUpdatePatch = {
     tracking_number?: string | null;
     tracking_carrier?: string | null;
     tracking_url?: string | null;
+    notes?: string | null;
     shipped_at?: string | null;
 };
 

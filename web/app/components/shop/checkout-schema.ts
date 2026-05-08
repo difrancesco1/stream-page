@@ -28,6 +28,7 @@ export const checkoutSchema = z.object({
     .string()
     .trim()
     .regex(/^\d{5}(-\d{4})?$/, "Enter a valid ZIP"),
+  notes: z.string().trim().max(2000, "Notes are too long").optional(),
 });
 
 export type CheckoutFormValues = z.infer<typeof checkoutSchema>;

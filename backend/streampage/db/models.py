@@ -568,6 +568,7 @@ class Order(Base):
     tracking_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
     tracking_carrier: Mapped[str | None] = mapped_column(String(50), nullable=True)
     tracking_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     shipped_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(

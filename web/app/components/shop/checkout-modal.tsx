@@ -43,6 +43,7 @@ const defaultFormValues: CheckoutFormValues = {
   shippingCity: "",
   shippingState: "",
   shippingZip: "",
+  notes: "",
 };
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
@@ -76,6 +77,7 @@ function toCustomerPayload(values: CheckoutFormValues): CheckoutCustomerInfo {
     shipping_state: values.shippingState,
     shipping_zip: values.shippingZip,
     shipping_country: "US",
+    notes: values.notes?.trim() ? values.notes.trim() : null,
   };
 }
 
@@ -288,6 +290,21 @@ export default function CheckoutModal({
                   className={`${inputClass} opacity-70 cursor-not-allowed`}
                 />
               </div>
+            </div>
+
+            <div className="flex flex-col gap-[var(--spacing-xs)]">
+              <label className="main-text text-xs">
+                Notes <span className="opacity-50">(optional)</span>
+              </label>
+              <textarea
+                rows={3}
+                placeholder="Anything you'd like us to know?"
+                className={`${inputClass} resize-y min-h-[3.5rem]`}
+                {...register("notes")}
+              />
+              {errors.notes && (
+                <p className={fieldErrorClass}>{errors.notes.message}</p>
+              )}
             </div>
 
             <div className="flex items-center justify-between pt-[var(--spacing-sm)]">

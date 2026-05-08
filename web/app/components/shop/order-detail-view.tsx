@@ -96,6 +96,15 @@ export default function OrderDetailView({ order }: OrderDetailViewProps) {
                 </div>
             </section>
 
+            {order.notes && (
+                <section className="pixel-borders bg-foreground p-[var(--spacing-sm)] flex flex-col gap-[var(--spacing-xs)]">
+                    <div className="main-text text-[0.75rem] opacity-70">notes</div>
+                    <p className="main-text text-[0.8125rem] whitespace-pre-wrap break-words">
+                        {order.notes}
+                    </p>
+                </section>
+            )}
+
             {(order.tracking_number || order.tracking_url || shipped) && (
                 <section className="pixel-borders bg-foreground p-[var(--spacing-sm)] flex flex-col gap-[var(--spacing-xs)]">
                     <div className="main-text text-[0.75rem] opacity-70">tracking</div>

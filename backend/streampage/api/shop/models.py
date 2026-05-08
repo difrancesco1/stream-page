@@ -72,6 +72,7 @@ class CustomerInfo(BaseModel):
     shipping_state: str
     shipping_zip: str
     shipping_country: str
+    notes: str | None = None
 
 class OrderCreateRequest(BaseModel):
     items: list[CartItem]
@@ -126,6 +127,7 @@ class OrderDetail(BaseModel):
     tracking_number: str | None
     tracking_carrier: str | None
     tracking_url: str | None
+    notes: str | None
     shipped_at: datetime | None
     created_at: datetime
     updated_at: datetime
@@ -136,6 +138,7 @@ class OrderUpdateRequest(BaseModel):
     tracking_number: str | None = None
     tracking_carrier: str | None = None
     tracking_url: str | None = None
+    notes: str | None = None
     shipped_at: datetime | None = None
 
 

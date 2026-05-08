@@ -485,6 +485,7 @@ def _order_to_detail(
         tracking_number=order.tracking_number,
         tracking_carrier=order.tracking_carrier,
         tracking_url=order.tracking_url,
+        notes=order.notes,
         shipped_at=order.shipped_at,
         created_at=order.created_at,
         updated_at=order.updated_at,
@@ -578,6 +579,8 @@ def update_order(
             order.tracking_carrier = body.tracking_carrier or None
         if body.tracking_url is not None:
             order.tracking_url = body.tracking_url or None
+        if body.notes is not None:
+            order.notes = body.notes or None
         if body.shipped_at is not None:
             order.shipped_at = body.shipped_at
 
@@ -673,6 +676,7 @@ async def create_order(request: OrderCreateRequest):
             shipping_state=cust.shipping_state,
             shipping_zip=cust.shipping_zip,
             shipping_country=cust.shipping_country,
+            notes=(cust.notes or None),
             total_amount=total,
         )
         session.add(order)
@@ -862,6 +866,7 @@ def create_custom_order(
             shipping_state=cust.shipping_state,
             shipping_zip=cust.shipping_zip,
             shipping_country=cust.shipping_country,
+            notes=(cust.notes or None),
             total_amount=total,
         )
         session.add(order)

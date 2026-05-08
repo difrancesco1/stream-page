@@ -31,6 +31,7 @@ export default function OrderEditForm({ order, onUpdated }: OrderEditFormProps) 
     const [trackingNumber, setTrackingNumber] = useState(order.tracking_number ?? "");
     const [trackingCarrier, setTrackingCarrier] = useState(order.tracking_carrier ?? "");
     const [trackingUrl, setTrackingUrl] = useState(order.tracking_url ?? "");
+    const [notes, setNotes] = useState(order.notes ?? "");
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -47,6 +48,7 @@ export default function OrderEditForm({ order, onUpdated }: OrderEditFormProps) 
             tracking_number: trackingNumber.trim() || null,
             tracking_carrier: trackingCarrier.trim() || null,
             tracking_url: trackingUrl.trim() || null,
+            notes: notes.trim() || null,
         };
 
         const result = await updateOrder(token, order.id, patch);
@@ -111,6 +113,17 @@ export default function OrderEditForm({ order, onUpdated }: OrderEditFormProps) 
                     onChange={(e) => setTrackingUrl(e.target.value)}
                     placeholder="https://..."
                     className="pixel-borders bg-background main-text text-[0.8125rem] px-[var(--spacing-xs)] py-[0.25rem]"
+                />
+            </label>
+
+            <label className="flex flex-col gap-[0.25rem]">
+                <span className="main-text text-[0.75rem] opacity-70">notes</span>
+                <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Anything to remember about this order..."
+                    rows={3}
+                    className="pixel-borders bg-background main-text text-[0.8125rem] px-[var(--spacing-xs)] py-[0.25rem] resize-y min-h-[3.5rem]"
                 />
             </label>
 
