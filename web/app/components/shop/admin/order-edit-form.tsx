@@ -18,6 +18,7 @@ interface OrderEditFormProps {
 const STATUS_OPTIONS: OrderStatus[] = [
     "pending",
     "paid",
+    "in_person",
     "shipped",
     "delivered",
     "failed",
@@ -75,7 +76,7 @@ export default function OrderEditForm({ order, onUpdated }: OrderEditFormProps) 
                 >
                     {STATUS_OPTIONS.map((s) => (
                         <option key={s} value={s}>
-                            {s}
+                            {s.replace("_", " ")}
                         </option>
                     ))}
                 </select>

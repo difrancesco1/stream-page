@@ -558,7 +558,7 @@ class Order(Base):
     customer_first_name: Mapped[str] = mapped_column(String(100))
     customer_last_name: Mapped[str] = mapped_column(String(100))
     customer_email: Mapped[str] = mapped_column(String(254))
-    customer_phone: Mapped[str] = mapped_column(String(30))
+    customer_discord_handle: Mapped[str] = mapped_column(String(50))
     shipping_street: Mapped[str] = mapped_column(String(300))
     shipping_city: Mapped[str] = mapped_column(String(100))
     shipping_state: Mapped[str] = mapped_column(String(100))

@@ -41,7 +41,7 @@ export default function OrderRow({ order }: OrderRowProps) {
                     <span
                         className={`pixel-borders px-[0.325rem] main-text text-[0.625rem] ${statusBadgeClass(order.status)}`}
                     >
-                        {order.status}
+                        {order.status.replace("_", " ")}
                     </span>
                 </div>
                 <div className="main-text text-[0.75rem] opacity-80">

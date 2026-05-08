@@ -38,7 +38,7 @@ const defaultFormValues: CheckoutFormValues = {
   firstName: "",
   lastName: "",
   email: "",
-  phone: "",
+  discordHandle: "",
   shippingStreet: "",
   shippingCity: "",
   shippingState: "",
@@ -70,7 +70,7 @@ function toCustomerPayload(values: CheckoutFormValues): CheckoutCustomerInfo {
     first_name: values.firstName,
     last_name: values.lastName,
     email: values.email,
-    phone: values.phone,
+    discord_handle: values.discordHandle,
     shipping_street: values.shippingStreet,
     shipping_city: values.shippingCity,
     shipping_state: values.shippingState,
@@ -194,15 +194,15 @@ export default function CheckoutModal({
             </div>
 
             <div className="flex flex-col gap-[var(--spacing-xs)]">
-              <label className="main-text text-xs">Phone</label>
+              <label className="main-text text-xs">Discord handle</label>
               <input
-                type="tel"
-                autoComplete="tel"
+                type="text"
+                autoComplete="off"
                 className={inputClass}
-                {...register("phone")}
+                {...register("discordHandle")}
               />
-              {errors.phone && (
-                <p className={fieldErrorClass}>{errors.phone.message}</p>
+              {errors.discordHandle && (
+                <p className={fieldErrorClass}>{errors.discordHandle.message}</p>
               )}
             </div>
 

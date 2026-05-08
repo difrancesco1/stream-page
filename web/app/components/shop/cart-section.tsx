@@ -10,6 +10,8 @@ interface CartSectionProps {
   onRemove?: (itemId: string) => void;
   onPay?: () => void;
   onContact?: () => void;
+  isAdmin?: boolean;
+  onCustomOrder?: () => void;
 }
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
@@ -45,6 +47,8 @@ export default function CartSection({
   onRemove,
   onPay,
   onContact,
+  isAdmin = false,
+  onCustomOrder,
 }: CartSectionProps) {
   const itemMap = new Map(items.map((item) => [item.id, item]));
 
@@ -172,24 +176,39 @@ export default function CartSection({
             </span>
           </div>
           <div className="flex gap-[var(--spacing-xs)]">
-            <button
-              type="button"
-              onClick={() => onContact?.()}
-              className="pixel-borders pixel-btn-border
-                cursor-pointer px-3 py-1.5 text-[0.875rem]"
-            >
-              Contact
-            </button>
-            <button
-              type="button"
-              onClick={() => onPay?.()}
-              disabled={isEmpty}
-              className="pixel-borders pixel-btn-border
-                disabled:opacity-50 disabled:cursor-not-allowed
-                cursor-pointer px-3 py-1.5 text-[0.875rem]"
-            >
-              Pay
-            </button>
+            {isAdmin ? (
+              <button
+                type="button"
+                onClick={() => onCustomOrder?.()}
+                disabled={isEmpty}
+                className="pixel-borders pixel-btn-border
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  cursor-pointer px-3 py-1.5 text-[0.875rem]"
+              >
+                Custom Order
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onContact?.()}
+                  className="pixel-borders pixel-btn-border
+                    cursor-pointer px-3 py-1.5 text-[0.875rem]"
+                >
+                  Contact
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onPay?.()}
+                  disabled={isEmpty}
+                  className="pixel-borders pixel-btn-border
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    cursor-pointer px-3 py-1.5 text-[0.875rem]"
+                >
+                  Pay
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

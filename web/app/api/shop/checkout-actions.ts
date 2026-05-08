@@ -2,6 +2,8 @@
 
 import { API_URL } from "@/lib/api";
 
+import type { OrderDetail } from "./order-actions";
+
 export type CartLineItem = {
     product_id: string;
     quantity: number;
@@ -11,7 +13,7 @@ export type CheckoutCustomerInfo = {
     first_name: string;
     last_name: string;
     email: string;
-    phone: string;
+    discord_handle: string;
     shipping_street: string;
     shipping_city: string;
     shipping_state: string;
@@ -25,6 +27,10 @@ export type CreateOrderResult =
 
 export type CaptureOrderResult =
     | { success: true; order_id: string; status: string; message: string }
+    | { success: false; error: string };
+
+export type CreateCustomOrderResult =
+    | { success: true; order: OrderDetail }
     | { success: false; error: string };
 
 async function parseError(response: Response, fallback: string): Promise<string> {
@@ -58,6 +64,37 @@ export async function createCheckoutOrder(
             paypal_order_id: string;
         };
         return { success: true, order_id: data.order_id, paypal_order_id: data.paypal_order_id };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function createCustomOrder(
+    token: string,
+    items: CartLineItem[],
+    customer: CheckoutCustomerInfo,
+): Promise<CreateCustomOrderResult> {
+    try {
+        const response = await fetch(`${API_URL}/shop/orders/custom`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ items, customer }),
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            const error = await parseError(response, `Server error: ${response.status}`);
+            return { success: false, error };
+        }
+
+        const order = (await response.json()) as OrderDetail;
+        return { success: true, order };
     } catch (error) {
         return {
             success: false,

@@ -66,7 +66,7 @@ class CustomerInfo(BaseModel):
     first_name: str
     last_name: str
     email: str
-    phone: str
+    discord_handle: str
     shipping_street: str
     shipping_city: str
     shipping_state: str
@@ -115,7 +115,7 @@ class OrderDetail(BaseModel):
     customer_first_name: str
     customer_last_name: str
     customer_email: str
-    customer_phone: str
+    customer_discord_handle: str
     shipping_street: str
     shipping_city: str
     shipping_state: str

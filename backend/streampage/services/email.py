@@ -116,7 +116,7 @@ class OrderEmailContext:
     customer_first_name: str
     customer_last_name: str
     customer_email: str
-    customer_phone: str
+    customer_discord_handle: str
     total_amount: float
     shipping_address_lines: list[str]
     items: list[OrderEmailLineItem] = field(default_factory=list)
@@ -274,7 +274,7 @@ def send_order_admin_notification_email(to_email: str, order: OrderEmailContext)
         f"Customer:\n"
         f"  {full_name}\n"
         f"  {order.customer_email}\n"
-        f"  {order.customer_phone}\n\n"
+        f"  Discord: {order.customer_discord_handle}\n\n"
         f"Items:\n{_items_text(order.items)}\n\n"
         f"Ship to:\n{full_name}\n{_shipping_text(order.shipping_address_lines)}"
     )
@@ -288,7 +288,7 @@ def send_order_admin_notification_email(to_email: str, order: OrderEmailContext)
         "<p style=\"margin-top:0;\">"
         f"{escape(full_name)}<br>"
         f"{escape(order.customer_email)}<br>"
-        f"{escape(order.customer_phone)}"
+        f"Discord: {escape(order.customer_discord_handle)}"
         "</p>"
         "<h3 style=\"margin-bottom:4px;\">Items</h3>"
         f"{_items_html(order.items)}"

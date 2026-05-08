@@ -461,7 +461,7 @@ def _order_to_detail(
         customer_first_name=order.customer_first_name,
         customer_last_name=order.customer_last_name,
         customer_email=order.customer_email,
-        customer_phone=order.customer_phone,
+        customer_discord_handle=order.customer_discord_handle,
         shipping_street=order.shipping_street,
         shipping_city=order.shipping_city,
         shipping_state=order.shipping_state,
@@ -667,7 +667,7 @@ async def create_order(request: OrderCreateRequest):
             customer_first_name=cust.first_name,
             customer_last_name=cust.last_name,
             customer_email=cust.email,
-            customer_phone=cust.phone,
+            customer_discord_handle=cust.discord_handle,
             shipping_street=cust.shipping_street,
             shipping_city=cust.shipping_city,
             shipping_state=cust.shipping_state,
@@ -754,7 +754,7 @@ async def capture_order(paypal_order_id: str):
                 customer_first_name=order.customer_first_name,
                 customer_last_name=order.customer_last_name,
                 customer_email=order.customer_email,
-                customer_phone=order.customer_phone,
+                customer_discord_handle=order.customer_discord_handle,
                 total_amount=float(order.total_amount),
                 shipping_address_lines=[
                     order.shipping_street,
@@ -803,6 +803,140 @@ async def capture_order(paypal_order_id: str):
             status="paid",
             message="Payment successful, order confirmed",
         )
+
+
+@shop_router.post("/orders/custom", response_model=OrderDetail)
+def create_custom_order(
+    request: OrderCreateRequest,
+    user: User = Depends(require_creator),
+):
+    """Admin-only: record an in-person/cash order without PayPal.
+
+    Validates products and stock the same way the public checkout does, then
+    persists the order with ``status=IN_PERSON`` and decrements product stock
+    in a single transaction. The same receipt + admin notification emails as
+    the paid flow are dispatched (best-effort) so the customer still gets a
+    confirmation when they provided an email.
+    """
+    if not request.items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+
+    product_ids = [uuid.UUID(item.product_id) for item in request.items]
+    qty_map = {uuid.UUID(item.product_id): item.quantity for item in request.items}
+
+    with get_db_session() as session:
+        products = session.execute(
+            select(Product).where(Product.id.in_(product_ids)).with_for_update()
+        ).scalars().all()
+
+        if len(products) != len(product_ids):
+            raise HTTPException(status_code=400, detail="One or more products not found")
+
+        total = 0.0
+        for product in products:
+            requested_qty = qty_map[product.id]
+
+            if not product.is_active:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Product '{product.name}' is no longer available",
+                )
+            if product.quantity < requested_qty:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Not enough stock for '{product.name}' (available: {product.quantity})",
+                )
+
+            total += float(product.price) * requested_qty
+
+        cust = request.customer
+        order = Order(
+            paypal_order_id=None,
+            status=OrderStatus.IN_PERSON,
+            customer_first_name=cust.first_name,
+            customer_last_name=cust.last_name,
+            customer_email=cust.email,
+            customer_discord_handle=cust.discord_handle,
+            shipping_street=cust.shipping_street,
+            shipping_city=cust.shipping_city,
+            shipping_state=cust.shipping_state,
+            shipping_zip=cust.shipping_zip,
+            shipping_country=cust.shipping_country,
+            total_amount=total,
+        )
+        session.add(order)
+        session.flush()
+
+        product_map = {p.id: p for p in products}
+        items: list[OrderItem] = []
+        for product in products:
+            qty = qty_map[product.id]
+            item = OrderItem(
+                order_id=order.id,
+                product_id=product.id,
+                quantity=qty,
+                unit_price=float(product.price),
+            )
+            session.add(item)
+            items.append(item)
+            product.quantity -= qty
+
+        session.commit()
+        session.refresh(order)
+
+        try:
+            order_url = (
+                f"{FRONTEND_URL.rstrip('/')}/shop/orders/{order.id}"
+                if FRONTEND_URL
+                else None
+            )
+            email_ctx = OrderEmailContext(
+                order_id_short=str(order.id)[:8],
+                customer_first_name=order.customer_first_name,
+                customer_last_name=order.customer_last_name,
+                customer_email=order.customer_email,
+                customer_discord_handle=order.customer_discord_handle,
+                total_amount=float(order.total_amount),
+                shipping_address_lines=[
+                    order.shipping_street,
+                    f"{order.shipping_city}, {order.shipping_state} {order.shipping_zip}",
+                    order.shipping_country,
+                ],
+                items=[
+                    OrderEmailLineItem(
+                        name=product_map[item.product_id].name,
+                        quantity=item.quantity,
+                        unit_price=float(item.unit_price),
+                        line_total=float(item.unit_price) * item.quantity,
+                    )
+                    for item in items
+                ],
+                order_url=order_url,
+            )
+
+            if order.customer_email:
+                send_order_receipt_email(order.customer_email, email_ctx)
+
+            admin_email = SHOP_ADMIN_EMAIL
+            if not admin_email:
+                creator = session.execute(
+                    select(User).where(func.lower(User.username) == "rosie")
+                ).scalar_one_or_none()
+                if creator and creator.email:
+                    admin_email = creator.email
+            if admin_email:
+                send_order_admin_notification_email(admin_email, email_ctx)
+        except Exception:
+            logger.warning(
+                "Failed to dispatch custom-order confirmation emails for order %s",
+                order.id,
+                exc_info=True,
+            )
+
+        items_for_response = session.execute(
+            select(OrderItem).where(OrderItem.order_id == order.id)
+        ).scalars().all()
+        return _order_to_detail(order, items_for_response, product_map)
 
 
 # ---------------------------------------------------------------------------

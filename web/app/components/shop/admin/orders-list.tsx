@@ -17,6 +17,7 @@ const STATUS_FILTERS: { id: OrderStatus | "all"; label: string }[] = [
     { id: "all", label: "all" },
     { id: "pending", label: "pending" },
     { id: "paid", label: "paid" },
+    { id: "in_person", label: "in person" },
     { id: "shipped", label: "shipped" },
     { id: "delivered", label: "delivered" },
     { id: "refunded", label: "refunded" },
@@ -103,7 +104,7 @@ export default function OrdersList() {
                 ) : orders.length === 0 ? (
                     <div className="pixel-borders bg-foreground p-[var(--spacing-md)]">
                         <span className="main-text text-[0.875rem] text-[color:var(--border)] opacity-70">
-                            No orders {filter === "all" ? "yet" : `with status \"${filter}\"`}.
+                                    No orders {filter === "all" ? "yet" : `with status \"${filter.replace("_", " ")}\"`}.
                         </span>
                     </div>
                 ) : (

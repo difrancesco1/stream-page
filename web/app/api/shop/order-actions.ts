@@ -8,7 +8,8 @@ export type OrderStatus =
     | "shipped"
     | "delivered"
     | "failed"
-    | "refunded";
+    | "refunded"
+    | "in_person";
 
 export type OrderItem = {
     product_id: string;
@@ -36,7 +37,7 @@ export type OrderDetail = {
     customer_first_name: string;
     customer_last_name: string;
     customer_email: string;
-    customer_phone: string;
+    customer_discord_handle: string;
     shipping_street: string;
     shipping_city: string;
     shipping_state: string;

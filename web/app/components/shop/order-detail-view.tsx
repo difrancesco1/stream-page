@@ -42,7 +42,7 @@ export default function OrderDetailView({ order }: OrderDetailViewProps) {
                     <span
                         className={`pixel-borders px-[0.4rem] main-text text-[0.6875rem] ${statusBadgeClass(order.status)}`}
                     >
-                        {order.status}
+                        {order.status.replace("_", " ")}
                     </span>
                 </div>
                 {created && (
@@ -90,7 +90,9 @@ export default function OrderDetailView({ order }: OrderDetailViewProps) {
                 </div>
                 <div className="main-text text-[0.6875rem] opacity-70 flex flex-col gap-[0.125rem] mt-[0.25rem]">
                     {order.customer_email && <span>{order.customer_email}</span>}
-                    {order.customer_phone && <span>{order.customer_phone}</span>}
+                    {order.customer_discord_handle && (
+                        <span>discord: {order.customer_discord_handle}</span>
+                    )}
                 </div>
             </section>
 

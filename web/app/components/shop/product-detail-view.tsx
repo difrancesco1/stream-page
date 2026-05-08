@@ -31,11 +31,11 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
 
   return (
     <section className="flex flex-col gap-[var(--spacing-sm)] flex-1 min-h-0 w-full">
-      <div className="pixel-borders flex-1 min-h-0 overflow-auto p-[var(--spacing-sm)]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 h-full">
+      <div className="pixel-borders flex-1 min-h-0 overflow-hidden p-[var(--spacing-sm)]">
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-2 h-full min-h-0">
           <div
-            className="relative w-full aspect-square max-h-[32vh] bg-foreground pixel-borders
-              md:aspect-auto md:max-h-none md:h-full"
+            className="relative w-full bg-foreground pixel-borders
+              flex-1 min-h-0 md:flex-none md:h-full md:aspect-auto"
           >
             {active ? (
               active.media_type === "image" ? (
@@ -62,28 +62,28 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
             )}
           </div>
 
-          <div className="min-w-0 flex flex-col gap-[var(--spacing-sm)] md:h-full relative">
-            <div className="flex flex-col">
+          <div className="min-w-0 flex flex-col gap-[var(--spacing-sm)] md:h-full shrink-0 min-h-0">
+            <div className="flex flex-col min-h-0">
               <h1 className="main-text !text-[1.325rem] leading-tight">
                 {item.name}
               </h1>
               <p
                 className="text-[0.8125rem] text-[color:var(--border)]
-                  whitespace-pre-wrap"
+                  whitespace-pre-wrap overflow-auto min-h-0"
               >
                 {item.description?.trim() || "No description available."}
               </p>
-
             </div>
-            <div className="flex justify-between"><span className="main-text !text-[1.5rem]">
-                  ${item.price}
-                </span>
-            <div className=" flex justify-end items-center  text-white px-1">
-                <span> {item.quantity > 0 ? "in stock" : "out of stock"} </span>
-              </div> </div>
-            
+
+            <div className="flex justify-between items-center">
+              <span className="main-text !text-[1.5rem]">${item.price}</span>
+              <div className="flex justify-end items-center text-white px-1">
+                <span>{item.quantity > 0 ? "in stock" : "out of stock"}</span>
+              </div>
+            </div>
+
             {ordered.length > 1 && (
-              <ul className="flex justify-start gap-1">
+              <ul className="flex flex-wrap justify-start gap-1">
                 {ordered.map((m) => {
                   const isActive = m.id === active?.id;
                   return (
@@ -93,7 +93,7 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
                         onClick={() => setActiveId(m.id)}
                         aria-label="View media item"
                         aria-current={isActive ? "true" : undefined}
-                        className={`relative w-[5.75rem] h-[5.75rem] bg-foreground overflow-hidden cursor-pointer transition-opacity ${
+                        className={`relative w-[3.5rem] h-[3.5rem] md:w-[5.75rem] md:h-[5.75rem] bg-foreground overflow-hidden cursor-pointer transition-opacity ${
                           isActive
                             ? "opacity-100 pixel-borders-accent bg-white"
                             : "opacity-60 hover:opacity-90 pixel-borders"
@@ -122,70 +122,58 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
               </ul>
             )}
 
-
-                
-                
-                
-                <div className="flex flex-col gap-2 items-center absolute bottom-0 left-0 right-0">
-                
-                <div className="flex items-center gap-2 pixel-borders p-1 justify-center flex w-full">
-                  <div className="flex items-center gap-1">
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={decrement}
-                        disabled={!inStock || clampedQty <= 1}
-                        aria-label="Decrease quantity"
-                        className="pixel-borders pixel-btn-border
-                          disabled:opacity-50 disabled:cursor-not-allowed
-                          cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
-                      >
-                        -
-                      </button>
-                      <span
-                        aria-live="polite"
-                        aria-label="Quantity"
-                        className="main-text min-w-[1.5rem] text-center"
-                      >
-                      {clampedQty}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={increment}
-                      disabled={!inStock || clampedQty >= maxQty}
-                      aria-label="Increase quantity"
-                      className="pixel-borders pixel-btn-border
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
-                    >
-                      +
-                    </button>
-                      </div>  
-                  </div>
+            <div className="mt-auto flex flex-col gap-2 items-center w-full">
+              <div className="flex items-center gap-2 pixel-borders p-1 justify-center w-full">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={decrement}
+                    disabled={!inStock || clampedQty <= 1}
+                    aria-label="Decrease quantity"
+                    className="pixel-borders pixel-btn-border
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
+                  >
+                    -
+                  </button>
+                  <span
+                    aria-live="polite"
+                    aria-label="Quantity"
+                    className="main-text min-w-[1.5rem] text-center"
+                  >
+                    {clampedQty}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={increment}
+                    disabled={!inStock || clampedQty >= maxQty}
+                    aria-label="Increase quantity"
+                    className="pixel-borders pixel-btn-border
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
               <button
-                    type="button"
-                    onClick={handleAdd}
-                    disabled={!inStock}
-                    aria-label={`Add ${item.name} to cart`}
-                    className="pixel-borders pixel-btn-border
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                      cursor-pointer px-3 py-1.5 !text-[0.875rem] w-full"
-                  >
-                    {inStock ? "Add to cart" : "Out of stock"}
-                </button>
-                <div className="text-border opacity-30">payments done through paypal </div>
-              <div/>
+                type="button"
+                onClick={handleAdd}
+                disabled={!inStock}
+                aria-label={`Add ${item.name} to cart`}
+                className="pixel-borders pixel-btn-border
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  cursor-pointer px-3 py-1.5 !text-[0.875rem] w-full"
+              >
+                {inStock ? "Add to cart" : "Out of stock"}
+              </button>
+              <div className="text-border opacity-30 text-[0.75rem]">
+                payments done through paypal
+              </div>
+            </div>
           </div>
-          
-          
         </div>
-        </div>
-
       </div>
-      
     </section>
   );
 }

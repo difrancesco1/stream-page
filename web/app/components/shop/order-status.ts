@@ -2,6 +2,8 @@ export function statusBadgeClass(status: string): string {
     switch (status) {
         case "paid":
             return "bg-emerald-500/20 text-emerald-700";
+        case "in_person":
+            return "bg-violet-500/20 text-violet-700";
         case "shipped":
             return "bg-blue-500/20 text-blue-700";
         case "delivered":

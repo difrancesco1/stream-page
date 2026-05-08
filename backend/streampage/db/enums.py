@@ -55,4 +55,5 @@ class OrderStatus(PyEnum):
     DELIVERED = "delivered"
     FAILED = "failed"
     REFUNDED = "refunded"
+    IN_PERSON = "in_person"
 
