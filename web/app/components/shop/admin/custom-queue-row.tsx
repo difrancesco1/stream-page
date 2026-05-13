@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 import type { CustomizationQueueRow } from "@/app/api/shop/order-actions";
 
@@ -14,7 +14,6 @@ interface CustomQueueRowProps {
     imageBusy: boolean;
     onToggle: (next: boolean) => void;
     onUploadImage: (file: File) => Promise<void>;
-    onClearImage: () => Promise<void>;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -29,7 +28,6 @@ export default function CustomQueueRow({
     imageBusy,
     onToggle,
     onUploadImage,
-    onClearImage,
 }: CustomQueueRowProps) {
     const placed = dateFormatter.format(new Date(row.order_created_at));
     const handle =
@@ -39,7 +37,6 @@ export default function CustomQueueRow({
         "(no discord)";
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const [confirmingClear, setConfirmingClear] = useState(false);
 
     const handleFileChange = async (
         e: React.ChangeEvent<HTMLInputElement>,
@@ -48,11 +45,6 @@ export default function CustomQueueRow({
         e.target.value = "";
         if (!file) return;
         await onUploadImage(file);
-    };
-
-    const handleConfirmClear = async () => {
-        setConfirmingClear(false);
-        await onClearImage();
     };
 
     return (
@@ -75,13 +67,9 @@ export default function CustomQueueRow({
                 placed={placed}
                 busy={busy}
                 imageBusy={imageBusy}
-                confirmingClear={confirmingClear}
                 fileInputRef={fileInputRef}
                 onToggle={onToggle}
                 onFileChange={handleFileChange}
-                onRequestClear={() => setConfirmingClear(true)}
-                onConfirmClear={handleConfirmClear}
-                onCancelClear={() => setConfirmingClear(false)}
             />
         </div>
     );

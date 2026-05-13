@@ -13,13 +13,9 @@ interface CustomQueueRowContentProps {
     placed: string;
     busy: boolean;
     imageBusy: boolean;
-    confirmingClear: boolean;
     fileInputRef: RefObject<HTMLInputElement | null>;
     onToggle: (next: boolean) => void;
     onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void | Promise<void>;
-    onRequestClear: () => void;
-    onConfirmClear: () => void | Promise<void>;
-    onCancelClear: () => void;
 }
 
 function siblingLabel(s: CustomizationQueueRow): string {
@@ -30,14 +26,13 @@ function siblingLabel(s: CustomizationQueueRow): string {
 }
 
 function formatShippingAddress(row: CustomizationQueueRow): string {
-    const fullName = `${row.customer_first_name} ${row.customer_last_name}`.trim();
     const cityLine = [
         row.shipping_city,
         [row.shipping_state, row.shipping_zip].filter(Boolean).join(" "),
     ]
         .filter(Boolean)
         .join(", ");
-    return [fullName, row.shipping_street, cityLine, row.shipping_country]
+    return [row.shipping_street, cityLine, row.shipping_country]
         .filter((line) => line && line.trim().length > 0)
         .join("\n");
 }
@@ -109,28 +104,20 @@ export default function CustomQueueRowContent({
     placed,
     busy,
     imageBusy,
-    confirmingClear,
     fileInputRef,
     onToggle,
     onFileChange,
-    onRequestClear,
-    onConfirmClear,
-    onCancelClear,
 }: CustomQueueRowContentProps) {
     const isCustom = row.kind === "custom";
     const cardLabel = isCustom ? "card name" : "product";
     const shippingAddress = formatShippingAddress(row);
+    const customerName =
+        `${row.customer_first_name} ${row.customer_last_name}`.trim();
 
     return (
         <div className="bg-foreground p-[var(--spacing-md)] flex flex-col gap-[var(--spacing-md)]">
             <div className="flex justify-between gap-[var(--spacing-md)]">
-                <div className="flex flex-col gap-[var(--spacing-xs)] min-w-0">
-                    <Field label="discord">{handle}</Field>
-                    <div className="flex flex-wrap gap-[var(--spacing-xs)]">
-                        <CopyButton label="address" value={shippingAddress} />
-                        <CopyButton label="email" value={row.customer_email} />
-                    </div>
-                </div>
+                <Field label="discord">{handle}</Field>
                 <Field label="date">{placed}</Field>
             </div>
             <hr />
@@ -210,7 +197,8 @@ export default function CustomQueueRowContent({
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={imageBusy}
                                 className="pixel-borders pixel-btn-border px-[var(--spacing-sm)] py-[0.25rem]
-                                    main-text text-[0.6875rem] cursor-pointer
+                                    !bg-transparent !text-border main-text text-[0.6875rem] cursor-pointer
+                                    hover:bg-red-500/20 hover:text-red-700
                                     disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {imageBusy
@@ -220,47 +208,9 @@ export default function CustomQueueRowContent({
                                       : "attach image"}
                             </button>
 
-                            {row.image_url && !confirmingClear && (
-                                <button
-                                    type="button"
-                                    onClick={onRequestClear}
-                                    disabled={imageBusy}
-                                    className="pixel-borders pixel-btn-border px-[var(--spacing-sm)] py-[0.25rem]
-                                        !bg-transparent !text-border main-text text-[0.6875rem] cursor-pointer
-                                        hover:bg-red-500/20 hover:text-red-700
-                                        disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    remove
-                                </button>
-                            )}
-
-                            {row.image_url && confirmingClear && (
-                                <>
-                                    <span className="main-text text-[0.6875rem] opacity-70">
-                                        sure?
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={onConfirmClear}
-                                        disabled={imageBusy}
-                                        className="pixel-borders px-[var(--spacing-sm)] py-[0.25rem]
-                                            bg-red-500/20 text-red-700 main-text text-[0.6875rem] cursor-pointer
-                                            disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        yes
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={onCancelClear}
-                                        disabled={imageBusy}
-                                        className="pixel-borders px-[var(--spacing-sm)] py-[0.25rem]
-                                            bg-foreground main-text text-[0.6875rem] cursor-pointer
-                                            disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        cancel
-                                    </button>
-                                </>
-                            )}
+                            <CopyButton label="name" value={customerName} />
+                            <CopyButton label="address" value={shippingAddress} />
+                            <CopyButton label="email" value={row.customer_email} />
                         </>
                     )}
                 </div>
