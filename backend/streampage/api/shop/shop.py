@@ -27,6 +27,7 @@ from streampage.api.shop.models import (
     OrderSummary,
     OrderUpdateRequest,
     ResponseMessage,
+    WaitlistEntry,
 )
 from streampage.db.engine import get_db_session
 from streampage.db.enums import ProductCategory, ProductMediaType, OrderStatus
@@ -1258,6 +1259,42 @@ def list_customizations(
         # Stable sort: to-do first, then oldest order first.
         result.sort(key=lambda r: (r.is_complete, r.order_created_at))
         return result
+
+
+@shop_router.get("/waitlist", response_model=list[WaitlistEntry])
+def list_waitlist():
+    """Public, no-auth slim view of every custom-card-art request.
+
+    Returns just enough fields to power the public waitlist UI on ``/shop``
+    (image gallery + Discord-name popover) without leaking customer PII like
+    full names, emails, or shipping addresses. Sorted FIFO (oldest order
+    first); the frontend reverses for the newest-first gallery.
+    """
+    with get_db_session() as session:
+        rows = session.execute(
+            select(OrderCustomization, Order)
+            .join(Order, Order.id == OrderCustomization.order_id)
+            .join(OrderItem, OrderItem.id == OrderCustomization.order_item_id)
+            .join(Product, Product.id == OrderItem.product_id)
+            .where(Product.category == ProductCategory.CUSTOM)
+            .order_by(
+                Order.created_at.asc(),
+                OrderCustomization.created_at.asc(),
+            )
+        ).all()
+
+        return [
+            WaitlistEntry(
+                id=str(c.id),
+                card_name=c.card_name,
+                image_url=c.image_url,
+                is_complete=c.is_complete,
+                customer_discord_handle=o.customer_discord_handle,
+                order_created_at=o.created_at,
+                created_at=c.created_at,
+            )
+            for c, o in rows
+        ]
 
 
 def _parse_customization_uuid(customization_id: str) -> uuid.UUID:

@@ -9,7 +9,7 @@ interface CardHeaderProps {
   exitbtn?: boolean;
   onClose?: () => void;
   showTabs?: boolean;
-  tabs?: { title: string }[];
+  tabs?: { title: string; className?: string }[];
   activeTab?: { title: string };
   setActiveTab?: (tab: { title: string }) => void;
   variant?: "window" | "section";

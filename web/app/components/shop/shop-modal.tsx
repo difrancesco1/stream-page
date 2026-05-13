@@ -16,7 +16,7 @@ import type { ShopItem } from "./types";
 interface ShopShellProps {
   items: ShopItem[];
   title?: string;
-  tabs?: { title: string }[];
+  tabs?: { title: string; className?: string }[];
   activeTab?: { title: string };
   setActiveTab?: (tab: { title: string }) => void;
   backHref?: string;

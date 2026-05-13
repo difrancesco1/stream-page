@@ -209,5 +209,21 @@ class ContactRequest(BaseModel):
     message: str
 
 
+class WaitlistEntry(BaseModel):
+    """Public, PII-light view of a single custom-card-art row.
+
+    Powers the public waitlist UI on ``/shop``. Server returns rows in FIFO
+    order (oldest order first) so the WAITLIST popover can render directly
+    and the gallery only has to reverse for newest-first.
+    """
+    id: str
+    card_name: str
+    image_url: str | None
+    is_complete: bool
+    customer_discord_handle: str
+    order_created_at: datetime
+    created_at: datetime
+
+
 class ResponseMessage(BaseModel):
     message: str

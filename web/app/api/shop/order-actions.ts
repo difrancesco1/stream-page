@@ -55,6 +55,16 @@ export type UpdateCustomizationResult =
     | { success: true; row: CustomizationQueueRow }
     | { success: false; error: string };
 
+export type WaitlistEntry = {
+    id: string;
+    card_name: string;
+    image_url: string | null;
+    is_complete: boolean;
+    customer_discord_handle: string;
+    order_created_at: string;
+    created_at: string;
+};
+
 export type OrderItem = {
     product_id: string;
     product_name: string;
@@ -384,5 +394,19 @@ export async function deleteCustomizationImage(
             success: false,
             error: error instanceof Error ? error.message : "An unexpected error occurred",
         };
+    }
+}
+
+export async function listWaitlist(): Promise<WaitlistEntry[]> {
+    try {
+        const response = await fetch(`${API_URL}/shop/waitlist`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            cache: "no-store",
+        });
+        if (!response.ok) return [];
+        return (await response.json()) as WaitlistEntry[];
+    } catch {
+        return [];
     }
 }

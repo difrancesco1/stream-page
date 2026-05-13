@@ -5,6 +5,7 @@ import { useRef } from "react";
 interface TabProps {
     tabs: {
         title: string;
+        className?: string;
     }[];
     activeTab: {
         title: string;
@@ -29,7 +30,7 @@ export default function Tabs({ tabs, activeTab, setActiveTab }: TabProps) {
             className="flex items-center justify-start gap-[var(--spacing-xs)] h-[1.375rem] relative ml-[var(--spacing-xs)] pb-[0.0625rem] overflow-x-auto overflow-y-visible scrollbar-hide"
         >
             {tabs.map((tab, index) => (
-                <div className="relative cursor-pointer" key={`${tab.title}-${index}`} onClick={() => setActiveTab(tab)}>
+                <div className={`relative cursor-pointer${tab.className ? ` ${tab.className}` : ""}`} key={`${tab.title}-${index}`} onClick={() => setActiveTab(tab)}>
                     {activeTab.title === tab.title ? (
                         <>
                             <div className="bg-white absolute mt-[var(--spacing-xs)] w-[calc(100%-var(--spacing-sm))] left-[var(--spacing-xs)] pointer-events-none rounded-t-sm h-[var(--spacing-xs)] border-accent!"></div>
