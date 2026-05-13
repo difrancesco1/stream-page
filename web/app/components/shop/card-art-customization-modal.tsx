@@ -162,7 +162,7 @@ export function CardArtCustomizationProvider({
               <div className="flex justify-end pt-[var(--spacing-sm)]">
                 <button
                   type="submit"
-                  disabled={!item}
+                  disabled={!item || (item?.quantity ?? 0) <= 0}
                   className="pixel-borders pixel-btn-border px-[var(--spacing-md)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   add to cart

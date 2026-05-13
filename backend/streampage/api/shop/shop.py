@@ -755,6 +755,11 @@ async def create_order(request: OrderCreateRequest):
                     status_code=400,
                     detail=f"Product '{product.name}' is no longer available",
                 )
+            if product.quantity <= 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"'{product.name}' is out of stock",
+                )
             if product.quantity < requested_qty:
                 raise HTTPException(
                     status_code=400,

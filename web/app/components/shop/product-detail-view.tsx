@@ -38,7 +38,11 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
 
   return (
     <section className="flex flex-col gap-[var(--spacing-sm)] flex-1 min-h-0 w-full">
-      <div className="pixel-borders flex-1 min-h-0 overflow-hidden p-[var(--spacing-sm)]">
+      <div
+        className={`pixel-borders flex-1 min-h-0 overflow-hidden p-[var(--spacing-sm)] ${
+          inStock ? "" : "opacity-60"
+        }`}
+      >
         <div className="flex flex-col md:grid md:grid-cols-2 gap-2 h-full min-h-0">
           <div
             className="relative w-full bg-foreground pixel-borders

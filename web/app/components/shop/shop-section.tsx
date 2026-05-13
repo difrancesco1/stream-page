@@ -46,10 +46,13 @@ export default function ShopSection({ items }: ShopSectionProps) {
           {sortedItems.map((item) => {
             const featured = featuredMedia(item);
             const category = item.category;
+            const inStock = item.quantity > 0;
             return (
               <li
                 key={item.id}
-                className="relative flex flex-col w-[90%] bg-foreground pixel-borders self-start"
+                className={`relative flex flex-col w-[90%] bg-foreground pixel-borders self-start ${
+                  inStock ? "" : "opacity-60"
+                }`}
               >
                 <Link
                   href={`/shop/${item.slug}`}
@@ -87,27 +90,29 @@ export default function ShopSection({ items }: ShopSectionProps) {
                 >
                   {priceFormatter.format(item.price)}
                 </div>
-                <button
-                  type="button"
-                  aria-label={`Add ${item.name} to cart`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (item.category === "custom") {
-                      requestCustomization(item);
-                    } else {
-                      add(item);
-                    }
-                  }}
-                  className="lg:flex absolute top-1 right-1
-                    w-7 h-7 items-center justify-center rounded-full
-                    bg-[color:var(--accent)] text-[color:var(--background)]
-                    border-[length:var(--border-width)] border-[color:var(--border)]
-                    text-[1rem] leading-none font-bold
-                    hover:bg-[color:var(--accent-shadow)] transition-colors z-10 cursor-pointer "
-                >
-                  +
-                </button>
+                {inStock && (
+                  <button
+                    type="button"
+                    aria-label={`Add ${item.name} to cart`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (item.category === "custom") {
+                        requestCustomization(item);
+                      } else {
+                        add(item);
+                      }
+                    }}
+                    className="lg:flex absolute top-1 right-1
+                      w-7 h-7 items-center justify-center rounded-full
+                      bg-[color:var(--accent)] text-[color:var(--background)]
+                      border-[length:var(--border-width)] border-[color:var(--border)]
+                      text-[1rem] leading-none font-bold
+                      hover:bg-[color:var(--accent-shadow)] transition-colors z-10 cursor-pointer "
+                  >
+                    +
+                  </button>
+                )}
               </li>
             );
           })}
