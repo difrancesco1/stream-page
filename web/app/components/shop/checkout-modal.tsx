@@ -13,11 +13,12 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   captureCheckoutOrder,
   createCheckoutOrder,
+  type CartCustomizationPayload,
   type CartLineItem,
   type CheckoutCustomerInfo,
 } from "@/app/api/shop/checkout-actions";
 
-import { useCart } from "./cart-context";
+import { useCart, type CartCustomization } from "./cart-context";
 import {
   US_STATES,
   checkoutSchema,
@@ -66,6 +67,20 @@ function buildCartLineItems(
     .map(([product_id, quantity]) => ({ product_id, quantity }));
 }
 
+function buildCustomizationPayload(
+  customizations: CartCustomization[],
+  items: ShopItem[],
+): CartCustomizationPayload[] {
+  const itemMap = new Map(items.map((i) => [i.id, i]));
+  return customizations
+    .filter((c) => itemMap.has(c.productId))
+    .map((c) => ({
+      product_id: c.productId,
+      card_name: c.cardName,
+      description: c.description,
+    }));
+}
+
 function toCustomerPayload(values: CheckoutFormValues): CheckoutCustomerInfo {
   return {
     first_name: values.firstName,
@@ -86,7 +101,7 @@ export default function CheckoutModal({
   onOpenChange,
   items,
 }: CheckoutModalProps) {
-  const { cart, clear } = useCart();
+  const { cart, customizations, clear } = useCart();
 
   const [step, setStep] = useState<Step>("customer");
   const [customer, setCustomer] = useState<CheckoutCustomerInfo | null>(null);
@@ -118,6 +133,7 @@ export default function CheckoutModal({
   }, [open, reset]);
 
   const cartLineItems = buildCartLineItems(cart, items);
+  const customizationPayload = buildCustomizationPayload(customizations, items);
   const itemMap = new Map(items.map((i) => [i.id, i]));
   const cartTotal = cartLineItems.reduce((sum, line) => {
     const item = itemMap.get(line.product_id);
@@ -346,6 +362,7 @@ export default function CheckoutModal({
                       const created = await createCheckoutOrder(
                         cartLineItems,
                         customer,
+                        customizationPayload,
                       );
                       if (!created.success) {
                         setError(created.error);
@@ -391,6 +408,7 @@ export default function CheckoutModal({
                     const result = await createCheckoutOrder(
                       cartLineItems,
                       customer,
+                      customizationPayload,
                     );
                     if (!result.success) {
                       setError(result.error);

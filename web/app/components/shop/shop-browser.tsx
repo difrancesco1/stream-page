@@ -9,7 +9,7 @@ import ShopShell from "./shop-modal";
 import ShopSection from "./shop-section";
 import type { ShopItem } from "./types";
 
-type TabKey = "all" | ProductCategory;
+type TabKey = "all" | Exclude<ProductCategory, "custom">;
 
 const TABS: { title: TabKey }[] = [
   { title: "all" },
@@ -30,13 +30,15 @@ export default function ShopBrowser({ items }: ShopBrowserProps) {
     TABS.find((t) => t.title === initial) ?? TABS[0],
   );
 
-  const filtered = useMemo(
-    () =>
-      active.title === "all"
-        ? items
-        : items.filter((i) => i.category === active.title),
-    [items, active],
-  );
+  const filtered = useMemo(() => {
+    if (active.title === "all") return items;
+    if (active.title === "tokens") {
+      return items.filter(
+        (i) => i.category === "tokens" || i.category === "custom",
+      );
+    }
+    return items.filter((i) => i.category === active.title);
+  }, [items, active]);
 
   const onChange = (tab: { title: string }) => {
     const next = TABS.find((t) => t.title === tab.title) ?? TABS[0];

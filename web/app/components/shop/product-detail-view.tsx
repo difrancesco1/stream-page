@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 
+import { useCardArtCustomizationModal } from "./card-art-customization-modal";
 import { useCart } from "./cart-context";
 import { sortedMedia, type ProductMedia, type ShopItem } from "./types";
 
@@ -12,6 +13,8 @@ interface ProductDetailViewProps {
 
 export default function ProductDetailView({ item }: ProductDetailViewProps) {
   const { add } = useCart();
+  const { requestCustomization } = useCardArtCustomizationModal();
+  const isCustom = item.category === "custom";
   const inStock = item.quantity > 0;
   const ordered = useMemo(() => sortedMedia(item.media), [item.media]);
   const [activeId, setActiveId] = useState<string | null>(
@@ -26,6 +29,10 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
   const decrement = () => setQty((q) => Math.max(1, q - 1));
   const increment = () => setQty((q) => Math.min(maxQty, q + 1));
   const handleAdd = () => {
+    if (isCustom) {
+      requestCustomization(item);
+      return;
+    }
     for (let i = 0; i < clampedQty; i++) add(item);
   };
 
@@ -123,39 +130,41 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
             )}
 
             <div className="mt-auto flex flex-col gap-2 items-center w-full">
-              <div className="flex items-center gap-2 pixel-borders p-1 justify-center w-full">
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={decrement}
-                    disabled={!inStock || clampedQty <= 1}
-                    aria-label="Decrease quantity"
-                    className="pixel-borders pixel-btn-border
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                      cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
-                  >
-                    -
-                  </button>
-                  <span
-                    aria-live="polite"
-                    aria-label="Quantity"
-                    className="main-text min-w-[1.5rem] text-center"
-                  >
-                    {clampedQty}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={increment}
-                    disabled={!inStock || clampedQty >= maxQty}
-                    aria-label="Increase quantity"
-                    className="pixel-borders pixel-btn-border
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                      cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
-                  >
-                    +
-                  </button>
+              {!isCustom && (
+                <div className="flex items-center gap-2 pixel-borders p-1 justify-center w-full">
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={decrement}
+                      disabled={!inStock || clampedQty <= 1}
+                      aria-label="Decrease quantity"
+                      className="pixel-borders pixel-btn-border
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
+                    >
+                      -
+                    </button>
+                    <span
+                      aria-live="polite"
+                      aria-label="Quantity"
+                      className="main-text min-w-[1.5rem] text-center"
+                    >
+                      {clampedQty}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={increment}
+                      disabled={!inStock || clampedQty >= maxQty}
+                      aria-label="Increase quantity"
+                      className="pixel-borders pixel-btn-border
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        cursor-pointer px-2 py-1.5 !text-[1rem] leading-none"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
               <button
                 type="button"
                 onClick={handleAdd}
@@ -165,7 +174,11 @@ export default function ProductDetailView({ item }: ProductDetailViewProps) {
                   disabled:opacity-50 disabled:cursor-not-allowed
                   cursor-pointer px-3 py-1.5 !text-[0.875rem] w-full"
               >
-                {inStock ? "Add to cart" : "Out of stock"}
+                {inStock
+                  ? isCustom
+                    ? "Customize & add to cart"
+                    : "Add to cart"
+                  : "Out of stock"}
               </button>
               <div className="text-border opacity-30 text-[0.75rem]">
                 payments done through paypal

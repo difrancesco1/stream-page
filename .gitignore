@@ -15,6 +15,10 @@ build/
 # Uploads (user-generated content)
 backend/uploads/
 
+# Local DB dumps (e.g. snapshots from Railway)
+*.dump
+*.sql.gz
+
 # Node
 node_modules/
 .next/

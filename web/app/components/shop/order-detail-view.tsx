@@ -54,19 +54,38 @@ export default function OrderDetailView({ order }: OrderDetailViewProps) {
 
             <section className="pixel-borders bg-foreground p-[var(--spacing-sm)] flex flex-col gap-[var(--spacing-xs)]">
                 <div className="main-text text-[0.75rem] opacity-70">items</div>
-                <div className="flex flex-col gap-[0.25rem]">
+                <div className="flex flex-col gap-[var(--spacing-xs)]">
                     {order.items.map((item, idx) => (
                         <div
                             key={`${item.product_id}-${idx}`}
-                            className="flex items-center justify-between gap-[var(--spacing-sm)]"
+                            className="flex flex-col gap-[0.125rem]"
                         >
-                            <div className="main-text text-[0.8125rem] truncate">
-                                {item.product_name}
-                                <span className="opacity-70"> × {item.quantity}</span>
+                            <div className="flex items-center justify-between gap-[var(--spacing-sm)]">
+                                <div className="main-text text-[0.8125rem] truncate">
+                                    {item.product_name}
+                                    <span className="opacity-70"> × {item.quantity}</span>
+                                </div>
+                                <div className="main-text text-[0.75rem] opacity-80 shrink-0">
+                                    {priceFormatter.format(item.line_total)}
+                                </div>
                             </div>
-                            <div className="main-text text-[0.75rem] opacity-80 shrink-0">
-                                {priceFormatter.format(item.line_total)}
-                            </div>
+                            {item.customizations.length > 0 && (
+                                <ul className="flex flex-col gap-[0.125rem] pl-[var(--spacing-sm)]">
+                                    {item.customizations.map((c) => (
+                                        <li
+                                            key={c.id}
+                                            className="main-text text-[0.6875rem] opacity-80 break-words whitespace-pre-wrap"
+                                        >
+                                            <span className="opacity-70">card:</span>{" "}
+                                            {c.card_name}
+                                            <span className="block opacity-80">
+                                                <span className="opacity-70">draw:</span>{" "}
+                                                {c.description}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                     ))}
                 </div>

@@ -11,12 +11,57 @@ export type OrderStatus =
     | "refunded"
     | "in_person";
 
+export type OrderCustomization = {
+    id: string;
+    product_id: string;
+    card_name: string;
+    description: string;
+    is_complete: boolean;
+    image_url: string | null;
+};
+
+export type QueueRowKind = "custom" | "item";
+
+export type CustomizationQueueRow = {
+    id: string;
+    kind: QueueRowKind;
+    quantity: number;
+    order_id: string;
+    order_id_short: string;
+    order_status: OrderStatus;
+    order_created_at: string;
+    card_name: string;
+    description: string;
+    is_complete: boolean;
+    image_url: string | null;
+    customer_first_name: string;
+    customer_last_name: string;
+    customer_email: string;
+    customer_discord_handle: string;
+    shipping_street: string;
+    shipping_city: string;
+    shipping_state: string;
+    shipping_zip: string;
+    shipping_country: string;
+    product_name: string;
+    order_total_quantity: number;
+};
+
+export type ListCustomizationsResult =
+    | { success: true; rows: CustomizationQueueRow[] }
+    | { success: false; rows: []; error: string };
+
+export type UpdateCustomizationResult =
+    | { success: true; row: CustomizationQueueRow }
+    | { success: false; error: string };
+
 export type OrderItem = {
     product_id: string;
     product_name: string;
     quantity: number;
     unit_price: number;
     line_total: number;
+    customizations: OrderCustomization[];
 };
 
 export type OrderSummary = {
@@ -25,6 +70,7 @@ export type OrderSummary = {
     customer_first_name: string;
     customer_last_name: string;
     customer_email: string;
+    customer_discord_handle: string;
     total_amount: number;
     item_count: number;
     tracking_number: string | null;
@@ -170,6 +216,169 @@ export async function updateOrder(
 
         const order = (await response.json()) as OrderDetail;
         return { success: true, order };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function listCustomizations(
+    token: string,
+    opts?: { status?: OrderStatus },
+): Promise<ListCustomizationsResult> {
+    try {
+        const params = new URLSearchParams();
+        if (opts?.status) params.set("status", opts.status);
+        const qs = params.toString();
+        const url = `${API_URL}/shop/customizations${qs ? `?${qs}` : ""}`;
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            const error = await parseError(response, `Server error: ${response.status}`);
+            return { success: false, rows: [], error };
+        }
+
+        const rows = (await response.json()) as CustomizationQueueRow[];
+        return { success: true, rows };
+    } catch (error) {
+        return {
+            success: false,
+            rows: [],
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function updateCustomization(
+    token: string,
+    customizationId: string,
+    patch: { is_complete: boolean },
+): Promise<UpdateCustomizationResult> {
+    try {
+        const response = await fetch(
+            `${API_URL}/shop/customizations/${encodeURIComponent(customizationId)}`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(patch),
+            },
+        );
+
+        if (!response.ok) {
+            const error = await parseError(response, `Server error: ${response.status}`);
+            return { success: false, error };
+        }
+
+        const row = (await response.json()) as CustomizationQueueRow;
+        return { success: true, row };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function updateOrderItem(
+    token: string,
+    orderItemId: string,
+    patch: { is_complete: boolean },
+): Promise<UpdateCustomizationResult> {
+    try {
+        const response = await fetch(
+            `${API_URL}/shop/order-items/${encodeURIComponent(orderItemId)}`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(patch),
+            },
+        );
+
+        if (!response.ok) {
+            const error = await parseError(response, `Server error: ${response.status}`);
+            return { success: false, error };
+        }
+
+        const row = (await response.json()) as CustomizationQueueRow;
+        return { success: true, row };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function uploadCustomizationImage(
+    token: string,
+    customizationId: string,
+    formData: FormData,
+): Promise<UpdateCustomizationResult> {
+    try {
+        const response = await fetch(
+            `${API_URL}/shop/customizations/${encodeURIComponent(customizationId)}/image`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            },
+        );
+
+        if (!response.ok) {
+            const error = await parseError(response, `Server error: ${response.status}`);
+            return { success: false, error };
+        }
+
+        const row = (await response.json()) as CustomizationQueueRow;
+        return { success: true, row };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function deleteCustomizationImage(
+    token: string,
+    customizationId: string,
+): Promise<UpdateCustomizationResult> {
+    try {
+        const response = await fetch(
+            `${API_URL}/shop/customizations/${encodeURIComponent(customizationId)}/image`,
+            {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+
+        if (!response.ok) {
+            const error = await parseError(response, `Server error: ${response.status}`);
+            return { success: false, error };
+        }
+
+        const row = (await response.json()) as CustomizationQueueRow;
+        return { success: true, row };
     } catch (error) {
         return {
             success: false,

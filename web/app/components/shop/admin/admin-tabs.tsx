@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 
-type Tab = "products" | "orders";
+type Tab = "products" | "orders" | "custom" | "pending" | "deprecated";
 
 interface AdminTabsProps {
     active: Tab;
 }
 
 const TABS: { id: Tab; label: string; href: string }[] = [
+    { id: "custom", label: "orders", href: "/shop/admin/orders/custom" },
     { id: "products", label: "products", href: "/shop/admin" },
-    { id: "orders", label: "orders", href: "/shop/admin/orders" },
+    { id: "pending", label: "pending", href: "/shop/admin/orders/pending" },
+    { id: "orders", label: "deprecated", href: "/shop/admin/orders" },
 ];
 
 export default function AdminTabs({ active }: AdminTabsProps) {

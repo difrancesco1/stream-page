@@ -41,6 +41,7 @@ class ProductCategory(PyEnum):
     TOKENS = "tokens"
     STICKERS = "stickers"
     ETC = "etc"
+    CUSTOM = "custom"
 
 
 class ProductMediaType(PyEnum):

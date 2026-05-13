@@ -578,6 +578,9 @@ class Order(Base):
     items: Mapped[list["OrderItem"]] = relationship(
         "OrderItem", back_populates="order", cascade="all, delete-orphan"
     )
+    customizations: Mapped[list["OrderCustomization"]] = relationship(
+        "OrderCustomization", back_populates="order", cascade="all, delete-orphan"
+    )
 
 
 class OrderItem(Base):
@@ -594,6 +597,37 @@ class OrderItem(Base):
     )
     quantity: Mapped[int] = mapped_column(Integer)
     unit_price: Mapped[float] = mapped_column(Numeric(10, 2))
+    is_complete: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     order: Mapped["Order"] = relationship("Order", back_populates="items")
     product: Mapped["Product"] = relationship("Product", viewonly=True)
+    customizations: Mapped[list["OrderCustomization"]] = relationship(
+        "OrderCustomization", back_populates="order_item", cascade="all, delete-orphan"
+    )
+
+
+class OrderCustomization(Base):
+    """Per-line-item customization (e.g. card name + drawing description) for
+    custom card art products. Multiple rows per order are possible; one row per
+    individual custom card art added to the cart."""
+    __tablename__ = "order_customization"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    order_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("order.id", ondelete="CASCADE"), index=True
+    )
+    order_item_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("order_item.id", ondelete="CASCADE"), index=True
+    )
+    card_name: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text)
+    is_complete: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    order: Mapped["Order"] = relationship("Order", back_populates="customizations")
+    order_item: Mapped["OrderItem"] = relationship(
+        "OrderItem", back_populates="customizations"
+    )

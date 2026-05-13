@@ -8,12 +8,13 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 import {
   createCustomOrder,
+  type CartCustomizationPayload,
   type CartLineItem,
   type CheckoutCustomerInfo,
 } from "@/app/api/shop/checkout-actions";
 import { useAuth } from "@/app/context/auth-context";
 
-import { useCart } from "./cart-context";
+import { useCart, type CartCustomization } from "./cart-context";
 import {
   US_STATES,
   checkoutSchema,
@@ -59,6 +60,20 @@ function buildCartLineItems(
     .map(([product_id, quantity]) => ({ product_id, quantity }));
 }
 
+function buildCustomizationPayload(
+  customizations: CartCustomization[],
+  items: ShopItem[],
+): CartCustomizationPayload[] {
+  const itemMap = new Map(items.map((i) => [i.id, i]));
+  return customizations
+    .filter((c) => itemMap.has(c.productId))
+    .map((c) => ({
+      product_id: c.productId,
+      card_name: c.cardName,
+      description: c.description,
+    }));
+}
+
 function toCustomerPayload(values: CheckoutFormValues): CheckoutCustomerInfo {
   return {
     first_name: values.firstName,
@@ -79,7 +94,7 @@ export default function CustomOrderModal({
   onOpenChange,
   items,
 }: CustomOrderModalProps) {
-  const { cart, clear } = useCart();
+  const { cart, customizations, clear } = useCart();
   const { token } = useAuth();
 
   const [step, setStep] = useState<Step>("form");
@@ -112,6 +127,7 @@ export default function CustomOrderModal({
   }, [open, reset]);
 
   const cartLineItems = buildCartLineItems(cart, items);
+  const customizationPayload = buildCustomizationPayload(customizations, items);
   const itemMap = new Map(items.map((i) => [i.id, i]));
   const cartTotal = cartLineItems.reduce((sum, line) => {
     const item = itemMap.get(line.product_id);
@@ -131,7 +147,12 @@ export default function CustomOrderModal({
     setSubmitting(true);
     try {
       const customer = toCustomerPayload(values);
-      const result = await createCustomOrder(token, cartLineItems, customer);
+      const result = await createCustomOrder(
+        token,
+        cartLineItems,
+        customer,
+        customizationPayload,
+      );
       if (!result.success) {
         setError(result.error);
         return;

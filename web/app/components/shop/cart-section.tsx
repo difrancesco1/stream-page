@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 
+import type { CartCustomization } from "./cart-context";
 import { featuredMedia, type ShopItem } from "./types";
 
 interface CartSectionProps {
   items: ShopItem[];
   cart: Record<string, number>;
+  customizations: CartCustomization[];
   onRemove?: (itemId: string) => void;
+  onRemoveCustomization?: (uid: string) => void;
   onPay?: () => void;
   onContact?: () => void;
   isAdmin?: boolean;
@@ -44,7 +47,9 @@ function CartIcon() {
 export default function CartSection({
   items,
   cart,
+  customizations,
   onRemove,
+  onRemoveCustomization,
   onPay,
   onContact,
   isAdmin = false,
@@ -52,18 +57,34 @@ export default function CartSection({
 }: CartSectionProps) {
   const itemMap = new Map(items.map((item) => [item.id, item]));
 
-  const cartEntries = Object.entries(cart)
+  const standardCartEntries = Object.entries(cart)
     .map(([id, qty]) => {
       const item = itemMap.get(id);
       return item ? { item, qty } : null;
     })
-    .filter((entry): entry is { item: ShopItem; qty: number } => entry !== null);
+    .filter(
+      (entry): entry is { item: ShopItem; qty: number } =>
+        entry !== null && entry.item.category !== "custom",
+    );
 
-  const totalItems = cartEntries.reduce((sum, { qty }) => sum + qty, 0);
-  const totalCost = cartEntries.reduce(
-    (sum, { item, qty }) => sum + item.price * qty,
-    0,
-  );
+  const customizationEntries = customizations
+    .map((c) => {
+      const item = itemMap.get(c.productId);
+      return item ? { item, customization: c } : null;
+    })
+    .filter(
+      (entry): entry is { item: ShopItem; customization: CartCustomization } =>
+        entry !== null,
+    );
+
+  const totalItems =
+    standardCartEntries.reduce((sum, { qty }) => sum + qty, 0) +
+    customizationEntries.length;
+  const totalCost =
+    standardCartEntries.reduce(
+      (sum, { item, qty }) => sum + item.price * qty,
+      0,
+    ) + customizationEntries.reduce((sum, { item }) => sum + item.price, 0);
 
   const isEmpty = totalItems === 0;
 
@@ -96,64 +117,128 @@ export default function CartSection({
             </div>
           ) : (
             <ul className="flex flex-row flex-wrap gap-[var(--spacing-sm)]">
-              {cartEntries.map(({ item, qty }) => {
+              {customizationEntries.map(({ item, customization }) => {
                 const featured = featuredMedia(item);
+                const tooltip = `${item.name}: ${customization.cardName} — ${customization.description}`;
                 return (
-                <li
-                  key={item.id}
-                  className="relative flex flex-col w-[3.5rem] md:w-[4rem]
-                    bg-white pixel-borders"
-                  title={`${item.name} (${qty})`}
-                >
-                  <button
-                    type="button"
-                    aria-label={`Remove one ${item.name} from cart`}
-                    onClick={() => onRemove?.(item.id)}
-                    className="relative w-full aspect-square cursor-pointer overflow-hidden"
+                  <li
+                    key={customization.uid}
+                    className="relative flex flex-col w-[3.5rem] md:w-[4rem]
+                      bg-white pixel-borders-accent"
+                    title={tooltip}
                   >
-                    {featured?.media_type === "image" && (
-                      <Image
-                        src={featured.url}
-                        alt={item.name}
-                        fill
-                        className="object-contain p-1"
-                      />
-                    )}
-                    {featured?.media_type === "video" && (
-                      <video
-                        src={featured.url}
-                        muted
-                        playsInline
-                        preload="metadata"
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Remove one ${item.name} from cart`}
-                    onClick={() => onRemove?.(item.id)}
-                    className="absolute -top-1.5 -right-1.5
-                      w-5 h-5 flex items-center justify-center rounded-full
-                      bg-[color:var(--accent)] text-[color:var(--background)]
-                      border-[length:var(--border-width)] border-[color:var(--border)]
-                      text-[0.75rem] leading-none font-bold
-                      hover:bg-[color:var(--accent-shadow)] transition-colors z-10 cursor-pointer"
-                  >
-                    −
-                  </button>
-                  {qty > 1 && (
-                    <span
-                      className="absolute -bottom-1.5 -right-1.5
-                        min-w-5 h-5 px-1 flex items-center justify-center rounded-full
+                    <button
+                      type="button"
+                      aria-label={`Remove customization for ${item.name}`}
+                      onClick={() =>
+                        onRemoveCustomization?.(customization.uid)
+                      }
+                      className="relative w-full aspect-square cursor-pointer overflow-hidden"
+                    >
+                      {featured?.media_type === "image" && (
+                        <Image
+                          src={featured.url}
+                          alt={item.name}
+                          fill
+                          className="object-contain p-1"
+                        />
+                      )}
+                      {featured?.media_type === "video" && (
+                        <video
+                          src={featured.url}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Remove customization for ${item.name}`}
+                      onClick={() =>
+                        onRemoveCustomization?.(customization.uid)
+                      }
+                      className="absolute -top-1.5 -right-1.5
+                        w-5 h-5 flex items-center justify-center rounded-full
                         bg-[color:var(--accent)] text-[color:var(--background)]
                         border-[length:var(--border-width)] border-[color:var(--border)]
-                        text-[0.75rem] leading-none font-bold z-10"
+                        text-[0.75rem] leading-none font-bold
+                        hover:bg-[color:var(--accent-shadow)] transition-colors z-10 cursor-pointer"
                     >
-                      {qty}
+                      −
+                    </button>
+                    <span
+                      className="absolute -bottom-1.5 -left-1.5
+                        h-4 px-1 flex items-center justify-center rounded
+                        bg-[color:var(--accent)] text-[color:var(--background)]
+                        border-[length:var(--border-width)] border-[color:var(--border)]
+                        text-[0.5625rem] leading-none font-bold z-10
+                        max-w-[3.5rem] truncate"
+                    >
+                      custom
                     </span>
-                  )}
-                </li>
+                  </li>
+                );
+              })}
+              {standardCartEntries.map(({ item, qty }) => {
+                const featured = featuredMedia(item);
+                return (
+                  <li
+                    key={item.id}
+                    className="relative flex flex-col w-[3.5rem] md:w-[4rem]
+                      bg-white pixel-borders"
+                    title={`${item.name} (${qty})`}
+                  >
+                    <button
+                      type="button"
+                      aria-label={`Remove one ${item.name} from cart`}
+                      onClick={() => onRemove?.(item.id)}
+                      className="relative w-full aspect-square cursor-pointer overflow-hidden"
+                    >
+                      {featured?.media_type === "image" && (
+                        <Image
+                          src={featured.url}
+                          alt={item.name}
+                          fill
+                          className="object-contain p-1"
+                        />
+                      )}
+                      {featured?.media_type === "video" && (
+                        <video
+                          src={featured.url}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Remove one ${item.name} from cart`}
+                      onClick={() => onRemove?.(item.id)}
+                      className="absolute -top-1.5 -right-1.5
+                        w-5 h-5 flex items-center justify-center rounded-full
+                        bg-[color:var(--accent)] text-[color:var(--background)]
+                        border-[length:var(--border-width)] border-[color:var(--border)]
+                        text-[0.75rem] leading-none font-bold
+                        hover:bg-[color:var(--accent-shadow)] transition-colors z-10 cursor-pointer"
+                    >
+                      −
+                    </button>
+                    {qty > 1 && (
+                      <span
+                        className="absolute -bottom-1.5 -right-1.5
+                          min-w-5 h-5 px-1 flex items-center justify-center rounded-full
+                          bg-[color:var(--accent)] text-[color:var(--background)]
+                          border-[length:var(--border-width)] border-[color:var(--border)]
+                          text-[0.75rem] leading-none font-bold z-10"
+                      >
+                        {qty}
+                      </span>
+                    )}
+                  </li>
                 );
               })}
             </ul>

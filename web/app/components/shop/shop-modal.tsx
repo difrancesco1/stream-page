@@ -36,7 +36,7 @@ export default function ShopShell({
   backLabel,
   children,
 }: ShopShellProps) {
-  const { cart, remove } = useCart();
+  const { cart, customizations, remove, removeCustomization } = useCart();
   const { user } = useAuth();
   const isAdmin = user?.username?.toLowerCase() === "rosie";
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -73,7 +73,9 @@ export default function ShopShell({
           <CartSection
             items={items}
             cart={cart}
+            customizations={customizations}
             onRemove={remove}
+            onRemoveCustomization={removeCustomization}
             onPay={handlePay}
             onContact={handleContact}
             isAdmin={isAdmin}

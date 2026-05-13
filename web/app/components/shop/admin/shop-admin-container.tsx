@@ -13,7 +13,7 @@ import AdminTabs from "./admin-tabs";
 import ProductForm from "./product-form";
 import ProductRow from "./product-row";
 
-const CATEGORY_ORDER: ProductCategory[] = ["tokens", "stickers", "etc"];
+const CATEGORY_ORDER: ProductCategory[] = ["tokens", "custom", "stickers", "etc"];
 
 export default function ShopAdminContainer() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -41,6 +41,7 @@ export default function ShopAdminContainer() {
     tokens: [],
     stickers: [],
     etc: [],
+    custom: [],
   };
   for (const p of products) {
     if (grouped[p.category]) grouped[p.category].push(p);

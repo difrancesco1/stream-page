@@ -23,9 +23,9 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 export default function OrderRow({ order }: OrderRowProps) {
-    const customer = `${order.customer_first_name} ${order.customer_last_name}`.trim();
     const created = dateFormatter.format(new Date(order.created_at));
     const total = priceFormatter.format(order.total_amount);
+    const handle = order.customer_discord_handle || order.customer_email;
 
     return (
         <Link
@@ -36,7 +36,7 @@ export default function OrderRow({ order }: OrderRowProps) {
             <div className="flex-1 min-w-0 flex flex-col gap-[0.125rem]">
                 <div className="flex items-center gap-[var(--spacing-xs)] flex-wrap">
                     <span className="main-text text-[0.875rem] truncate">
-                        {customer || order.customer_email}
+                        {handle}
                     </span>
                     <span
                         className={`pixel-borders px-[0.325rem] main-text text-[0.625rem] ${statusBadgeClass(order.status)}`}

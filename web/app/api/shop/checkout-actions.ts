@@ -9,6 +9,12 @@ export type CartLineItem = {
     quantity: number;
 };
 
+export type CartCustomizationPayload = {
+    product_id: string;
+    card_name: string;
+    description: string;
+};
+
 export type CheckoutCustomerInfo = {
     first_name: string;
     last_name: string;
@@ -46,12 +52,13 @@ async function parseError(response: Response, fallback: string): Promise<string>
 export async function createCheckoutOrder(
     items: CartLineItem[],
     customer: CheckoutCustomerInfo,
+    customizations: CartCustomizationPayload[] = [],
 ): Promise<CreateOrderResult> {
     try {
         const response = await fetch(`${API_URL}/shop/orders/create`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ items, customer }),
+            body: JSON.stringify({ items, customer, customizations }),
             cache: "no-store",
         });
 
@@ -77,6 +84,7 @@ export async function createCustomOrder(
     token: string,
     items: CartLineItem[],
     customer: CheckoutCustomerInfo,
+    customizations: CartCustomizationPayload[] = [],
 ): Promise<CreateCustomOrderResult> {
     try {
         const response = await fetch(`${API_URL}/shop/orders/custom`, {
@@ -85,7 +93,7 @@ export async function createCustomOrder(
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ items, customer }),
+            body: JSON.stringify({ items, customer, customizations }),
             cache: "no-store",
         });
 

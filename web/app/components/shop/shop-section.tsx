@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useMemo } from "react";
 
+import { useCardArtCustomizationModal } from "./card-art-customization-modal";
 import { useCart } from "./cart-context";
 import { featuredMedia, type ShopItem } from "./types";
 
@@ -17,14 +19,31 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
+const CATEGORY_ORDER: Record<string, number> = {
+  custom: 0,
+  tokens: 1,
+};
+
+const categoryRank = (category: string) =>
+  CATEGORY_ORDER[category] ?? Number.MAX_SAFE_INTEGER;
+
 export default function ShopSection({ items }: ShopSectionProps) {
   const { add } = useCart();
+  const { requestCustomization } = useCardArtCustomizationModal();
+
+  const sortedItems = useMemo(
+    () =>
+      [...items].sort(
+        (a, b) => categoryRank(a.category) - categoryRank(b.category),
+      ),
+    [items],
+  );
 
   return (
     <section className="flex flex-col gap-[var(--spacing-xs)] flex-1 min-h-0 w-full">
       <div className="pt-1 flex-1 min-h-0 overflow-auto border-b-2">
         <ul className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 justify-items-center items-start gap-2 w-full">
-          {items.map((item) => {
+          {sortedItems.map((item) => {
             const featured = featuredMedia(item);
             const category = item.category;
             return (
@@ -37,7 +56,7 @@ export default function ShopSection({ items }: ShopSectionProps) {
                   prefetch
                   aria-label={`View details for ${item.name}`}
                   className={`relative w-full cursor-pointer block ${
-                    category !== "tokens" ? "aspect-[3/2]" : "aspect-[65/91]"
+                    category === "tokens" || category === "custom" ? "aspect-[65/91]" : "aspect-[3/2]"
                   }`}
                 >
                   {featured?.media_type === "image" && (
@@ -74,7 +93,11 @@ export default function ShopSection({ items }: ShopSectionProps) {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    add(item);
+                    if (item.category === "custom") {
+                      requestCustomization(item);
+                    } else {
+                      add(item);
+                    }
                   }}
                   className="lg:flex absolute top-1 right-1
                     w-7 h-7 items-center justify-center rounded-full

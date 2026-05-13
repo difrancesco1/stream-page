@@ -62,6 +62,15 @@ class CartItem(BaseModel):
     product_id: str
     quantity: int
 
+
+class CartCustomization(BaseModel):
+    """One custom-card-art instance from the cart. Each row in the cart
+    customization list becomes a separate ``order_customization`` DB row."""
+    product_id: str
+    card_name: str
+    description: str
+
+
 class CustomerInfo(BaseModel):
     first_name: str
     last_name: str
@@ -77,6 +86,7 @@ class CustomerInfo(BaseModel):
 class OrderCreateRequest(BaseModel):
     items: list[CartItem]
     customer: CustomerInfo
+    customizations: list[CartCustomization] = []
 
 class OrderCreateResponse(BaseModel):
     order_id: str
@@ -88,12 +98,62 @@ class OrderCaptureResponse(BaseModel):
     message: str
 
 
+class OrderCustomizationResponse(BaseModel):
+    id: str
+    product_id: str
+    card_name: str
+    description: str
+    is_complete: bool = False
+    image_url: str | None = None
+
+
+class CustomizationQueueRow(BaseModel):
+    """One row in the admin "queue" view. Each row is either:
+
+    - ``kind="custom"``: one ``order_customization`` (a single custom card art
+      to draw). ``quantity`` is always 1.
+    - ``kind="item"``: one non-custom ``order_item`` (e.g. stickers x3).
+      ``quantity`` is the line quantity. ``card_name`` is the product name and
+      ``description`` is blank.
+
+    Joined with denormalized order metadata so the queue can render without
+    an extra fetch per row.
+    """
+    id: str
+    kind: str
+    quantity: int
+    order_id: str
+    order_id_short: str
+    order_status: str
+    order_created_at: datetime
+    card_name: str
+    description: str
+    is_complete: bool
+    image_url: str | None
+    customer_first_name: str
+    customer_last_name: str
+    customer_email: str
+    customer_discord_handle: str
+    shipping_street: str
+    shipping_city: str
+    shipping_state: str
+    shipping_zip: str
+    shipping_country: str
+    product_name: str
+    order_total_quantity: int
+
+
+class CustomizationUpdateRequest(BaseModel):
+    is_complete: bool | None = None
+
+
 class OrderItemResponse(BaseModel):
     product_id: str
     product_name: str
     quantity: int
     unit_price: float
     line_total: float
+    customizations: list[OrderCustomizationResponse] = []
 
 
 class OrderSummary(BaseModel):
@@ -103,6 +163,7 @@ class OrderSummary(BaseModel):
     customer_first_name: str
     customer_last_name: str
     customer_email: str
+    customer_discord_handle: str
     total_amount: float
     item_count: int
     tracking_number: str | None
