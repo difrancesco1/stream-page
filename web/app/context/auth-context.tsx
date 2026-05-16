@@ -111,9 +111,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             const result = await refreshAccessToken(storedRefresh);
-            if (result.success && result.token && result.refreshToken) {
-                storeTokens(result.token, result.refreshToken);
-                scheduleRefresh(result.token, performRefresh);
+            if (result.success && result.accessToken && result.refreshToken) {
+                storeTokens(result.accessToken, result.refreshToken);
+                scheduleRefresh(result.accessToken, performRefresh);
                 return true;
             }
 
