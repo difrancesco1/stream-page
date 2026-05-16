@@ -6,6 +6,7 @@ import type { WaitlistEntry } from "@/app/api/shop/order-actions";
 
 import WaitlistCard from "./waitlist-card";
 import WaitlistFooter from "./waitlist-footer";
+import WaitlistImageModal from "./waitlist-image-modal";
 import WaitlistNamesModal from "./waitlist-names-modal";
 
 interface WaitlistContentProps {
@@ -14,9 +15,18 @@ interface WaitlistContentProps {
 
 export default function WaitlistContent({ entries }: WaitlistContentProps) {
   const [namesOpen, setNamesOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const gallery = useMemo(
-    () => entries.filter((e) => !!e.image_url).slice().reverse(),
+    () =>
+      entries
+        .filter((e) => !!e.image_url)
+        .slice()
+        .sort((a, b) => {
+          const ta = new Date(a.completed_at ?? a.order_created_at).getTime();
+          const tb = new Date(b.completed_at ?? b.order_created_at).getTime();
+          return tb - ta;
+        }),
     [entries],
   );
   const pending = useMemo(
@@ -32,7 +42,7 @@ export default function WaitlistContent({ entries }: WaitlistContentProps) {
             key={entry.id}
             imageUrl={entry.image_url as string}
             discordHandle={entry.customer_discord_handle}
-            orderCreatedAt={entry.order_created_at}
+            onClick={() => setPreviewUrl(entry.image_url as string)}
           />
         ))}
       </div>
@@ -41,6 +51,13 @@ export default function WaitlistContent({ entries }: WaitlistContentProps) {
         open={namesOpen}
         onOpenChange={setNamesOpen}
         entries={pending}
+      />
+      <WaitlistImageModal
+        open={!!previewUrl}
+        onOpenChange={(o) => {
+          if (!o) setPreviewUrl(null);
+        }}
+        imageUrl={previewUrl}
       />
     </div>
   );

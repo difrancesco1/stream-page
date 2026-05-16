@@ -626,6 +626,7 @@ class OrderCustomization(Base):
     is_complete: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     order: Mapped["Order"] = relationship("Order", back_populates="customizations")
     order_item: Mapped["OrderItem"] = relationship(

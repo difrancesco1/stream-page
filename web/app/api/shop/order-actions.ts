@@ -18,6 +18,7 @@ export type OrderCustomization = {
     description: string;
     is_complete: boolean;
     image_url: string | null;
+    completed_at: string | null;
 };
 
 export type QueueRowKind = "custom" | "item";
@@ -34,6 +35,7 @@ export type CustomizationQueueRow = {
     description: string;
     is_complete: boolean;
     image_url: string | null;
+    completed_at: string | null;
     customer_first_name: string;
     customer_last_name: string;
     customer_email: string;
@@ -63,6 +65,7 @@ export type WaitlistEntry = {
     customer_discord_handle: string;
     order_created_at: string;
     created_at: string;
+    completed_at: string | null;
 };
 
 export type OrderItem = {

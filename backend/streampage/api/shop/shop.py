@@ -501,6 +501,7 @@ def _order_to_detail(
                         description=c.description,
                         is_complete=c.is_complete,
                         image_url=c.image_url,
+                        completed_at=c.completed_at,
                     )
                     for c in custom_map.get(item.id, [])
                 ],
@@ -1127,6 +1128,7 @@ def _customization_to_queue_row(
         description=customization.description,
         is_complete=customization.is_complete,
         image_url=customization.image_url,
+        completed_at=customization.completed_at,
         customer_first_name=order.customer_first_name,
         customer_last_name=order.customer_last_name,
         customer_email=order.customer_email,
@@ -1292,6 +1294,7 @@ def list_waitlist():
                 customer_discord_handle=o.customer_discord_handle,
                 order_created_at=o.created_at,
                 created_at=c.created_at,
+                completed_at=c.completed_at,
             )
             for c, o in rows
         ]
@@ -1346,7 +1349,7 @@ def _load_order_item_with_order(
 def update_customization(
     customization_id: str,
     body: CustomizationUpdateRequest,
-    user: User = Depends(require_creator),
+    _: User = Depends(require_creator),
 ):
     """Toggle the ``is_complete`` flag on a single card art request."""
     cust_uuid = _parse_customization_uuid(customization_id)
@@ -1357,6 +1360,10 @@ def update_customization(
         )
 
         if body.is_complete is not None:
+            if body.is_complete and not customization.is_complete:
+                customization.completed_at = datetime.utcnow()
+            elif not body.is_complete:
+                customization.completed_at = None
             customization.is_complete = body.is_complete
 
         session.commit()

@@ -105,6 +105,7 @@ class OrderCustomizationResponse(BaseModel):
     description: str
     is_complete: bool = False
     image_url: str | None = None
+    completed_at: datetime | None = None
 
 
 class CustomizationQueueRow(BaseModel):
@@ -130,6 +131,7 @@ class CustomizationQueueRow(BaseModel):
     description: str
     is_complete: bool
     image_url: str | None
+    completed_at: datetime | None = None
     customer_first_name: str
     customer_last_name: str
     customer_email: str
@@ -223,6 +225,7 @@ class WaitlistEntry(BaseModel):
     customer_discord_handle: str
     order_created_at: datetime
     created_at: datetime
+    completed_at: datetime | None = None
 
 
 class ResponseMessage(BaseModel):
