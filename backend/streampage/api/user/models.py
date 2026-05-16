@@ -12,17 +12,11 @@ class UserResponse(BaseModel):
     profile_picture: str | None
 
 
-class RegisterRequest(BaseModel):
+class AuthenticateRequest(BaseModel):
     username: str
     password: str
 
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-
-class LoginResponse(BaseModel):
+class TokenPairResponse(BaseModel):
     access_token: str
     refresh_token: str
 
@@ -31,9 +25,6 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
-class RefreshResponse(BaseModel):
-    access_token: str
-    refresh_token: str
 
 class UpdateProfileRequest(BaseModel):
     display_name: str | None = None

@@ -17,11 +17,9 @@ from streampage.api.middleware.authenticator import (
 )
 from streampage.api.user.auth import hash_password, verify_password
 from streampage.api.user.models import (
-    LoginRequest,
-    LoginResponse,
+    AuthenticateRequest,
+    TokenPairResponse,
     RefreshRequest,
-    RefreshResponse,
-    RegisterRequest,
     UserResponse,
     UpdateProfileRequest,
     UpdateSocialLinksRequest,
@@ -39,7 +37,7 @@ users_router = APIRouter()
 
 
 @users_router.post("/register")
-def register(request: RegisterRequest) -> LoginResponse:
+def register(request: AuthenticateRequest) -> TokenPairResponse:
     with get_db_session() as session:
         existing_user = session.query(User).filter(User.username == request.username).first()
         if existing_user:
@@ -60,14 +58,14 @@ def register(request: RegisterRequest) -> LoginResponse:
         access_token, _ = create_access_token(user_login)
         refresh_token, _ = create_refresh_token(user_login)
 
-        return LoginResponse(
+        return TokenPairResponse(
             access_token=access_token,
             refresh_token=refresh_token,
         )
 
 
 @users_router.post("/login")
-def login(request: LoginRequest) -> LoginResponse:
+def login(request: AuthenticateRequest) -> TokenPairResponse:
     with get_db_session() as session:
         user_login = (
             session.query(UserLogin)
@@ -92,11 +90,11 @@ def login(request: LoginRequest) -> LoginResponse:
         access_token, _ = create_access_token(user_login)
         refresh_token, _ = create_refresh_token(user_login)
 
-        return LoginResponse(access_token=access_token, refresh_token=refresh_token)
+        return TokenPairResponse(access_token=access_token, refresh_token=refresh_token)
 
 
 @users_router.post("/refresh")
-def refresh(request: RefreshRequest) -> RefreshResponse:
+def refresh(request: RefreshRequest) -> TokenPairResponse:
     """Exchange a valid refresh token for a new access + refresh token pair."""
     username = validate_refresh_token(request.refresh_token)
 
@@ -115,7 +113,7 @@ def refresh(request: RefreshRequest) -> RefreshResponse:
         access_token, _ = create_access_token(user_login)
         new_refresh_token, _ = create_refresh_token(user_login)
 
-        return RefreshResponse(access_token=access_token, refresh_token=new_refresh_token)
+        return TokenPairResponse(access_token=access_token, refresh_token=new_refresh_token)
 
 
 @users_router.get("/user")
