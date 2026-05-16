@@ -30,7 +30,7 @@ from streampage.api.shop.models import (
     WaitlistEntry,
 )
 from streampage.db.engine import get_db_session
-from streampage.db.enums import ProductCategory, ProductMediaType, OrderStatus
+from streampage.db.enums import ProductCategory, ProductMediaType, OrderStatus, ShippingMethod
 from streampage.db.models import (
     Product,
     ProductMedia,
@@ -57,6 +57,53 @@ from streampage.services.storage import (
 logger = logging.getLogger(__name__)
 
 shop_router = APIRouter()
+
+
+TRACKING_COST = 6.0
+NO_TRACKING_COST = 1.0
+CUSTOM_PICKUP_DISCOUNT_PER_UNIT = 10.0
+PICKUP_ALLOWED_STATES = {"WA"}
+
+
+_SHIPPING_METHOD_LABELS = {
+    ShippingMethod.TRACKING: "Tracking",
+    ShippingMethod.NO_TRACKING: "No tracking",
+    ShippingMethod.PICKUP: "Pickup",
+}
+
+
+def _shipping_method_label(method: ShippingMethod | None) -> str | None:
+    return _SHIPPING_METHOD_LABELS.get(method) if method else None
+
+
+def _compute_shipping_and_discount(
+    method: ShippingMethod,
+    shipping_state: str,
+    products: list[Product],
+    qty_map: dict[uuid.UUID, int],
+) -> tuple[float, float]:
+    """Return ``(shipping_cost, discount_amount)`` for the given checkout.
+
+    Raises ``HTTPException(400)`` if the combination is invalid (currently:
+    PICKUP requires ``shipping_state`` in :data:`PICKUP_ALLOWED_STATES`).
+    """
+    if method == ShippingMethod.TRACKING:
+        return TRACKING_COST, 0.0
+    if method == ShippingMethod.NO_TRACKING:
+        return NO_TRACKING_COST, 0.0
+    if method == ShippingMethod.PICKUP:
+        if shipping_state not in PICKUP_ALLOWED_STATES:
+            raise HTTPException(
+                status_code=400,
+                detail="Pickup is only available for Washington (WA) addresses",
+            )
+        custom_units = sum(
+            qty_map.get(p.id, 0)
+            for p in products
+            if p.category == ProductCategory.CUSTOM
+        )
+        return 0.0, CUSTOM_PICKUP_DISCOUNT_PER_UNIT * custom_units
+    raise HTTPException(status_code=400, detail="Invalid shipping method")
 
 
 def _slugify(text: str) -> str:
@@ -481,6 +528,9 @@ def _order_to_detail(
         shipping_state=order.shipping_state,
         shipping_zip=order.shipping_zip,
         shipping_country=order.shipping_country,
+        shipping_method=order.shipping_method.value if order.shipping_method else None,
+        shipping_cost=float(order.shipping_cost or 0),
+        discount_amount=float(order.discount_amount or 0),
         total_amount=float(order.total_amount),
         items=[
             OrderItemResponse(
@@ -735,6 +785,10 @@ async def create_order(request: OrderCreateRequest):
     if not request.items:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
+    cust = request.customer
+    if cust.shipping_method is None:
+        raise HTTPException(status_code=400, detail="Shipping method is required")
+
     product_ids = [uuid.UUID(item.product_id) for item in request.items]
     qty_map = {uuid.UUID(item.product_id): item.quantity for item in request.items}
 
@@ -746,8 +800,7 @@ async def create_order(request: OrderCreateRequest):
         if len(products) != len(product_ids):
             raise HTTPException(status_code=400, detail="One or more products not found")
 
-        paypal_items: list[dict] = []
-        total = 0.0
+        item_subtotal = 0.0
 
         for product in products:
             requested_qty = qty_map[product.id]
@@ -768,16 +821,16 @@ async def create_order(request: OrderCreateRequest):
                     detail=f"Not enough stock for '{product.name}' (available: {product.quantity})",
                 )
 
-            line_total = float(product.price) * requested_qty
-            total += line_total
+            item_subtotal += float(product.price) * requested_qty
 
-            paypal_items.append({
-                "name": product.name,
-                "unit_amount": {"currency_code": "USD", "value": f"{float(product.price):.2f}"},
-                "quantity": str(requested_qty),
-            })
+        shipping_cost, discount_amount = _compute_shipping_and_discount(
+            cust.shipping_method,
+            cust.shipping_state,
+            list(products),
+            qty_map,
+        )
+        total = max(0.0, item_subtotal + shipping_cost - discount_amount)
 
-        cust = request.customer
         full_name = f"{cust.first_name} {cust.last_name}".strip()
         shipping = {
             "name": {"full_name": full_name},
@@ -793,7 +846,6 @@ async def create_order(request: OrderCreateRequest):
         paypal_order_id = await paypal_service.create_order(
             total=f"{total:.2f}",
             currency="USD",
-            items=paypal_items,
             shipping=shipping,
         )
 
@@ -809,6 +861,9 @@ async def create_order(request: OrderCreateRequest):
             shipping_state=cust.shipping_state,
             shipping_zip=cust.shipping_zip,
             shipping_country=cust.shipping_country,
+            shipping_method=cust.shipping_method,
+            shipping_cost=shipping_cost,
+            discount_amount=discount_amount,
             notes=(cust.notes or None),
             total_amount=total,
         )
@@ -899,6 +954,11 @@ async def capture_order(paypal_order_id: str):
                 if FRONTEND_URL
                 else None
             )
+            shipping_cost = float(order.shipping_cost or 0)
+            discount_amount = float(order.discount_amount or 0)
+            item_subtotal = sum(
+                float(item.unit_price) * item.quantity for item in items
+            )
             email_ctx = OrderEmailContext(
                 order_id_short=str(order.id)[:8],
                 customer_first_name=order.customer_first_name,
@@ -921,6 +981,10 @@ async def capture_order(paypal_order_id: str):
                     for item in items
                 ],
                 order_url=order_url,
+                shipping_method_label=_shipping_method_label(order.shipping_method),
+                item_subtotal=item_subtotal,
+                shipping_cost=shipping_cost,
+                discount_amount=discount_amount,
             )
 
             if order.customer_email:

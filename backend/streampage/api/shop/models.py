@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from streampage.db.enums import OrderStatus, ProductCategory
+from streampage.db.enums import OrderStatus, ProductCategory, ShippingMethod
 
 
 class ProductCreate(BaseModel):
@@ -81,6 +81,7 @@ class CustomerInfo(BaseModel):
     shipping_state: str
     shipping_zip: str
     shipping_country: str
+    shipping_method: ShippingMethod | None = None
     notes: str | None = None
 
 class OrderCreateRequest(BaseModel):
@@ -185,6 +186,9 @@ class OrderDetail(BaseModel):
     shipping_state: str
     shipping_zip: str
     shipping_country: str
+    shipping_method: str | None
+    shipping_cost: float
+    discount_amount: float
     total_amount: float
     items: list[OrderItemResponse]
     tracking_number: str | None

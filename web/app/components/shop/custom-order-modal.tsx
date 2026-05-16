@@ -17,8 +17,8 @@ import { useAuth } from "@/app/context/auth-context";
 import { useCart, type CartCustomization } from "./cart-context";
 import {
   US_STATES,
-  checkoutSchema,
-  type CheckoutFormValues,
+  customOrderSchema,
+  type CustomOrderFormValues,
 } from "./checkout-schema";
 import type { ShopItem } from "./types";
 import CardHeader from "../shared/card-header";
@@ -31,7 +31,7 @@ interface CustomOrderModalProps {
 
 type Step = "form" | "success";
 
-const defaultFormValues: CheckoutFormValues = {
+const defaultFormValues: CustomOrderFormValues = {
   firstName: "",
   lastName: "",
   email: "",
@@ -74,7 +74,9 @@ function buildCustomizationPayload(
     }));
 }
 
-function toCustomerPayload(values: CheckoutFormValues): CheckoutCustomerInfo {
+function toCustomerPayload(
+  values: CustomOrderFormValues,
+): CheckoutCustomerInfo {
   return {
     first_name: values.firstName,
     last_name: values.lastName,
@@ -108,8 +110,10 @@ export default function CustomOrderModal({
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<CheckoutFormValues>({
-    resolver: zodResolver(checkoutSchema as never) as Resolver<CheckoutFormValues>,
+  } = useForm<CustomOrderFormValues>({
+    resolver: zodResolver(
+      customOrderSchema as never,
+    ) as Resolver<CustomOrderFormValues>,
     defaultValues: defaultFormValues,
     mode: "onSubmit",
     reValidateMode: "onSubmit",

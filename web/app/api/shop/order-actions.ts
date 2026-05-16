@@ -90,6 +90,8 @@ export type OrderSummary = {
     created_at: string;
 };
 
+export type OrderShippingMethod = "tracking" | "no_tracking" | "pickup";
+
 export type OrderDetail = {
     id: string;
     status: OrderStatus;
@@ -102,6 +104,9 @@ export type OrderDetail = {
     shipping_state: string;
     shipping_zip: string;
     shipping_country: string;
+    shipping_method: OrderShippingMethod | null;
+    shipping_cost: number;
+    discount_amount: number;
     total_amount: number;
     items: OrderItem[];
     tracking_number: string | null;

@@ -8,7 +8,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from sqlalchemy import UniqueConstraint, Index
 
-from streampage.db.enums import Platform, MediaCategory, QuestionType, ProductCategory, ProductMediaType, OrderStatus
+from streampage.db.enums import Platform, MediaCategory, QuestionType, ProductCategory, ProductMediaType, OrderStatus, ShippingMethod
 
 
 class Base(DeclarativeBase):
@@ -564,6 +564,20 @@ class Order(Base):
     shipping_state: Mapped[str] = mapped_column(String(100))
     shipping_zip: Mapped[str] = mapped_column(String(20))
     shipping_country: Mapped[str] = mapped_column(String(100))
+    shipping_method: Mapped[ShippingMethod | None] = mapped_column(
+        Enum(
+            ShippingMethod,
+            name="shippingmethod",
+            values_callable=lambda enum_cls: [m.value for m in enum_cls],
+        ),
+        nullable=True,
+    )
+    shipping_cost: Mapped[float] = mapped_column(
+        Numeric(10, 2), nullable=False, default=0, server_default="0"
+    )
+    discount_amount: Mapped[float] = mapped_column(
+        Numeric(10, 2), nullable=False, default=0, server_default="0"
+    )
     total_amount: Mapped[float] = mapped_column(Numeric(10, 2))
     tracking_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
     tracking_carrier: Mapped[str | None] = mapped_column(String(50), nullable=True)

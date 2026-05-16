@@ -22,8 +22,17 @@ import { useCart, type CartCustomization } from "./cart-context";
 import {
   US_STATES,
   checkoutSchema,
+  PICKUP_ALLOWED_STATES,
   type CheckoutFormValues,
+  type UsStateCode,
 } from "./checkout-schema";
+import {
+  CUSTOM_PICKUP_DISCOUNT_PER_UNIT,
+  NO_TRACKING_COST,
+  TRACKING_COST,
+  computeOrderTotals,
+  priceFormatter,
+} from "./pricing";
 import type { ShopItem } from "./types";
 import CardHeader from "../shared/card-header";
 
@@ -44,18 +53,12 @@ const defaultFormValues: CheckoutFormValues = {
   shippingCity: "",
   shippingState: "",
   shippingZip: "",
+  shippingMethod: undefined as unknown as CheckoutFormValues["shippingMethod"],
   notes: "",
 };
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 const PAYPAL_TEST_MODE = process.env.NEXT_PUBLIC_PAYPAL_TEST_MODE === "true";
-
-const priceFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
 
 function buildCartLineItems(
   cart: Record<string, number>,
@@ -92,6 +95,7 @@ function toCustomerPayload(values: CheckoutFormValues): CheckoutCustomerInfo {
     shipping_state: values.shippingState,
     shipping_zip: values.shippingZip,
     shipping_country: "US",
+    shipping_method: values.shippingMethod,
     notes: values.notes?.trim() ? values.notes.trim() : null,
   };
 }
@@ -113,6 +117,8 @@ export default function CheckoutModal({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema as never) as Resolver<CheckoutFormValues>,
@@ -120,6 +126,20 @@ export default function CheckoutModal({
     mode: "onSubmit",
     reValidateMode: "onSubmit",
   });
+
+  const watchedState = watch("shippingState");
+  const watchedMethod = watch("shippingMethod");
+  const pickupEligible =
+    typeof watchedState === "string" &&
+    PICKUP_ALLOWED_STATES.has(watchedState as UsStateCode);
+
+  useEffect(() => {
+    if (!pickupEligible && watchedMethod === "pickup") {
+      setValue("shippingMethod", undefined as unknown as CheckoutFormValues["shippingMethod"], {
+        shouldValidate: false,
+      });
+    }
+  }, [pickupEligible, watchedMethod, setValue]);
 
   useEffect(() => {
     if (open) {
@@ -135,10 +155,17 @@ export default function CheckoutModal({
   const cartLineItems = buildCartLineItems(cart, items);
   const customizationPayload = buildCustomizationPayload(customizations, items);
   const itemMap = new Map(items.map((i) => [i.id, i]));
-  const cartTotal = cartLineItems.reduce((sum, line) => {
+  const cartSubtotal = cartLineItems.reduce((sum, line) => {
     const item = itemMap.get(line.product_id);
     return item ? sum + item.price * line.quantity : sum;
   }, 0);
+  const totals = computeOrderTotals(
+    cartSubtotal,
+    watchedMethod ?? null,
+    watchedState ?? null,
+    cart,
+    items,
+  );
 
   const onCustomerSubmit = handleSubmit((values) => {
     setError(null);
@@ -308,6 +335,60 @@ export default function CheckoutModal({
               </div>
             </div>
 
+            <fieldset className="flex flex-col gap-[var(--spacing-xs)]">
+              <legend className="main-text text-xs">Shipping</legend>
+              <label className="main-text text-xs flex items-center gap-[var(--spacing-sm)]">
+                <input
+                  type="radio"
+                  value="tracking"
+                  {...register("shippingMethod")}
+                />
+                <span>
+                  Tracking{" "}
+                  <span className="opacity-70">
+                    (+{priceFormatter.format(TRACKING_COST)})
+                  </span>
+                </span>
+              </label>
+              <label className="main-text text-xs flex items-center gap-[var(--spacing-sm)]">
+                <input
+                  type="radio"
+                  value="no_tracking"
+                  {...register("shippingMethod")}
+                />
+                <span>
+                  No tracking{" "}
+                  <span className="opacity-70">
+                    (+{priceFormatter.format(NO_TRACKING_COST)})
+                  </span>
+                </span>
+              </label>
+              {pickupEligible ? (
+                <label className="main-text text-xs flex items-center gap-[var(--spacing-sm)]">
+                  <input
+                    type="radio"
+                    value="pickup"
+                    {...register("shippingMethod")}
+                  />
+                  <span>
+                    Local pickup (WA){" "}
+                    <span className="opacity-70">
+                      (free, -{priceFormatter.format(CUSTOM_PICKUP_DISCOUNT_PER_UNIT)} per custom card)
+                    </span>
+                  </span>
+                </label>
+              ) : (
+                <p className="main-text text-[10px] opacity-50">
+                  Local pickup is available for WA addresses.
+                </p>
+              )}
+              {errors.shippingMethod && (
+                <p className={fieldErrorClass}>
+                  {errors.shippingMethod.message}
+                </p>
+              )}
+            </fieldset>
+
             <div className="flex flex-col gap-[var(--spacing-xs)]">
               <label className="main-text text-xs">
                 Notes <span className="opacity-50">(optional)</span>
@@ -323,10 +404,32 @@ export default function CheckoutModal({
               )}
             </div>
 
-            <div className="flex items-center justify-between pt-[var(--spacing-sm)]">
-              <span className="main-text text-xs opacity-70">
-                Total: {priceFormatter.format(cartTotal)}
-              </span>
+            <div className="flex flex-col gap-[var(--spacing-xs)] pt-[var(--spacing-sm)] main-text text-xs">
+              <div className="flex justify-between opacity-70">
+                <span>Subtotal</span>
+                <span>{priceFormatter.format(totals.subtotal)}</span>
+              </div>
+              <div className="flex justify-between opacity-70">
+                <span>Shipping</span>
+                <span>
+                  {watchedMethod
+                    ? priceFormatter.format(totals.shipping)
+                    : "—"}
+                </span>
+              </div>
+              {totals.discount > 0 && (
+                <div className="flex justify-between opacity-70">
+                  <span>Discount</span>
+                  <span>-{priceFormatter.format(totals.discount)}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span>Total</span>
+                <span>{priceFormatter.format(totals.total)}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-[var(--spacing-sm)]">
               <button
                 type="submit"
                 className="pixel-borders pixel-btn-border px-[var(--spacing-md)]"
@@ -344,7 +447,7 @@ export default function CheckoutModal({
         {step === "pay" && customer && (
           <div className="flex flex-col gap-[var(--spacing-md)]">
             <div className="main-text text-xs opacity-70">
-              Paying {priceFormatter.format(cartTotal)} as {customer.email}
+              Paying {priceFormatter.format(totals.total)} as {customer.email}
             </div>
 
             {PAYPAL_TEST_MODE ? (

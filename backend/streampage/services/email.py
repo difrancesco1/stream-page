@@ -121,6 +121,10 @@ class OrderEmailContext:
     shipping_address_lines: list[str]
     items: list[OrderEmailLineItem] = field(default_factory=list)
     order_url: str | None = None
+    shipping_method_label: str | None = None
+    item_subtotal: float | None = None
+    shipping_cost: float = 0.0
+    discount_amount: float = 0.0
 
 
 def _format_money(value: float) -> str:
@@ -166,6 +170,64 @@ def _shipping_html(lines: list[str]) -> str:
     return "<br>".join(escape(line) for line in lines if line)
 
 
+def _totals_text(order: "OrderEmailContext") -> str:
+    """Multi-line totals block, only emitted when there's a breakdown to show."""
+    if (
+        order.item_subtotal is None
+        and not order.shipping_cost
+        and not order.discount_amount
+    ):
+        return ""
+    parts: list[str] = []
+    if order.item_subtotal is not None:
+        parts.append(f"Subtotal: {_format_money(order.item_subtotal)}")
+    method = order.shipping_method_label
+    if method or order.shipping_cost:
+        label = f"Shipping ({method})" if method else "Shipping"
+        parts.append(f"{label}: {_format_money(order.shipping_cost)}")
+    if order.discount_amount:
+        parts.append(f"Discount: -{_format_money(order.discount_amount)}")
+    return "\n".join(parts) + "\n"
+
+
+def _totals_html(order: "OrderEmailContext") -> str:
+    if (
+        order.item_subtotal is None
+        and not order.shipping_cost
+        and not order.discount_amount
+    ):
+        return ""
+    rows: list[str] = []
+    if order.item_subtotal is not None:
+        rows.append(
+            "<tr>"
+            "<td style=\"padding:2px 12px 2px 0;\">Subtotal</td>"
+            f"<td style=\"padding:2px 0;text-align:right;\">{_format_money(order.item_subtotal)}</td>"
+            "</tr>"
+        )
+    method = order.shipping_method_label
+    if method or order.shipping_cost:
+        label = f"Shipping ({escape(method)})" if method else "Shipping"
+        rows.append(
+            "<tr>"
+            f"<td style=\"padding:2px 12px 2px 0;\">{label}</td>"
+            f"<td style=\"padding:2px 0;text-align:right;\">{_format_money(order.shipping_cost)}</td>"
+            "</tr>"
+        )
+    if order.discount_amount:
+        rows.append(
+            "<tr>"
+            "<td style=\"padding:2px 12px 2px 0;\">Discount</td>"
+            f"<td style=\"padding:2px 0;text-align:right;\">-{_format_money(order.discount_amount)}</td>"
+            "</tr>"
+        )
+    return (
+        "<table style=\"border-collapse:collapse;margin-top:8px;\">"
+        f"<tbody>{''.join(rows)}</tbody>"
+        "</table>"
+    )
+
+
 def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
     """Send the customer-facing itemized order receipt.
 
@@ -184,12 +246,16 @@ def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
         else ""
     )
 
+    totals_text = _totals_text(order)
+    totals_html = _totals_html(order)
+
     body_text = (
         f"Hi {order.customer_first_name},\n\n"
         f"Thanks for your order! Your payment was received and your order "
         f"#{order.order_id_short} is confirmed.\n\n"
         f"{track_text}"
         f"Items:\n{_items_text(order.items)}\n\n"
+        f"{totals_text}"
         f"Order total: {total}\n\n"
         f"Shipping to:\n{full_name}\n{_shipping_text(order.shipping_address_lines)}\n\n"
         f"We'll be in touch when your order ships."
@@ -202,6 +268,7 @@ def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
         "<p>Thanks for your order! Your payment was received and your order is confirmed.</p>"
         f"{track_html}"
         f"{_items_html(order.items)}"
+        f"{totals_html}"
         f"<p style=\"margin-top:16px;\"><strong>Order total: {total}</strong></p>"
         "<h3 style=\"margin-bottom:4px;\">Shipping to</h3>"
         f"<p style=\"margin-top:0;\">{escape(full_name)}<br>{_shipping_html(order.shipping_address_lines)}</p>"
@@ -266,6 +333,9 @@ def send_order_admin_notification_email(to_email: str, order: OrderEmailContext)
         else ""
     )
 
+    totals_text = _totals_text(order)
+    totals_html = _totals_html(order)
+
     body_text = (
         f"New order received\n\n"
         f"Order: #{order.order_id_short}\n"
@@ -276,6 +346,7 @@ def send_order_admin_notification_email(to_email: str, order: OrderEmailContext)
         f"  {order.customer_email}\n"
         f"  Discord: {order.customer_discord_handle}\n\n"
         f"Items:\n{_items_text(order.items)}\n\n"
+        f"{totals_text}"
         f"Ship to:\n{full_name}\n{_shipping_text(order.shipping_address_lines)}"
     )
 
@@ -292,6 +363,7 @@ def send_order_admin_notification_email(to_email: str, order: OrderEmailContext)
         "</p>"
         "<h3 style=\"margin-bottom:4px;\">Items</h3>"
         f"{_items_html(order.items)}"
+        f"{totals_html}"
         "<h3 style=\"margin-bottom:4px;margin-top:16px;\">Ship to</h3>"
         f"<p style=\"margin-top:0;\">{escape(full_name)}<br>{_shipping_html(order.shipping_address_lines)}</p>"
         "</body></html>"

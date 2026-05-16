@@ -1,4 +1,4 @@
-import type { OrderDetail } from "@/app/api/shop/order-actions";
+import type { OrderDetail, OrderShippingMethod } from "@/app/api/shop/order-actions";
 
 import { statusBadgeClass } from "./order-status";
 
@@ -12,6 +12,12 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
 });
+
+const SHIPPING_METHOD_LABELS: Record<OrderShippingMethod, string> = {
+    tracking: "Tracking",
+    no_tracking: "No tracking",
+    pickup: "Pickup",
+};
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
@@ -31,6 +37,20 @@ export default function OrderDetailView({ order }: OrderDetailViewProps) {
     const fullName = `${order.customer_first_name} ${order.customer_last_name}`.trim();
     const created = formatDate(order.created_at);
     const shipped = formatDate(order.shipped_at);
+
+    const shippingCost = order.shipping_cost ?? 0;
+    const discountAmount = order.discount_amount ?? 0;
+    const showBreakdown =
+        order.shipping_method !== null ||
+        shippingCost > 0 ||
+        discountAmount > 0;
+    const itemSubtotal = order.items.reduce(
+        (sum, item) => sum + item.line_total,
+        0,
+    );
+    const shippingMethodLabel = order.shipping_method
+        ? SHIPPING_METHOD_LABELS[order.shipping_method]
+        : null;
 
     return (
         <div className="flex flex-col gap-[var(--spacing-md)]">
@@ -89,6 +109,29 @@ export default function OrderDetailView({ order }: OrderDetailViewProps) {
                         </div>
                     ))}
                 </div>
+                {showBreakdown && (
+                    <div className="flex flex-col gap-[0.125rem] mt-[var(--spacing-xs)] main-text text-[0.75rem] opacity-80">
+                        <div className="flex items-center justify-between">
+                            <span>subtotal</span>
+                            <span>{priceFormatter.format(itemSubtotal)}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span>
+                                shipping
+                                {shippingMethodLabel && (
+                                    <span className="opacity-70"> ({shippingMethodLabel})</span>
+                                )}
+                            </span>
+                            <span>{priceFormatter.format(shippingCost)}</span>
+                        </div>
+                        {discountAmount > 0 && (
+                            <div className="flex items-center justify-between">
+                                <span>discount</span>
+                                <span>-{priceFormatter.format(discountAmount)}</span>
+                            </div>
+                        )}
+                    </div>
+                )}
                 <div className="flex items-center justify-between mt-[var(--spacing-xs)]">
                     <span className="main-text text-[0.8125rem]">total</span>
                     <span className="main-text text-[0.8125rem]">

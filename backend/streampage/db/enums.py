@@ -58,3 +58,9 @@ class OrderStatus(PyEnum):
     REFUNDED = "refunded"
     IN_PERSON = "in_person"
 
+
+class ShippingMethod(PyEnum):
+    TRACKING = "tracking"
+    NO_TRACKING = "no_tracking"
+    PICKUP = "pickup"
+

@@ -55,15 +55,16 @@ class PayPalService:
         self,
         total: str,
         currency: str,
-        items: list[dict],
         shipping: dict,
     ) -> str:
         """Create a PayPal order and return its ID.
 
         Args:
-            total: Order total as a string (e.g. "29.99").
+            total: Final order total as a string (e.g. "29.99"). Shipping and
+                any discounts are already folded in; we deliberately omit the
+                per-line items + breakdown so the buyer just sees the final
+                amount to pay.
             currency: ISO currency code (e.g. "USD").
-            items: List of dicts with name, unit_amount, quantity.
             shipping: Dict with name and address fields for PayPal.
 
         Returns:
@@ -76,10 +77,6 @@ class PayPalService:
 
         token = await self._get_access_token()
 
-        item_total = sum(
-            float(i["unit_amount"]["value"]) * int(i["quantity"]) for i in items
-        )
-
         payload = {
             "intent": "CAPTURE",
             "purchase_units": [
@@ -87,14 +84,7 @@ class PayPalService:
                     "amount": {
                         "currency_code": currency,
                         "value": total,
-                        "breakdown": {
-                            "item_total": {
-                                "currency_code": currency,
-                                "value": f"{item_total:.2f}",
-                            }
-                        },
                     },
-                    "items": items,
                     "shipping": shipping,
                 }
             ],
