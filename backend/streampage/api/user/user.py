@@ -39,10 +39,8 @@ users_router = APIRouter()
 
 
 @users_router.post("/register")
-def register(request: RegisterRequest) -> UserResponse:
-    """Register a new user with username and password."""
+def register(request: RegisterRequest) -> LoginResponse:
     with get_db_session() as session:
-        # Check if username already exists
         existing_user = session.query(User).filter(User.username == request.username).first()
         if existing_user:
             raise HTTPException(
@@ -50,32 +48,27 @@ def register(request: RegisterRequest) -> UserResponse:
                 detail="Username already exists",
             )
 
-        # Create new user
         user = User(username=request.username)
         session.add(user)
-        session.flush()  # Get the user ID
+        session.flush()
 
-        # Create login entry with hashed password
         hashed_password = hash_password(request.password)
         user_login = UserLogin(user=user, password=hashed_password)
         session.add(user_login)
         session.commit()
 
-        return UserResponse(
-            id=user.id,
-            username=user.username,
-            email=user.email,
-            display_name=user.display_name,
-            birthday=user.birthday,
-            profile_picture=user.profile_picture,
+        access_token, _ = create_access_token(user_login)
+        refresh_token, _ = create_refresh_token(user_login)
+
+        return LoginResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
         )
 
 
 @users_router.post("/login")
 def login(request: LoginRequest) -> LoginResponse:
-    """Login with username and password, returns JWT token."""
     with get_db_session() as session:
-        # Find user login
         user_login = (
             session.query(UserLogin)
             .filter(func.lower(UserLogin.username) == request.username.lower())
@@ -89,7 +82,6 @@ def login(request: LoginRequest) -> LoginResponse:
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        # Verify password
         if not verify_password(request.password, user_login.password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

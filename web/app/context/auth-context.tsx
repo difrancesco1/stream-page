@@ -158,9 +158,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = useCallback(async (username: string, password: string) => {
         const result = await loginUser(username, password);
 
-        if (result.success && result.token && result.refreshToken) {
-            storeTokens(result.token, result.refreshToken);
-            scheduleRefresh(result.token, performRefresh);
+        if (result.success && result.accessToken && result.refreshToken) {
+            storeTokens(result.accessToken, result.refreshToken);
+            scheduleRefresh(result.accessToken, performRefresh);
             return { success: true };
         }
 
@@ -169,8 +169,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const register = useCallback(async (username: string, password: string) => {
         const result = await registerUser(username, password);
-        return { success: true, error: result.error };
-    }, []);
+
+        if (result.success && result.accessToken && result.refreshToken) {
+            storeTokens(result.accessToken, result.refreshToken);
+            return { success: true };
+        }
+        
+        return { success: false, error: result.error };
+    }, [storeTokens, scheduleRefresh]);
 
     const logout = useCallback(() => {
         clearTokens();

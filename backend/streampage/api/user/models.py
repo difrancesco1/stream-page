@@ -25,7 +25,6 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
-    token_type: str = "bearer"
 
 
 class RefreshRequest(BaseModel):
@@ -35,8 +34,6 @@ class RefreshRequest(BaseModel):
 class RefreshResponse(BaseModel):
     access_token: str
     refresh_token: str
-    token_type: str = "bearer"
-
 
 class UpdateProfileRequest(BaseModel):
     display_name: str | None = None

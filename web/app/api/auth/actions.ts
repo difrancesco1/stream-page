@@ -8,20 +8,18 @@ export type AuthResult = {
 };
 
 export type LoginResult = AuthResult & {
-    token?: string;
+    accessToken?: string;
     refreshToken?: string;
 };
 
 export type RefreshResult = AuthResult & {
-    token?: string;
+    accessToken?: string;
     refreshToken?: string;
 };
 
 export type RegisterResult = AuthResult & {
-    user?: {
-        id: string;
-        username: string;
-    };
+    accessToken?: string;
+    refreshToken?: string;
 };
 
 export async function loginUser(
@@ -48,7 +46,7 @@ export async function loginUser(
 
         return {
             success: true,
-            token: data.access_token,
+            accessToken: data.access_token,
             refreshToken: data.refresh_token,
         };
     } catch (error) {
@@ -82,7 +80,7 @@ export async function refreshAccessToken(
 
         return {
             success: true,
-            token: data.access_token,
+            accessToken: data.access_token,
             refreshToken: data.refresh_token,
         };
     } catch (error) {
@@ -117,10 +115,8 @@ export async function registerUser(
 
         return {
             success: true,
-            user: {
-                id: data.id,
-                username: data.username,
-            },
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
         };
     } catch (error) {
         return {
