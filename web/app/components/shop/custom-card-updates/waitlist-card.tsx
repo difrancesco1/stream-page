@@ -20,7 +20,7 @@ export default function WaitlistCard({ imageUrl, discordHandle, onClick }: Waitl
                     <img
                         src={imageUrl}
                         alt={`Card art for ${discordHandle}`}
-                        className="absolute inset-0 w-full h-full object-fill"
+                        className="absolute inset-0 w-full h-full object-cover"
                     />
                 </div>
                 <div className="border-t-[length:var(--border-width)] border-[color:var(--border)]
