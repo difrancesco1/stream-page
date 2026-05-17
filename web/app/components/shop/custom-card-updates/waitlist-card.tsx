@@ -14,7 +14,7 @@ export default function WaitlistCard({ imageUrl, discordHandle, onClick }: Waitl
                 onClick={onClick}
                 className="relative flex flex-col w-[90%] bg-foreground pixel-borders self-start cursor-pointer p-0 text-left"
             >
-                <div className="relative w-full block aspect-[1/1]">
+                <div className="relative w-full block aspect-[7/6]">
                     {/* Plain <img>: Supabase URLs aren't whitelisted in next.config. */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
