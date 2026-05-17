@@ -59,7 +59,7 @@ export default function ShopSection({ items }: ShopSectionProps) {
                   prefetch
                   aria-label={`View details for ${item.name}`}
                   className={`relative w-full cursor-pointer block ${
-                    category === "tokens" || category === "custom" ? "aspect-[65/91]" : "aspect-[3/2]"
+                    category === "tokens" || category === "custom" ? "aspect-[7/6]" : "aspect-[7/6]"
                   }`}
                 >
                   {featured?.media_type === "image" && (
@@ -104,7 +104,7 @@ export default function ShopSection({ items }: ShopSectionProps) {
                       }
                     }}
                     className="lg:flex absolute top-1 right-1
-                      w-7 h-7 items-center justify-center rounded-full
+                      w-6 h-6 items-center justify-center pixel-borders
                       bg-[color:var(--accent)] text-[color:var(--background)]
                       border-[length:var(--border-width)] border-[color:var(--border)]
                       text-[1rem] leading-none font-bold
