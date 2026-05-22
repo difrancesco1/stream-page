@@ -28,7 +28,7 @@ export default async function Shop() {
     : [];
 
   return (
-    <div className="relative w-full h-screen bg-background p-[0.325rem] lg:p-[1.825rem] md:p-[1rem]">
+    <div className="relative w-full h-screen bg-background lg:p-[1.825rem] md:p-[1rem]">
       <ShopContainer>
         <div className="relative z-10 flex h-full w-full items-center justify-center gap-4">
           <Suspense fallback={null}>

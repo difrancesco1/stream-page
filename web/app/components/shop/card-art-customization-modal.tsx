@@ -116,7 +116,7 @@ export function CardArtCustomizationProvider({
             <DialogTitle className="sr-only">
               Custom card art request
             </DialogTitle>
-
+            
             <form
               onSubmit={onSubmit}
               noValidate
