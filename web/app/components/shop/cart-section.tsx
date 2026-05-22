@@ -98,7 +98,8 @@ export default function CartSection({
         <span className="main-text flex items-center gap-[var(--spacing-xs)]">
           cart
           <CartIcon />
-          {totalItems} {totalItems === 1 ? "item" : "items"}
+          {totalItems} {totalItems === 1 ? "item" : "items"} 
+          
         </span>
         <span className="main-text">USA only &lt;3</span>
       </div>
@@ -113,7 +114,7 @@ export default function CartSection({
               className="h-[3rem] md:h-[3.5rem] flex items-center justify-center
                 text-[0.75rem] text-[color:var(--border)] opacity-60"
             >
-              Your cart is empty
+              Your cart is empty~
             </div>
           ) : (
             <ul className="flex flex-row flex-wrap gap-[var(--spacing-sm)]">
@@ -160,7 +161,7 @@ export default function CartSection({
                         onRemoveCustomization?.(customization.uid)
                       }
                       className="absolute -top-1.5 -right-1.5
-                        w-5 h-5 flex items-center justify-center rounded-full
+                        w-5 h-5 flex items-center justify-center pixel-borders
                         bg-[color:var(--accent)] text-[color:var(--background)]
                         border-[length:var(--border-width)] border-[color:var(--border)]
                         text-[0.75rem] leading-none font-bold
@@ -170,7 +171,7 @@ export default function CartSection({
                     </button>
                     <span
                       className="absolute -bottom-1.5 -left-1.5
-                        h-4 px-1 flex items-center justify-center rounded
+                        h-4 px-1 flex items-center justify-center pixel-borders
                         bg-[color:var(--accent)] text-[color:var(--background)]
                         border-[length:var(--border-width)] border-[color:var(--border)]
                         text-[0.5625rem] leading-none font-bold z-10
@@ -257,7 +258,7 @@ export default function CartSection({
               Total
             </span>
             <span className="main-text text-[1rem] md:text-[1.125rem] leading-none">
-              {priceFormatter.format(totalCost)}
+              {priceFormatter.format(totalCost)} + shipping
             </span>
           </div>
           <div className="flex gap-[var(--spacing-xs)]">
