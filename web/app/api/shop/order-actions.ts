@@ -66,6 +66,7 @@ export type WaitlistEntry = {
     order_created_at: string;
     created_at: string;
     completed_at: string | null;
+    notes: string | null;
 };
 
 export type OrderItem = {
@@ -280,7 +281,7 @@ export async function listCustomizations(
 export async function updateCustomization(
     token: string,
     customizationId: string,
-    patch: { is_complete: boolean },
+    patch: { is_complete?: boolean; notes?: string },
 ): Promise<UpdateCustomizationResult> {
     try {
         const response = await fetch(
