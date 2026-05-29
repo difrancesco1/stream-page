@@ -1359,6 +1359,7 @@ def list_waitlist():
                 order_created_at=o.created_at,
                 created_at=c.created_at,
                 completed_at=c.completed_at,
+                notes=c.notes,
             )
             for c, o in rows
         ]
@@ -1429,6 +1430,9 @@ def update_customization(
             elif not body.is_complete:
                 customization.completed_at = None
             customization.is_complete = body.is_complete
+
+        if body.notes is not None:
+            customization.notes = body.notes if body.notes else None
 
         session.commit()
         session.refresh(customization)

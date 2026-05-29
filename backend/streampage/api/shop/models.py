@@ -148,6 +148,7 @@ class CustomizationQueueRow(BaseModel):
 
 class CustomizationUpdateRequest(BaseModel):
     is_complete: bool | None = None
+    notes: str | None = None
 
 
 class OrderItemResponse(BaseModel):
@@ -230,6 +231,7 @@ class WaitlistEntry(BaseModel):
     order_created_at: datetime
     created_at: datetime
     completed_at: datetime | None = None
+    notes: str | None = None
 
 
 class ResponseMessage(BaseModel):

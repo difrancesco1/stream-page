@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { vanityUrls } from "./lib/vanity-urls";
 
 const nextConfig: NextConfig = {
   images: {
@@ -31,6 +32,13 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "1000mb",
     },
+  },
+  async redirects() {
+    return vanityUrls.map(({ source, destination, permanent }) => ({
+      source,
+      destination,
+      permanent: permanent ?? false,
+    }));
   },
 };
 
