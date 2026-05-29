@@ -67,7 +67,7 @@ export default function ShopSection({ items }: ShopSectionProps) {
                       src={featured.url}
                       alt={item.name}
                       fill
-                      className="object-contain"
+                      className="object-cover"
                     />
                   )}
                   {featured?.media_type === "video" && (
@@ -78,7 +78,7 @@ export default function ShopSection({ items }: ShopSectionProps) {
                       playsInline
                       autoPlay
                       preload="metadata"
-                      className="absolute inset-0 w-full h-full object-contain"
+                      className="absolute inset-0 w-full h-full object-cover"
                     />
                   )}
                 </Link>
