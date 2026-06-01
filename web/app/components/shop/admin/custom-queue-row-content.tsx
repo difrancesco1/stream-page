@@ -207,12 +207,12 @@ export default function CustomQueueRowContent({
                                       ? "replace image"
                                       : "attach image"}
                             </button>
-
-                            <CopyButton label="name" value={customerName} />
-                            <CopyButton label="address" value={shippingAddress} />
-                            <CopyButton label="email" value={row.customer_email} />
                         </>
                     )}
+
+                    <CopyButton label="name" value={customerName} />
+                    <CopyButton label="address" value={shippingAddress} />
+                    <CopyButton label="email" value={row.customer_email} />
                 </div>
 
                 <label className="flex items-center gap-[var(--spacing-xs)] cursor-pointer">

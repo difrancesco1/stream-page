@@ -473,6 +473,9 @@ export default function CheckoutModal({
                       }
                       const captured = await captureCheckoutOrder(
                         created.paypal_order_id,
+                        cartLineItems,
+                        customer,
+                        customizationPayload,
                       );
                       if (!captured.success) {
                         setError(captured.error);
@@ -521,7 +524,12 @@ export default function CheckoutModal({
                   }}
                   onApprove={async (data) => {
                     setError(null);
-                    const result = await captureCheckoutOrder(data.orderID);
+                    const result = await captureCheckoutOrder(
+                      data.orderID,
+                      cartLineItems,
+                      customer,
+                      customizationPayload,
+                    );
                     if (!result.success) {
                       setError(result.error);
                       return;
