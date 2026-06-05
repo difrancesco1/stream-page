@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
+import Image from "next/image";
+
 import type { CustomizationQueueRow } from "@/app/api/shop/order-actions";
 
 import CopyAllIcon from '@mui/icons-material/CopyAll';
@@ -142,16 +144,17 @@ export default function CustomQueueRowContent({
                             href={row.image_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="pixel-borders bg-background p-[0.25rem] self-start max-w-[12rem]"
+                            className="pixel-borders bg-background p-[0.25rem] self-start w-[12rem]"
                         >
-                            {/* Plain <img> on purpose: Supabase URLs are external
-                                and we don't want to plumb domains through next.config. */}
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={row.image_url}
-                                alt={`Card art for ${row.card_name}`}
-                                className="block max-w-full h-auto"
-                            />
+                            <div className="relative w-full aspect-square">
+                                <Image
+                                    src={row.image_url}
+                                    alt={`Card art for ${row.card_name}`}
+                                    fill
+                                    sizes="192px"
+                                    className="object-contain"
+                                />
+                            </div>
                         </a>
                     )}
                 </div>
