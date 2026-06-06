@@ -14,6 +14,7 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/context/auth-context";
 import { useEditMode } from "@/app/context/edit-mode-context";
 import AuthModal from "./auth/auth-modal";
+import EgressMonitorToggle from "./shared/egress-monitor-toggle";
 
 type CardId = "main" | "intList" | "opgg" | "movies" | "catPictures" | "duoTracker" | "firstTracker";
 
@@ -255,6 +256,7 @@ export default function CardContainer() {
       <div className="absolute top-4 right-4 z-[9999]">
         {isAuthenticated ? (
           <div className="flex gap-2">
+            {isRosie && <EgressMonitorToggle />}
             {isRosie && (
               <button 
                 className="pixel-btn text-xs flex items-center gap-2 hover:animate-pulse"

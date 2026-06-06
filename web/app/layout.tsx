@@ -6,6 +6,7 @@ import { AuthProvider } from "./context/auth-context";
 import { EditModeProvider } from "./context/edit-mode-context";
 import { ProfileProvider } from "./context/profile-context";
 import { AnimatedCursor } from "./components/shared/animated-cursor";
+import EgressMonitor from "./components/shared/egress-monitor";
 
 const silkscreen = Silkscreen({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
           </ProfileProvider>
         </AuthProvider>
         <AnimatedCursor />
+        <EgressMonitor />
       </body>
     </html>
   );

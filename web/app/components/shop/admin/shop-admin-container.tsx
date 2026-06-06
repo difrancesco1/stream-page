@@ -8,6 +8,7 @@ import {
   type Product,
   type ProductCategory,
 } from "@/app/api/shop/actions";
+import EgressMonitorToggle from "@/app/components/shared/egress-monitor-toggle";
 
 import AdminTabs from "./admin-tabs";
 import ProductForm from "./product-form";
@@ -53,15 +54,18 @@ export default function ShopAdminContainer() {
         <span className="main-text text-[1.125rem] md:text-[1.25rem]">
           manage shop
         </span>
-        <Link
-          href="/shop"
-          className="pixel-borders px-[var(--spacing-sm)] py-[0.25rem]
-            bg-foreground text-[color:var(--border)] main-text text-[0.75rem]
-            hover:bg-[color:var(--accent)] hover:text-[color:var(--background)]
-            transition-colors"
-        >
-          back to shop
-        </Link>
+        <div className="flex items-center gap-[var(--spacing-sm)]">
+          <EgressMonitorToggle />
+          <Link
+            href="/shop"
+            className="pixel-borders px-[var(--spacing-sm)] py-[0.25rem]
+              bg-foreground text-[color:var(--border)] main-text text-[0.75rem]
+              hover:bg-[color:var(--accent)] hover:text-[color:var(--background)]
+              transition-colors"
+          >
+            back to shop
+          </Link>
+        </div>
       </div>
 
       <AdminTabs active="products" />

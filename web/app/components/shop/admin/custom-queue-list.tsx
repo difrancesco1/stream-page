@@ -10,6 +10,7 @@ import {
     uploadCustomizationImage,
     type CustomizationQueueRow,
 } from "@/app/api/shop/order-actions";
+import EgressMonitorToggle from "@/app/components/shared/egress-monitor-toggle";
 import { useAuth } from "@/app/context/auth-context";
 
 import AdminTabs from "./admin-tabs";
@@ -151,15 +152,18 @@ export default function CustomQueueList() {
                 <span className="main-text text-[1.125rem] md:text-[1.25rem]">
                     manage shop
                 </span>
-                <Link
-                    href="/shop"
-                    className="pixel-borders px-[var(--spacing-sm)] py-[0.25rem]
-                        bg-foreground text-[color:var(--border)] main-text text-[0.75rem]
-                        hover:bg-[color:var(--accent)] hover:text-[color:var(--background)]
-                        transition-colors"
-                >
-                    back to shop
-                </Link>
+                <div className="flex items-center gap-[var(--spacing-sm)]">
+                    <EgressMonitorToggle />
+                    <Link
+                        href="/shop"
+                        className="pixel-borders px-[var(--spacing-sm)] py-[0.25rem]
+                            bg-foreground text-[color:var(--border)] main-text text-[0.75rem]
+                            hover:bg-[color:var(--accent)] hover:text-[color:var(--background)]
+                            transition-colors"
+                    >
+                        back to shop
+                    </Link>
+                </div>
             </div>
 
             <AdminTabs active="custom" />
