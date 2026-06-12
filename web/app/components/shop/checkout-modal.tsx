@@ -282,7 +282,7 @@ export default function CheckoutModal({
                 )}
               </div>
               <div className="flex flex-col gap-[var(--spacing-xs)]">
-                <label className="main-text text-xs">State</label>
+                <label className="main-text text-xs">State/Province</label>
                 <select
                   autoComplete="address-level1"
                   className={`${inputClass} appearance-none`}
