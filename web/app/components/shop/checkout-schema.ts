@@ -9,6 +9,11 @@ export const US_STATES = [
   "DC",
 ] as const;
 
+export const CA_PROVINCE = [
+  "Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", 
+  "Nova Scotia", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan",
+] as const;
+
 export type UsStateCode = (typeof US_STATES)[number];
 
 const usStateSet = new Set<string>(US_STATES);
