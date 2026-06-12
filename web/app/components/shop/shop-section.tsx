@@ -19,15 +19,30 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
+// Keep in sync with the backend category ordering in
+// backend/streampage/api/shop/shop.py (list_products).
+const CATEGORY_ORDER: Record<string, number> = {
+  custom: 0,
+  tokens: 1,
+  stickers: 2,
+};
+
+const categoryRank = (category: string) => CATEGORY_ORDER[category] ?? 3;
+
 export default function ShopSection({ items }: ShopSectionProps) {
   const { add } = useCart();
   const { requestCustomization } = useCardArtCustomizationModal();
 
-  // Display order is owned by the admin (shop-admin-container.tsx). Ties on
+  // Items are grouped by category first (custom, then tokens, then stickers,
+  // then everything else) to match the backend ordering. Within a category,
+  // display order is owned by the admin (shop-admin-container.tsx); ties on
   // display_order fall back to id for a deterministic render order.
   const sortedItems = useMemo(
     () =>
       [...items].sort((a, b) => {
+        const rankA = categoryRank(a.category);
+        const rankB = categoryRank(b.category);
+        if (rankA !== rankB) return rankA - rankB;
         if (a.display_order !== b.display_order) {
           return a.display_order - b.display_order;
         }

@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query
-from sqlalchemy import select, func
+from sqlalchemy import select, func, case, cast, String
 from sqlalchemy.orm import Session, selectinload
 
 from streampage.api.middleware.authenticator import require_creator
@@ -210,10 +210,16 @@ def list_products(
     active_only: bool = Query(True),
 ):
     with get_db_session() as session:
+        category_order = case(
+            {"custom": 0, "tokens": 1, "stickers": 2},
+            value=cast(Product.category, String),
+            else_=3,
+        )
         stmt = (
             select(Product)
             .options(selectinload(Product.media))
             .order_by(
+                category_order.asc(),
                 Product.display_order.asc(),
                 Product.created_at.desc(),
             )
