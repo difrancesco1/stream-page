@@ -19,6 +19,7 @@ export type ShopItem = {
   quantity: number;
   media: ProductMedia[];
   is_active: boolean;
+  display_order: number;
 };
 
 /**

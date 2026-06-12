@@ -25,6 +25,7 @@ export type Product = {
     quantity: number;
     media: ProductMedia[];
     is_active: boolean;
+    display_order: number;
     created_at: string;
     updated_at: string;
 };
@@ -49,6 +50,10 @@ export type ProductMediaResult =
 
 export type ReorderMediaResult =
     | { success: true; media: ProductMedia[] }
+    | { success: false; error: string };
+
+export type ReorderProductsResult =
+    | { success: true; products: Product[] }
     | { success: false; error: string };
 
 async function parseError(response: Response, fallback: string): Promise<string> {
@@ -338,6 +343,35 @@ export async function reorderProductMedia(
 
         const media = (await response.json()) as ProductMedia[];
         return { success: true, media };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function reorderProducts(
+    token: string,
+    order: { id: string; display_order: number }[]
+): Promise<ReorderProductsResult> {
+    try {
+        const response = await fetch(`${API_URL}/shop/products/order`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ order }),
+        });
+
+        if (!response.ok) {
+            const error = await parseError(response, `Server error: ${response.status}`);
+            return { success: false, error };
+        }
+
+        const products = (await response.json()) as Product[];
+        return { success: true, products };
     } catch (error) {
         return {
             success: false,
