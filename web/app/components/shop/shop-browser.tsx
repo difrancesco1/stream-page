@@ -15,9 +15,9 @@ type TabKey = "all" | "custom" | Exclude<ProductCategory, "custom">;
 
 const TABS: { title: TabKey; className?: string }[] = [
   { title: "all" },
-  { title: "tokens" },
-  { title: "stickers" },
-  { title: "etc" },
+  { title: "cards" },
+  { title: "items" },
+  { title: "preorder" },
   { title: "custom", className: "lg:hidden ml-auto" },
 ];
 

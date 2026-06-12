@@ -2,7 +2,7 @@
 
 import { API_URL } from "@/lib/api";
 
-export type ProductCategory = "tokens" | "stickers" | "etc" | "custom";
+export type ProductCategory = "tokens" | "stickers" | "etc" | "custom" | string;
 
 export type ProductMediaType = "image" | "video";
 
