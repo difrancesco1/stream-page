@@ -11,13 +11,15 @@ import ShopSection from "./shop-section";
 import WaitlistContent from "./custom-card-updates/waitlist-content";
 import type { ShopItem } from "./types";
 
-type TabKey = "all" | "custom" | Exclude<ProductCategory, "custom">;
+type TabKey = "all" | "custom" | "cards" | "items" | "preorder";
 
-const TABS: { title: TabKey; className?: string }[] = [
+type Tab = { title: TabKey; category?: ProductCategory; className?: string };
+
+const TABS: Tab[] = [
   { title: "all" },
-  { title: "cards" },
-  { title: "items" },
-  { title: "preorder" },
+  { title: "cards", category: "tokens" },
+  { title: "items", category: "stickers" },
+  { title: "preorder", category: "etc" },
   { title: "custom", className: "lg:hidden ml-auto" },
 ];
 
@@ -30,19 +32,19 @@ export default function ShopBrowser({ items, waitlistEntries }: ShopBrowserProps
   const router = useRouter();
   const params = useSearchParams();
   const initial = (params.get("tab") as TabKey | null) ?? "all";
-  const [active, setActive] = useState<{ title: TabKey }>(
+  const [active, setActive] = useState<Tab>(
     TABS.find((t) => t.title === initial) ?? TABS[0],
   );
 
   const filtered = useMemo(() => {
     if (active.title === "all") return items;
     if (active.title === "custom") return items;
-    if (active.title === "tokens") {
+    if (active.category === "tokens") {
       return items.filter(
         (i) => i.category === "tokens" || i.category === "custom",
       );
     }
-    return items.filter((i) => i.category === active.title);
+    return items.filter((i) => i.category === active.category);
   }, [items, active]);
 
   const onChange = (tab: { title: string }) => {
