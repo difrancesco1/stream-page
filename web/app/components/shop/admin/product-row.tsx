@@ -16,6 +16,11 @@ import ProductForm from "./product-form";
 interface ProductRowProps {
   product: Product;
   onChanged: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  isReordering?: boolean;
 }
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
@@ -25,7 +30,15 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
-export default function ProductRow({ product, onChanged }: ProductRowProps) {
+export default function ProductRow({
+  product,
+  onChanged,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp = false,
+  canMoveDown = false,
+  isReordering = false,
+}: ProductRowProps) {
   const { token } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [busy, setBusy] = useState<"deactivate" | "delete" | null>(null);
@@ -93,6 +106,35 @@ export default function ProductRow({ product, onChanged }: ProductRowProps) {
 
   return (
     <div className="pixel-borders bg-foreground p-[var(--spacing-sm)] flex items-center gap-[var(--spacing-sm)]">
+      {(onMoveUp || onMoveDown) && (
+        <div className="flex flex-col gap-[0.125rem] shrink-0">
+          <button
+            type="button"
+            onClick={onMoveUp}
+            disabled={!canMoveUp || isReordering || busy !== null}
+            aria-label={`Move ${product.name} up`}
+            title="Move up"
+            className="pixel-borders pixel-btn-border w-5 h-5 flex items-center justify-center
+              text-[0.75rem] leading-none cursor-pointer
+              disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            onClick={onMoveDown}
+            disabled={!canMoveDown || isReordering || busy !== null}
+            aria-label={`Move ${product.name} down`}
+            title="Move down"
+            className="pixel-borders pixel-btn-border w-5 h-5 flex items-center justify-center
+              text-[0.75rem] leading-none cursor-pointer
+              disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            ↓
+          </button>
+        </div>
+      )}
+
       <div className="relative w-[3rem] h-[3rem] md:w-[3.5rem] md:h-[3.5rem] bg-white pixel-borders shrink-0 overflow-hidden">
         {featured?.media_type === "image" && (
           <Image

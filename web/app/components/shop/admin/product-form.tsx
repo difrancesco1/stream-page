@@ -14,7 +14,13 @@ import {
 
 import ProductMediaManager from "./product-media-manager";
 
-const CATEGORIES: ProductCategory[] = ["tokens", "stickers", "etc", "custom"];
+const CATEGORIES: ProductCategory[] = [
+  "tokens",
+  "stickers",
+  "etc",
+  "custom",
+  "preorder",
+];
 
 const NEW_MEDIA_ACCEPT =
   "image/png,image/jpeg,image/webp,video/mp4,video/webm";

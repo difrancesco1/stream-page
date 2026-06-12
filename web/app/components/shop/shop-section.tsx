@@ -19,23 +19,20 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
-const CATEGORY_ORDER: Record<string, number> = {
-  custom: 0,
-  tokens: 1,
-};
-
-const categoryRank = (category: string) =>
-  CATEGORY_ORDER[category] ?? Number.MAX_SAFE_INTEGER;
-
 export default function ShopSection({ items }: ShopSectionProps) {
   const { add } = useCart();
   const { requestCustomization } = useCardArtCustomizationModal();
 
+  // Display order is owned by the admin (shop-admin-container.tsx). Ties on
+  // display_order fall back to id for a deterministic render order.
   const sortedItems = useMemo(
     () =>
-      [...items].sort(
-        (a, b) => categoryRank(a.category) - categoryRank(b.category),
-      ),
+      [...items].sort((a, b) => {
+        if (a.display_order !== b.display_order) {
+          return a.display_order - b.display_order;
+        }
+        return a.id.localeCompare(b.id);
+      }),
     [items],
   );
 

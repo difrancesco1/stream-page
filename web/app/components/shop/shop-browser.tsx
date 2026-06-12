@@ -18,6 +18,7 @@ const TABS: { title: TabKey; className?: string }[] = [
   { title: "tokens" },
   { title: "stickers" },
   { title: "etc" },
+  { title: "preorder" },
   { title: "custom", className: "lg:hidden ml-auto" },
 ];
 
@@ -37,12 +38,25 @@ export default function ShopBrowser({ items, waitlistEntries }: ShopBrowserProps
   const filtered = useMemo(() => {
     if (active.title === "all") return items;
     if (active.title === "custom") return items;
-    if (active.title === "tokens") {
+    // Sold-out items surface in the preorder tab regardless of their original
+    // category so customers can see everything they can't currently buy in
+    // one place. They're hidden from their original category tab to avoid
+    // dimmed clutter there.
+    if (active.title === "preorder") {
       return items.filter(
-        (i) => i.category === "tokens" || i.category === "custom",
+        (i) => i.category === "preorder" || i.quantity === 0,
       );
     }
-    return items.filter((i) => i.category === active.title);
+    if (active.title === "tokens") {
+      return items.filter(
+        (i) =>
+          (i.category === "tokens" || i.category === "custom") &&
+          i.quantity > 0,
+      );
+    }
+    return items.filter(
+      (i) => i.category === active.title && i.quantity > 0,
+    );
   }, [items, active]);
 
   const onChange = (tab: { title: string }) => {

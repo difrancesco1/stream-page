@@ -24,6 +24,7 @@ export default async function Shop() {
         quantity: p.quantity,
         media: p.media,
         is_active: p.is_active,
+        display_order: p.display_order,
       }))
     : [];
 

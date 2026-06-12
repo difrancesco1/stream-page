@@ -19,6 +19,7 @@ class ProductUpdate(BaseModel):
     price: float | None = None
     quantity: int | None = None
     is_active: bool | None = None
+    display_order: int | None = None
 
 
 class ProductMediaResponse(BaseModel):
@@ -44,6 +45,15 @@ class ProductMediaReorderRequest(BaseModel):
     order: list[MediaOrderEntry]
 
 
+class ProductOrderEntry(BaseModel):
+    id: str
+    display_order: int
+
+
+class ProductReorderRequest(BaseModel):
+    order: list[ProductOrderEntry]
+
+
 class ProductResponse(BaseModel):
     id: str
     category: str
@@ -54,6 +64,7 @@ class ProductResponse(BaseModel):
     quantity: int
     media: list[ProductMediaResponse]
     is_active: bool
+    display_order: int
     created_at: datetime
     updated_at: datetime
 

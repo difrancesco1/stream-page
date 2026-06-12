@@ -18,6 +18,7 @@ from streampage.api.shop.models import (
     ProductMediaResponse,
     ProductMediaUpdate,
     ProductMediaReorderRequest,
+    ProductReorderRequest,
     OrderCreateRequest,
     OrderCreateResponse,
     OrderCaptureResponse,
@@ -136,6 +137,7 @@ def _product_to_response(p: Product) -> ProductResponse:
         quantity=p.quantity,
         media=[_media_to_response(m) for m in p.media],
         is_active=p.is_active,
+        display_order=p.display_order,
         created_at=p.created_at,
         updated_at=p.updated_at,
     )
@@ -178,6 +180,13 @@ async def create_product(
     with get_db_session() as session:
         slug = _ensure_unique_slug(session, _slugify(name))
 
+        # New products land at the bottom of the existing display order so
+        # admin reordering stays predictable.
+        current_max = session.execute(
+            select(func.max(Product.display_order))
+        ).scalar()
+        next_order = (current_max + 1) if current_max is not None else 0
+
         product = Product(
             name=name,
             category=category,
@@ -185,6 +194,7 @@ async def create_product(
             description=description,
             price=price,
             quantity=quantity,
+            display_order=next_order,
         )
         session.add(product)
         session.commit()
@@ -204,7 +214,7 @@ def list_products(
             select(Product)
             .options(selectinload(Product.media))
             .order_by(
-                Product.category,
+                Product.display_order.asc(),
                 Product.created_at.desc(),
             )
         )
@@ -233,6 +243,7 @@ async def update_product(
     quantity: int | None = Form(None),
     description: str | None = Form(None),
     is_active: bool | None = Form(None),
+    display_order: int | None = Form(None),
     user: User = Depends(require_creator),
 ):
     with get_db_session() as session:
@@ -251,6 +262,8 @@ async def update_product(
             product.description = description
         if is_active is not None:
             product.is_active = is_active
+        if display_order is not None:
+            product.display_order = display_order
 
         session.commit()
         session.refresh(product)
@@ -479,6 +492,56 @@ def reorder_product_media(
         session.commit()
         session.refresh(product)
         return [_media_to_response(m) for m in product.media]
+
+
+@shop_router.put(
+    "/products/order",
+    response_model=list[ProductResponse],
+)
+def reorder_products(
+    body: ProductReorderRequest,
+    user: User = Depends(require_creator),
+):
+    """Bulk-update ``display_order`` for a set of products.
+
+    Mirrors the media-reorder pattern: clients send the full desired ordering
+    (or just the subset they're shuffling) and we update each row in a single
+    transaction. Returns the resulting product list sorted by the new order
+    so the admin UI can re-render without a follow-up GET.
+    """
+    if not body.order:
+        return []
+
+    with get_db_session() as session:
+        product_ids = [uuid.UUID(entry.id) for entry in body.order]
+        products = session.execute(
+            select(Product)
+            .where(Product.id.in_(product_ids))
+            .options(selectinload(Product.media))
+        ).scalars().all()
+        product_by_id = {p.id: p for p in products}
+
+        for entry in body.order:
+            pid = uuid.UUID(entry.id)
+            product = product_by_id.get(pid)
+            if not product:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Product {entry.id} not found",
+                )
+            product.display_order = entry.display_order
+
+        session.commit()
+
+        refreshed = session.execute(
+            select(Product)
+            .options(selectinload(Product.media))
+            .order_by(
+                Product.display_order.asc(),
+                Product.created_at.desc(),
+            )
+        ).scalars().all()
+        return [_product_to_response(p) for p in refreshed]
 
 
 # ---------------------------------------------------------------------------

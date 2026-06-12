@@ -12,7 +12,7 @@ interface ProductPageProps {
   searchParams: Promise<{ tab?: string }>;
 }
 
-const VALID_TABS = new Set(["all", "tokens", "stickers", "etc"]);
+const VALID_TABS = new Set(["all", "tokens", "stickers", "etc", "preorder"]);
 
 export default async function ProductPage({
   params,
@@ -32,6 +32,7 @@ export default async function ProductPage({
         quantity: p.quantity,
         media: p.media,
         is_active: p.is_active,
+        display_order: p.display_order,
       }))
     : [];
 
