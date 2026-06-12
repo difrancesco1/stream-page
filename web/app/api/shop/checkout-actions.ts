@@ -32,7 +32,7 @@ export type CheckoutCustomerInfo = {
 };
 
 export type CreateOrderResult =
-    | { success: true; order_id: string; paypal_order_id: string }
+    | { success: true; paypal_order_id: string }
     | { success: false; error: string };
 
 export type CaptureOrderResult =
@@ -71,10 +71,9 @@ export async function createCheckoutOrder(
         }
 
         const data = (await response.json()) as {
-            order_id: string;
             paypal_order_id: string;
         };
-        return { success: true, order_id: data.order_id, paypal_order_id: data.paypal_order_id };
+        return { success: true, paypal_order_id: data.paypal_order_id };
     } catch (error) {
         return {
             success: false,
@@ -117,6 +116,9 @@ export async function createCustomOrder(
 
 export async function captureCheckoutOrder(
     paypalOrderId: string,
+    items: CartLineItem[],
+    customer: CheckoutCustomerInfo,
+    customizations: CartCustomizationPayload[] = [],
 ): Promise<CaptureOrderResult> {
     try {
         const response = await fetch(
@@ -124,6 +126,7 @@ export async function captureCheckoutOrder(
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ items, customer, customizations }),
                 cache: "no-store",
             },
         );

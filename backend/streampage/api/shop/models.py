@@ -90,7 +90,6 @@ class OrderCreateRequest(BaseModel):
     customizations: list[CartCustomization] = []
 
 class OrderCreateResponse(BaseModel):
-    order_id: str
     paypal_order_id: str
 
 class OrderCaptureResponse(BaseModel):

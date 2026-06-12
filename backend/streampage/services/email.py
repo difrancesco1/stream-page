@@ -237,15 +237,6 @@ def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
     full_name = f"{order.customer_first_name} {order.customer_last_name}".strip()
     total = _format_money(order.total_amount)
 
-    track_text = (
-        f"Track your order: {order.order_url}\n\n" if order.order_url else ""
-    )
-    track_html = (
-        f"<p><a href=\"{escape(order.order_url)}\">Track your order</a></p>"
-        if order.order_url
-        else ""
-    )
-
     totals_text = _totals_text(order)
     totals_html = _totals_html(order)
 
@@ -253,12 +244,10 @@ def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
         f"Hi {order.customer_first_name},\n\n"
         f"Thanks for your order! Your payment was received and your order "
         f"#{order.order_id_short} is confirmed.\n\n"
-        f"{track_text}"
         f"Items:\n{_items_text(order.items)}\n\n"
         f"{totals_text}"
         f"Order total: {total}\n\n"
-        f"Shipping to:\n{full_name}\n{_shipping_text(order.shipping_address_lines)}\n\n"
-        f"We'll be in touch when your order ships."
+        f"Shipping to:\n{full_name}\n{_shipping_text(order.shipping_address_lines)}"
     )
 
     body_html = (
@@ -266,13 +255,11 @@ def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
         f"<h2>Order #{escape(order.order_id_short)} confirmed</h2>"
         f"<p>Hi {escape(order.customer_first_name)},</p>"
         "<p>Thanks for your order! Your payment was received and your order is confirmed.</p>"
-        f"{track_html}"
         f"{_items_html(order.items)}"
         f"{totals_html}"
         f"<p style=\"margin-top:16px;\"><strong>Order total: {total}</strong></p>"
         "<h3 style=\"margin-bottom:4px;\">Shipping to</h3>"
         f"<p style=\"margin-top:0;\">{escape(full_name)}<br>{_shipping_html(order.shipping_address_lines)}</p>"
-        "<p>We'll be in touch when your order ships.</p>"
         "</body></html>"
     )
 

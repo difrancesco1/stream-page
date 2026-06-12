@@ -584,19 +584,21 @@ def _load_customizations_for_items(
     return grouped
 
 
-def _persist_customizations(
-    session: Session,
-    order: Order,
-    items_by_product_id: dict[uuid.UUID, OrderItem],
+def _validate_customizations(
+    qty_by_product_id: dict[uuid.UUID, int],
     product_by_id: dict[uuid.UUID, Product],
     customizations,
-) -> None:
-    """Validate the customization payload and insert ``OrderCustomization``
-    rows linked to their parent ``OrderItem``.
+) -> dict[uuid.UUID, list[tuple[str, str]]]:
+    """Validate the customization payload against the cart.
+
+    Returns a ``{product_id: [(card_name, description), ...]}`` mapping that
+    :func:`_insert_customizations` can consume directly. This function does
+    not touch the database, so it's safe to call before a payment has been
+    captured.
 
     Rules:
     - Every ``CUSTOM``-category product in the cart must have a number of
-      customizations equal to its ``OrderItem.quantity`` (each click of "+"
+      customizations equal to its requested quantity (each click of "+"
       adds 1 unit and produces 1 customization).
     - Customizations cannot reference a product that's missing from the cart
       or one that isn't ``CUSTOM`` category.
@@ -611,7 +613,7 @@ def _persist_customizations(
                 status_code=400, detail="Invalid customization product_id"
             )
         product = product_by_id.get(pid)
-        if not product or pid not in items_by_product_id:
+        if not product or pid not in qty_by_product_id:
             raise HTTPException(
                 status_code=400,
                 detail="Customization references a product not in the cart",
@@ -638,19 +640,29 @@ def _persist_customizations(
             )
         grouped.setdefault(pid, []).append((card_name, description))
 
-    for pid, item in items_by_product_id.items():
+    for pid, qty in qty_by_product_id.items():
         product = product_by_id.get(pid)
         if product and product.category == ProductCategory.CUSTOM:
             provided = grouped.get(pid, [])
-            if len(provided) != item.quantity:
+            if len(provided) != qty:
                 raise HTTPException(
                     status_code=400,
                     detail=(
-                        f"Expected {item.quantity} customization(s) for "
+                        f"Expected {qty} customization(s) for "
                         f"'{product.name}', got {len(provided)}"
                     ),
                 )
 
+    return grouped
+
+
+def _insert_customizations(
+    session: Session,
+    order: Order,
+    items_by_product_id: dict[uuid.UUID, OrderItem],
+    grouped: dict[uuid.UUID, list[tuple[str, str]]],
+) -> None:
+    """Insert ``OrderCustomization`` rows for a validated grouping."""
     for pid, custs in grouped.items():
         item = items_by_product_id[pid]
         for card_name, description in custs:
@@ -780,8 +792,29 @@ def update_order(
         return _order_to_detail(order, items, product_map, custom_map)
 
 
-@shop_router.post("/orders/create", response_model=OrderCreateResponse)
-async def create_order(request: OrderCreateRequest):
+def _validate_checkout_request(
+    session: Session,
+    request: OrderCreateRequest,
+) -> tuple[
+    list[Product],
+    dict[uuid.UUID, int],
+    dict[uuid.UUID, list[tuple[str, str]]],
+    float,
+    float,
+    float,
+    float,
+]:
+    """Validate cart + customer + customizations against current product data.
+
+    Used by both ``create_order`` (pre-PayPal) and ``capture_order``
+    (post-PayPal, before persisting). Returns the loaded products, quantity
+    map, validated customization grouping, item subtotal, shipping cost,
+    discount amount, and total.
+
+    Raises ``HTTPException`` on any validation failure. Does not lock rows;
+    capture re-runs stock validation under a ``FOR UPDATE`` lock right
+    before decrementing.
+    """
     if not request.items:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
@@ -792,230 +825,388 @@ async def create_order(request: OrderCreateRequest):
     product_ids = [uuid.UUID(item.product_id) for item in request.items]
     qty_map = {uuid.UUID(item.product_id): item.quantity for item in request.items}
 
-    with get_db_session() as session:
-        products = session.execute(
-            select(Product).where(Product.id.in_(product_ids))
-        ).scalars().all()
+    products = session.execute(
+        select(Product).where(Product.id.in_(product_ids))
+    ).scalars().all()
 
-        if len(products) != len(product_ids):
-            raise HTTPException(status_code=400, detail="One or more products not found")
+    if len(products) != len(product_ids):
+        raise HTTPException(status_code=400, detail="One or more products not found")
 
-        item_subtotal = 0.0
-
-        for product in products:
-            requested_qty = qty_map[product.id]
-
-            if not product.is_active:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Product '{product.name}' is no longer available",
-                )
-            if product.quantity <= 0:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"'{product.name}' is out of stock",
-                )
-            if product.quantity < requested_qty:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Not enough stock for '{product.name}' (available: {product.quantity})",
-                )
-
-            item_subtotal += float(product.price) * requested_qty
-
-        shipping_cost, discount_amount = _compute_shipping_and_discount(
-            cust.shipping_method,
-            cust.shipping_state,
-            list(products),
-            qty_map,
-        )
-        total = max(0.0, item_subtotal + shipping_cost - discount_amount)
-
-        full_name = f"{cust.first_name} {cust.last_name}".strip()
-        shipping = {
-            "name": {"full_name": full_name},
-            "address": {
-                "address_line_1": cust.shipping_street,
-                "admin_area_2": cust.shipping_city,
-                "admin_area_1": cust.shipping_state,
-                "postal_code": cust.shipping_zip,
-                "country_code": cust.shipping_country,
-            },
-        }
-
-        paypal_order_id = await paypal_service.create_order(
-            total=f"{total:.2f}",
-            currency="USD",
-            shipping=shipping,
-        )
-
-        order = Order(
-            paypal_order_id=paypal_order_id,
-            status=OrderStatus.PENDING,
-            customer_first_name=cust.first_name,
-            customer_last_name=cust.last_name,
-            customer_email=cust.email,
-            customer_discord_handle=cust.discord_handle,
-            shipping_street=cust.shipping_street,
-            shipping_city=cust.shipping_city,
-            shipping_state=cust.shipping_state,
-            shipping_zip=cust.shipping_zip,
-            shipping_country=cust.shipping_country,
-            shipping_method=cust.shipping_method,
-            shipping_cost=shipping_cost,
-            discount_amount=discount_amount,
-            notes=(cust.notes or None),
-            total_amount=total,
-        )
-        session.add(order)
-        session.flush()
-
-        items_by_product_id: dict[uuid.UUID, OrderItem] = {}
-        for product in products:
-            order_item = OrderItem(
-                order_id=order.id,
-                product_id=product.id,
-                quantity=qty_map[product.id],
-                unit_price=float(product.price),
+    item_subtotal = 0.0
+    for product in products:
+        requested_qty = qty_map[product.id]
+        if not product.is_active:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Product '{product.name}' is no longer available",
             )
-            session.add(order_item)
-            items_by_product_id[product.id] = order_item
-        session.flush()
+        if product.quantity <= 0:
+            raise HTTPException(
+                status_code=400,
+                detail=f"'{product.name}' is out of stock",
+            )
+        if product.quantity < requested_qty:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Not enough stock for '{product.name}' (available: {product.quantity})",
+            )
+        item_subtotal += float(product.price) * requested_qty
 
-        product_by_id = {p.id: p for p in products}
-        _persist_customizations(
-            session,
-            order,
-            items_by_product_id,
-            product_by_id,
-            request.customizations,
+    shipping_cost, discount_amount = _compute_shipping_and_discount(
+        cust.shipping_method,
+        cust.shipping_state,
+        list(products),
+        qty_map,
+    )
+    total = max(0.0, item_subtotal + shipping_cost - discount_amount)
+
+    product_by_id = {p.id: p for p in products}
+    grouped_customizations = _validate_customizations(
+        qty_map, product_by_id, request.customizations
+    )
+
+    return (
+        list(products),
+        qty_map,
+        grouped_customizations,
+        item_subtotal,
+        shipping_cost,
+        discount_amount,
+        total,
+    )
+
+
+@shop_router.post("/orders/create", response_model=OrderCreateResponse)
+async def create_order(request: OrderCreateRequest):
+    """Validate the cart and create a PayPal order. No DB rows are written.
+
+    The order is only persisted after the user approves the payment and the
+    frontend re-sends the cart payload to :func:`capture_order`, which then
+    captures the PayPal payment and inserts the ``Order`` row in a single
+    transaction. This avoids leaving abandoned ``pending`` orders in the DB.
+    """
+    with get_db_session() as session:
+        (
+            _products,
+            _qty_map,
+            _grouped,
+            _item_subtotal,
+            _shipping_cost,
+            _discount_amount,
+            total,
+        ) = _validate_checkout_request(session, request)
+
+    cust = request.customer
+    full_name = f"{cust.first_name} {cust.last_name}".strip()
+    shipping = {
+        "name": {"full_name": full_name},
+        "address": {
+            "address_line_1": cust.shipping_street,
+            "admin_area_2": cust.shipping_city,
+            "admin_area_1": cust.shipping_state,
+            "postal_code": cust.shipping_zip,
+            "country_code": cust.shipping_country,
+        },
+    }
+
+    paypal_order_id = await paypal_service.create_order(
+        total=f"{total:.2f}",
+        currency="USD",
+        shipping=shipping,
+    )
+
+    return OrderCreateResponse(paypal_order_id=paypal_order_id)
+
+
+def _write_orphan_capture_row(
+    paypal_order_id: str,
+    request: OrderCreateRequest,
+    total: float,
+    shipping_cost: float,
+    discount_amount: float,
+    reason: str,
+) -> str | None:
+    """Write a minimal ``Order(status=FAILED)`` row when a PayPal capture
+    succeeded but the main DB transaction could not persist the full order.
+
+    This is the failsafe that guarantees every successful PayPal charge has
+    *some* DB record an admin can find. Best-effort: returns the new order
+    id on success, ``None`` if even this insert fails (in which case the
+    error is logged and the admin will have to reconcile via the PayPal
+    dashboard alone).
+    """
+    cust = request.customer
+    try:
+        with get_db_session() as session:
+            existing = session.execute(
+                select(Order).where(Order.paypal_order_id == paypal_order_id)
+            ).scalar_one_or_none()
+            if existing is not None:
+                return str(existing.id)
+
+            orphan = Order(
+                paypal_order_id=paypal_order_id,
+                status=OrderStatus.FAILED,
+                customer_first_name=cust.first_name,
+                customer_last_name=cust.last_name,
+                customer_email=cust.email,
+                customer_discord_handle=cust.discord_handle,
+                shipping_street=cust.shipping_street,
+                shipping_city=cust.shipping_city,
+                shipping_state=cust.shipping_state,
+                shipping_zip=cust.shipping_zip,
+                shipping_country=cust.shipping_country,
+                shipping_method=cust.shipping_method,
+                shipping_cost=shipping_cost,
+                discount_amount=discount_amount,
+                notes=(
+                    f"AUTO: PayPal capture succeeded but order persist failed "
+                    f"({reason}). PayPal order id: {paypal_order_id}. "
+                    f"Reconcile manually."
+                ),
+                total_amount=total,
+            )
+            session.add(orphan)
+            session.commit()
+            session.refresh(orphan)
+            return str(orphan.id)
+    except Exception:
+        logger.exception(
+            "Failed to write orphan-capture row for PayPal order %s",
+            paypal_order_id,
         )
-
-        session.commit()
-
-        return OrderCreateResponse(
-            order_id=str(order.id),
-            paypal_order_id=paypal_order_id,
-        )
+        return None
 
 
 @shop_router.post("/orders/{paypal_order_id}/capture", response_model=OrderCaptureResponse)
-async def capture_order(paypal_order_id: str):
+async def capture_order(paypal_order_id: str, request: OrderCreateRequest):
+    """Capture a PayPal payment, then persist the order in one transaction.
+
+    The cart, customer info, and customizations are re-sent by the frontend
+    so the backend can persist the full order without ever leaving a
+    ``pending`` row in the DB. Validation is re-run server-side so a
+    tampered re-submission cannot slip past the original ``create`` check.
+
+    Flow:
+      1. Validate the resubmitted cart (products, stock, customizations).
+      2. Call PayPal capture. If it errors or is not ``COMPLETED``, return
+         an error and write nothing to the DB.
+      3. In a single transaction: lock product rows, re-check stock,
+         decrement, insert ``Order(status=PAID)`` + items + customizations.
+      4. Best-effort send receipt + admin emails.
+
+    If step 3 raises after the PayPal capture succeeded, we fall back to
+    inserting a minimal ``Order(status=FAILED)`` row so admins can always
+    reconcile a real charge.
+    """
     with get_db_session() as session:
-        order = session.execute(
-            select(Order).where(Order.paypal_order_id == paypal_order_id)
-        ).scalar_one_or_none()
+        (
+            _products,
+            _qty_map,
+            grouped_customizations,
+            _item_subtotal,
+            shipping_cost,
+            discount_amount,
+            total,
+        ) = _validate_checkout_request(session, request)
 
-        if not order:
-            raise HTTPException(status_code=404, detail="Order not found")
-        if order.status != OrderStatus.PENDING:
-            raise HTTPException(status_code=400, detail="Order is not in pending state")
+    try:
+        capture_data = await paypal_service.capture_order(paypal_order_id)
+    except Exception as e:
+        logger.error("PayPal capture failed for %s: %s", paypal_order_id, e)
+        raise HTTPException(status_code=502, detail="Payment capture failed")
 
-        try:
-            capture_data = await paypal_service.capture_order(paypal_order_id)
-        except Exception as e:
-            logger.error("PayPal capture failed for %s: %s", paypal_order_id, e)
-            order.status = OrderStatus.FAILED
-            session.commit()
-            raise HTTPException(status_code=502, detail="Payment capture failed")
+    if capture_data.get("status") != "COMPLETED":
+        raise HTTPException(status_code=400, detail="Payment was not completed")
 
-        if capture_data.get("status") != "COMPLETED":
-            order.status = OrderStatus.FAILED
-            session.commit()
-            raise HTTPException(status_code=400, detail="Payment was not completed")
+    cust = request.customer
+    try:
+        with get_db_session() as session:
+            existing = session.execute(
+                select(Order).where(Order.paypal_order_id == paypal_order_id)
+            ).scalar_one_or_none()
+            if existing is not None:
+                return OrderCaptureResponse(
+                    order_id=str(existing.id),
+                    status=existing.status.value,
+                    message="Order already recorded",
+                )
 
-        items = session.execute(
-            select(OrderItem).where(OrderItem.order_id == order.id)
-        ).scalars().all()
+            product_ids = list({uuid.UUID(item.product_id) for item in request.items})
+            qty_map = {
+                uuid.UUID(item.product_id): item.quantity for item in request.items
+            }
+            products = session.execute(
+                select(Product).where(Product.id.in_(product_ids)).with_for_update()
+            ).scalars().all()
+            product_map = {p.id: p for p in products}
 
-        product_ids = [item.product_id for item in items]
-        products = session.execute(
-            select(Product).where(Product.id.in_(product_ids)).with_for_update()
-        ).scalars().all()
-        product_map = {p.id: p for p in products}
-
-        for item in items:
-            product = product_map.get(item.product_id)
-            if not product or product.quantity < item.quantity:
-                order.status = OrderStatus.FAILED
-                session.commit()
+            if len(products) != len(product_ids):
                 raise HTTPException(
                     status_code=409,
-                    detail="Stock changed during payment — contact support",
+                    detail="Product changed during payment — contact support",
                 )
-            product.quantity -= item.quantity
 
-        order.status = OrderStatus.PAID
-        session.commit()
-
-        try:
-            order_url = (
-                f"{FRONTEND_URL.rstrip('/')}/shop/orders/{order.id}"
-                if FRONTEND_URL
-                else None
-            )
-            shipping_cost = float(order.shipping_cost or 0)
-            discount_amount = float(order.discount_amount or 0)
-            item_subtotal = sum(
-                float(item.unit_price) * item.quantity for item in items
-            )
-            email_ctx = OrderEmailContext(
-                order_id_short=str(order.id)[:8],
-                customer_first_name=order.customer_first_name,
-                customer_last_name=order.customer_last_name,
-                customer_email=order.customer_email,
-                customer_discord_handle=order.customer_discord_handle,
-                total_amount=float(order.total_amount),
-                shipping_address_lines=[
-                    order.shipping_street,
-                    f"{order.shipping_city}, {order.shipping_state} {order.shipping_zip}",
-                    order.shipping_country,
-                ],
-                items=[
-                    OrderEmailLineItem(
-                        name=product_map[item.product_id].name,
-                        quantity=item.quantity,
-                        unit_price=float(item.unit_price),
-                        line_total=float(item.unit_price) * item.quantity,
+            for pid, qty in qty_map.items():
+                product = product_map.get(pid)
+                if not product or product.quantity < qty:
+                    raise HTTPException(
+                        status_code=409,
+                        detail="Stock changed during payment — contact support",
                     )
-                    for item in items
-                ],
-                order_url=order_url,
-                shipping_method_label=_shipping_method_label(order.shipping_method),
-                item_subtotal=item_subtotal,
+                product.quantity -= qty
+
+            order = Order(
+                paypal_order_id=paypal_order_id,
+                status=OrderStatus.PAID,
+                customer_first_name=cust.first_name,
+                customer_last_name=cust.last_name,
+                customer_email=cust.email,
+                customer_discord_handle=cust.discord_handle,
+                shipping_street=cust.shipping_street,
+                shipping_city=cust.shipping_city,
+                shipping_state=cust.shipping_state,
+                shipping_zip=cust.shipping_zip,
+                shipping_country=cust.shipping_country,
+                shipping_method=cust.shipping_method,
                 shipping_cost=shipping_cost,
                 discount_amount=discount_amount,
+                notes=(cust.notes or None),
+                total_amount=total,
             )
+            session.add(order)
+            session.flush()
 
-            if order.customer_email:
-                send_order_receipt_email(order.customer_email, email_ctx)
-
-            admin_email = SHOP_ADMIN_EMAIL
-            if not admin_email:
-                creator = session.execute(
-                    select(User).where(func.lower(User.username) == "rosie")
-                ).scalar_one_or_none()
-                if creator and creator.email:
-                    admin_email = creator.email
-            if admin_email:
-                send_order_admin_notification_email(admin_email, email_ctx)
-            else:
-                logger.warning(
-                    "No admin email configured (set SHOP_ADMIN_EMAIL); "
-                    "skipping admin notification for order %s",
-                    order.id,
+            items_by_product_id: dict[uuid.UUID, OrderItem] = {}
+            items_in_order: list[OrderItem] = []
+            for product in products:
+                order_item = OrderItem(
+                    order_id=order.id,
+                    product_id=product.id,
+                    quantity=qty_map[product.id],
+                    unit_price=float(product.price),
                 )
-        except Exception:
-            logger.warning(
-                "Failed to dispatch order confirmation emails for order %s",
-                order.id,
-                exc_info=True,
+                session.add(order_item)
+                items_by_product_id[product.id] = order_item
+                items_in_order.append(order_item)
+            session.flush()
+
+            _insert_customizations(
+                session,
+                order,
+                items_by_product_id,
+                grouped_customizations,
             )
 
-        return OrderCaptureResponse(
-            order_id=str(order.id),
-            status="paid",
-            message="Payment successful, order confirmed",
+            session.commit()
+            session.refresh(order)
+            order_id_str = str(order.id)
+
+            try:
+                order_url = (
+                    f"{FRONTEND_URL.rstrip('/')}/shop/orders/{order.id}"
+                    if FRONTEND_URL
+                    else None
+                )
+                item_subtotal = sum(
+                    float(item.unit_price) * item.quantity
+                    for item in items_in_order
+                )
+                email_ctx = OrderEmailContext(
+                    order_id_short=str(order.id)[:8],
+                    customer_first_name=order.customer_first_name,
+                    customer_last_name=order.customer_last_name,
+                    customer_email=order.customer_email,
+                    customer_discord_handle=order.customer_discord_handle,
+                    total_amount=float(order.total_amount),
+                    shipping_address_lines=[
+                        order.shipping_street,
+                        f"{order.shipping_city}, {order.shipping_state} {order.shipping_zip}",
+                        order.shipping_country,
+                    ],
+                    items=[
+                        OrderEmailLineItem(
+                            name=product_map[item.product_id].name,
+                            quantity=item.quantity,
+                            unit_price=float(item.unit_price),
+                            line_total=float(item.unit_price) * item.quantity,
+                        )
+                        for item in items_in_order
+                    ],
+                    order_url=order_url,
+                    shipping_method_label=_shipping_method_label(order.shipping_method),
+                    item_subtotal=item_subtotal,
+                    shipping_cost=float(order.shipping_cost or 0),
+                    discount_amount=float(order.discount_amount or 0),
+                )
+
+                if order.customer_email:
+                    send_order_receipt_email(order.customer_email, email_ctx)
+
+                admin_email = SHOP_ADMIN_EMAIL
+                if not admin_email:
+                    creator = session.execute(
+                        select(User).where(func.lower(User.username) == "rosie")
+                    ).scalar_one_or_none()
+                    if creator and creator.email:
+                        admin_email = creator.email
+                if admin_email:
+                    send_order_admin_notification_email(admin_email, email_ctx)
+                else:
+                    logger.warning(
+                        "No admin email configured (set SHOP_ADMIN_EMAIL); "
+                        "skipping admin notification for order %s",
+                        order.id,
+                    )
+            except Exception:
+                logger.warning(
+                    "Failed to dispatch order confirmation emails for order %s",
+                    order.id,
+                    exc_info=True,
+                )
+
+            return OrderCaptureResponse(
+                order_id=order_id_str,
+                status="paid",
+                message="Payment successful, order confirmed",
+            )
+    except HTTPException as http_exc:
+        orphan_id = _write_orphan_capture_row(
+            paypal_order_id,
+            request,
+            total,
+            shipping_cost,
+            discount_amount,
+            reason=f"HTTP {http_exc.status_code}: {http_exc.detail}",
+        )
+        logger.error(
+            "Order persist failed post-capture for PayPal %s (orphan row: %s): %s",
+            paypal_order_id,
+            orphan_id,
+            http_exc.detail,
+        )
+        raise
+    except Exception as exc:
+        orphan_id = _write_orphan_capture_row(
+            paypal_order_id,
+            request,
+            total,
+            shipping_cost,
+            discount_amount,
+            reason=f"{type(exc).__name__}: {exc}",
+        )
+        logger.exception(
+            "Unexpected error persisting order after PayPal capture %s (orphan row: %s)",
+            paypal_order_id,
+            orphan_id,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Payment succeeded but the order could not be saved. "
+                "Support has been notified — please contact us with your "
+                "PayPal confirmation."
+            ),
         )
 
 
@@ -1083,6 +1274,10 @@ def create_custom_order(
         session.flush()
 
         product_map = {p.id: p for p in products}
+        grouped_customizations = _validate_customizations(
+            qty_map, product_map, request.customizations
+        )
+
         items: list[OrderItem] = []
         items_by_product_id: dict[uuid.UUID, OrderItem] = {}
         for product in products:
@@ -1099,12 +1294,11 @@ def create_custom_order(
             product.quantity -= qty
         session.flush()
 
-        _persist_customizations(
+        _insert_customizations(
             session,
             order,
             items_by_product_id,
-            product_map,
-            request.customizations,
+            grouped_customizations,
         )
 
         session.commit()

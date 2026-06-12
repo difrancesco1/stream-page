@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "@/app/context/auth-context"
 import { fetchCatImages, deleteCatImage, type CatImage } from "@/app/api/cat/actions"
-import { getImageUrl } from "@/lib/api"
+import { getImageUrl, isBackendImage } from "@/lib/api"
 import Image from "next/image"
 
 interface CatPictureCardProps {
@@ -85,8 +85,9 @@ return (
                                 alt={`Cat by ${cat.contributor_username}`}
                                 width={130}
                                 height={110}
+                                sizes="(max-width: 640px) 50vw, 160px"
                                 className="pixel-borders bg-white w-full"
-                                unoptimized
+                                unoptimized={isBackendImage(cat.image_url)}
                             />
                         <div className="absolute pl-[var(--spacing-sm)] w-full leading-tight bg-background pixel-borders">
                             <div className="grid-container">

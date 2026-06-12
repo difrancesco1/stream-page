@@ -65,8 +65,7 @@ class SupabaseStorageService:
             img.load()
             img = ImageOps.exif_transpose(img)
 
-            # Resize overly-large images to reduce upload size (conservative default).
-            max_dim = 2560
+            max_dim = 1920
             w, h = img.size
             largest = max(w, h)
             if largest > max_dim:
@@ -79,13 +78,12 @@ class SupabaseStorageService:
             if ext in {".jpg", ".jpeg"}:
                 if img.mode not in {"RGB", "L"}:
                     img = img.convert("RGB")
-                img.save(out, format="JPEG", quality=85, optimize=True, progressive=True)
+                img.save(out, format="JPEG", quality=75, optimize=True, progressive=True)
             elif ext == ".png":
                 # PNG optimization is lossless; may not always reduce size.
                 img.save(out, format="PNG", optimize=True, compress_level=9)
             elif ext == ".webp":
-                # WebP is lossy by default; reasonable quality/method for size reduction.
-                img.save(out, format="WEBP", quality=80, method=6)
+                img.save(out, format="WEBP", quality=75, method=6)
 
             compressed = out.getvalue()
             if compressed and len(compressed) < len(file_content):
@@ -95,13 +93,19 @@ class SupabaseStorageService:
         except Exception:
             return file_content
 
+    _LONG_CACHE_CONTROL_SECONDS = "31536000"
+
     def _upload(self, path: str, file_content: bytes, content_type: str) -> str:
         """Low-level helper that pushes bytes to Supabase and returns public URL."""
         try:
             self.supabase.storage.from_(self.bucket).upload(
                 path=path,
                 file=file_content,
-                file_options={"content-type": content_type, "upsert": "true"},
+                file_options={
+                    "content-type": content_type,
+                    "upsert": "true",
+                    "cache-control": self._LONG_CACHE_CONTROL_SECONDS,
+                },
             )
             return self.supabase.storage.from_(self.bucket).get_public_url(path)
         except Exception as e:
