@@ -1707,7 +1707,7 @@ def update_customization(
         session.refresh(customization)
         total_qty = _sum_order_quantity(session, order.id)
         return _customization_to_queue_row(
-            customization, order, product.name, total_qty
+            customization, order, product.name, total_qty, product.category
         )
 
 
@@ -1754,7 +1754,7 @@ async def upload_customization_image(
         session.refresh(customization)
         total_qty = _sum_order_quantity(session, order.id)
         response = _customization_to_queue_row(
-            customization, order, product.name, total_qty
+            customization, order, product.name, total_qty, product.category
         )
 
     if previous_url and previous_url != new_url and "supabase.co" in previous_url:
@@ -1785,7 +1785,7 @@ def delete_customization_image(
         session.refresh(customization)
         total_qty = _sum_order_quantity(session, order.id)
         response = _customization_to_queue_row(
-            customization, order, product.name, total_qty
+            customization, order, product.name, total_qty, product.category
         )
 
     if previous_url and "supabase.co" in previous_url:
@@ -1818,7 +1818,9 @@ def update_order_item(
         session.commit()
         session.refresh(item)
         total_qty = _sum_order_quantity(session, order.id)
-        return _orderitem_to_queue_row(item, order, product.name, total_qty)
+        return _orderitem_to_queue_row(
+            item, order, product.name, total_qty, product.category
+        )
 
 
 # ---------------------------------------------------------------------------

@@ -11,7 +11,6 @@ interface OrderCardProps {
     rows: CustomizationQueueRow[];
     busyIds: Set<string>;
     imageBusyIds: Set<string>;
-    showNotes: boolean;
     onToggle: (row: CustomizationQueueRow, next: boolean) => void;
     onUploadImage: (row: CustomizationQueueRow, file: File) => Promise<void>;
 }
@@ -25,7 +24,6 @@ export default function OrderCard({
     rows,
     busyIds,
     imageBusyIds,
-    showNotes,
     onToggle,
     onUploadImage,
 }: OrderCardProps) {
@@ -94,7 +92,6 @@ export default function OrderCard({
                                 key={r.id}
                                 row={r}
                                 imageBusy={imageBusyIds.has(r.id)}
-                                showNotes={showNotes}
                                 onUploadImage={(file) =>
                                     onUploadImage(r, file)
                                 }

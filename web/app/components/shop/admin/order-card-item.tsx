@@ -9,7 +9,6 @@ import type { CustomizationQueueRow } from "@/app/api/shop/order-actions";
 interface OrderCardItemProps {
     row: CustomizationQueueRow;
     imageBusy: boolean;
-    showNotes: boolean;
     onUploadImage: (file: File) => Promise<void>;
 }
 
@@ -23,7 +22,6 @@ function itemTitle(row: CustomizationQueueRow): string {
 export default function OrderCardItem({
     row,
     imageBusy,
-    showNotes,
     onUploadImage,
 }: OrderCardItemProps) {
     const isCustom = row.kind === "custom";
@@ -64,19 +62,21 @@ export default function OrderCardItem({
             )}
 
             <div className="flex-1 min-w-0 flex flex-col gap-[0.25rem]">
-                <span
-                    className={`main-text text-[0.875rem] break-words font-bold ${
-                        row.is_complete ? "line-through" : ""
-                    }`}
-                >
-                    {itemTitle(row)}
-                </span>
-
-                {showNotes && isCustom && row.description && (
-                    <span className="main-text text-[0.6875rem] opacity-70 whitespace-pre-wrap break-words">
-                        {row.description}
+                <div className="flex items-baseline gap-[var(--spacing-sm)]">
+                    <span
+                        className={`main-text text-[0.875rem] break-words font-bold shrink-0 ${
+                            row.is_complete ? "line-through" : ""
+                        }`}
+                    >
+                        {itemTitle(row)}
                     </span>
-                )}
+
+                    {isCustom && row.description && (
+                        <span className="main-text text-[0.6875rem] opacity-70 whitespace-pre-wrap break-words text-right min-w-0 flex-1">
+                            {row.description}
+                        </span>
+                    )}
+                </div>
 
                 {isCustom && (
                     <>

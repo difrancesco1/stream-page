@@ -256,7 +256,6 @@ export default function CustomQueueList({
                                               rows={group}
                                               busyIds={busyIds}
                                               imageBusyIds={imageBusyIds}
-                                              showNotes={customOnly}
                                               onToggle={handleToggle}
                                               onUploadImage={handleUploadImage}
                                           />
@@ -315,7 +314,6 @@ export default function CustomQueueList({
                                               rows={group}
                                               busyIds={busyIds}
                                               imageBusyIds={imageBusyIds}
-                                              showNotes={customOnly}
                                               onToggle={handleToggle}
                                               onUploadImage={handleUploadImage}
                                           />
