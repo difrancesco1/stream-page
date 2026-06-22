@@ -2,16 +2,16 @@
 
 import Link from "next/link";
 
-type Tab = "products" | "orders" | "custom" | "pending" | "deprecated";
+export type Tab = "products" | "orders" | "custom" | "cards" | "deprecated";
 
 interface AdminTabsProps {
     active: Tab;
 }
 
 const TABS: { id: Tab; label: string; href: string }[] = [
+    { id: "cards", label: "custom cards", href: "/shop/admin/cards" },
     { id: "custom", label: "orders", href: "/shop/admin/orders/custom" },
     { id: "products", label: "products", href: "/shop/admin" },
-    { id: "pending", label: "pending", href: "/shop/admin/orders/pending" },
     { id: "orders", label: "deprecated", href: "/shop/admin/orders" },
 ];
 

@@ -12,16 +12,27 @@ import {
 } from "@/app/api/shop/order-actions";
 import { useAuth } from "@/app/context/auth-context";
 
-import AdminTabs from "./admin-tabs";
+import AdminTabs, { type Tab } from "./admin-tabs";
 import CustomQueueRowView from "./custom-queue-row";
+import OrderCard from "./order-card";
+import TopSellers from "./top-sellers";
 
-export default function CustomQueueList() {
+interface CustomQueueListProps {
+    activeTab?: Tab;
+    customOnly?: boolean;
+}
+
+export default function CustomQueueList({
+    activeTab = "custom",
+    customOnly = false,
+}: CustomQueueListProps = {}) {
     const { token } = useAuth();
     const [rows, setRows] = useState<CustomizationQueueRow[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
     const [imageBusyIds, setImageBusyIds] = useState<Set<string>>(new Set());
+    const [doneOpen, setDoneOpen] = useState(false);
 
     const fetchRows = useCallback(async () => {
         if (!token) return;
@@ -45,10 +56,11 @@ export default function CustomQueueList() {
         const todo: CustomizationQueueRow[] = [];
         const done: CustomizationQueueRow[] = [];
         for (const r of rows) {
+            if (customOnly && r.kind !== "custom") continue;
             (r.is_complete ? done : todo).push(r);
         }
         return { todo, done };
-    }, [rows]);
+    }, [rows, customOnly]);
 
     // For each row we want to show every sibling line in the same parent
     // order so the admin can see the full order at a glance and tell which
@@ -62,6 +74,25 @@ export default function CustomQueueList() {
         }
         return map;
     }, [rows]);
+
+    // Orders-tab grouping: one card per order. An order is "done" only when
+    // every item in it is complete; otherwise it stays in "to do" (with the
+    // finished items struck-through inside). Sorted oldest order first.
+    const { todoOrders, doneOrders } = useMemo(() => {
+        const groups = Array.from(siblingsByOrder.values()).sort(
+            (a, b) =>
+                new Date(a[0].order_created_at).getTime() -
+                new Date(b[0].order_created_at).getTime(),
+        );
+        const todoOrders: CustomizationQueueRow[][] = [];
+        const doneOrders: CustomizationQueueRow[][] = [];
+        for (const group of groups) {
+            (group.every((r) => r.is_complete) ? doneOrders : todoOrders).push(
+                group,
+            );
+        }
+        return { todoOrders, doneOrders };
+    }, [siblingsByOrder]);
 
     const handleToggle = useCallback(
         async (row: CustomizationQueueRow, next: boolean) => {
@@ -146,7 +177,7 @@ export default function CustomQueueList() {
     );
 
     return (
-        <div className="w-full max-w-[50rem] mx-auto flex flex-col gap-[var(--spacing-md)]">
+        <div className="w-full max-w-[80rem] mx-auto flex flex-col gap-[var(--spacing-md)]">
             <div className="flex items-center justify-between gap-[var(--spacing-sm)]">
                 <span className="main-text text-[1.125rem] md:text-[1.25rem]">
                     manage shop
@@ -162,7 +193,7 @@ export default function CustomQueueList() {
                 </Link>
             </div>
 
-            <AdminTabs active="custom" />
+            <AdminTabs active={activeTab} />
 
             {isLoading ? (
                 <div className="main-text text-[0.875rem] text-[color:var(--border)] opacity-70">
@@ -174,72 +205,121 @@ export default function CustomQueueList() {
                         {error}
                     </span>
                 </div>
-            ) : rows.length === 0 ? (
+            ) : (customOnly ? todo.length + done.length === 0 : rows.length === 0) ? (
                 <div className="pixel-borders bg-foreground p-[var(--spacing-md)]">
                     <span className="main-text text-[0.875rem] text-[color:var(--border)] opacity-70">
-                        No custom card art requests yet.
+                        {customOnly
+                            ? "No custom card requests yet."
+                            : "No custom card art requests yet."}
                     </span>
                 </div>
             ) : (
                 <>
+                    {!customOnly && <TopSellers rows={rows} />}
+
                     <section className="flex flex-col gap-[var(--spacing-sm)]">
                         <div className="main-text text-[0.875rem] text-[color:var(--border)]">
-                            to do ({todo.length})
+                            to do ({customOnly ? todo.length : todoOrders.length})
                         </div>
-                        {todo.length === 0 ? (
+                        {(customOnly ? todo.length : todoOrders.length) === 0 ? (
                             <div className="pixel-borders bg-foreground p-[var(--spacing-sm)]">
                                 <span className="main-text text-[0.75rem] opacity-70">
                                     All caught up.
                                 </span>
                             </div>
                         ) : (
-                            <div className="flex flex-col gap-[var(--spacing-sm)]">
-                                {todo.map((r) => (
-                                    <CustomQueueRowView
-                                        key={r.id}
-                                        row={r}
-                                        siblings={
-                                            siblingsByOrder.get(r.order_id) ?? [r]
-                                        }
-                                        busy={busyIds.has(r.id)}
-                                        imageBusy={imageBusyIds.has(r.id)}
-                                        onToggle={(next) => handleToggle(r, next)}
-                                        onUploadImage={(file) =>
-                                            handleUploadImage(r, file)
-                                        }
-                                    />
-                                ))}
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[var(--spacing-sm)] items-start">
+                                {customOnly
+                                    ? todo.map((r) => (
+                                          <CustomQueueRowView
+                                              key={r.id}
+                                              row={r}
+                                              siblings={
+                                                  siblingsByOrder.get(
+                                                      r.order_id,
+                                                  ) ?? [r]
+                                              }
+                                              busy={busyIds.has(r.id)}
+                                              imageBusy={imageBusyIds.has(r.id)}
+                                              showNotes={customOnly}
+                                              onToggle={(next) =>
+                                                  handleToggle(r, next)
+                                              }
+                                              onUploadImage={(file) =>
+                                                  handleUploadImage(r, file)
+                                              }
+                                          />
+                                      ))
+                                    : todoOrders.map((group) => (
+                                          <OrderCard
+                                              key={group[0].order_id}
+                                              rows={group}
+                                              busyIds={busyIds}
+                                              imageBusyIds={imageBusyIds}
+                                              showNotes={customOnly}
+                                              onToggle={handleToggle}
+                                              onUploadImage={handleUploadImage}
+                                          />
+                                      ))}
                             </div>
                         )}
                     </section>
 
                     <section className="flex flex-col gap-[var(--spacing-sm)]">
-                        <div className="main-text text-[0.875rem] text-[color:var(--border)]">
-                            done ({done.length})
-                        </div>
-                        {done.length === 0 ? (
+                        <button
+                            type="button"
+                            onClick={() => setDoneOpen((v) => !v)}
+                            aria-expanded={doneOpen}
+                            className="flex items-center gap-[var(--spacing-xs)] self-start
+                                main-text text-[0.875rem] text-[color:var(--border)] cursor-pointer"
+                        >
+                            <span>{doneOpen ? "\u25be" : "\u25b8"}</span>
+                            <span>
+                                done ({customOnly ? done.length : doneOrders.length})
+                            </span>
+                        </button>
+                        {!doneOpen ? null : (customOnly
+                              ? done.length
+                              : doneOrders.length) === 0 ? (
                             <div className="pixel-borders bg-foreground p-[var(--spacing-sm)]">
                                 <span className="main-text text-[0.75rem] opacity-70">
                                     Nothing finished yet.
                                 </span>
                             </div>
                         ) : (
-                            <div className="flex flex-col gap-[var(--spacing-sm)]">
-                                {done.map((r) => (
-                                    <CustomQueueRowView
-                                        key={r.id}
-                                        row={r}
-                                        siblings={
-                                            siblingsByOrder.get(r.order_id) ?? [r]
-                                        }
-                                        busy={busyIds.has(r.id)}
-                                        imageBusy={imageBusyIds.has(r.id)}
-                                        onToggle={(next) => handleToggle(r, next)}
-                                        onUploadImage={(file) =>
-                                            handleUploadImage(r, file)
-                                        }
-                                    />
-                                ))}
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[var(--spacing-sm)] items-start">
+                                {customOnly
+                                    ? done.map((r) => (
+                                          <CustomQueueRowView
+                                              key={r.id}
+                                              row={r}
+                                              siblings={
+                                                  siblingsByOrder.get(
+                                                      r.order_id,
+                                                  ) ?? [r]
+                                              }
+                                              busy={busyIds.has(r.id)}
+                                              imageBusy={imageBusyIds.has(r.id)}
+                                              showNotes={customOnly}
+                                              onToggle={(next) =>
+                                                  handleToggle(r, next)
+                                              }
+                                              onUploadImage={(file) =>
+                                                  handleUploadImage(r, file)
+                                              }
+                                          />
+                                      ))
+                                    : doneOrders.map((group) => (
+                                          <OrderCard
+                                              key={group[0].order_id}
+                                              rows={group}
+                                              busyIds={busyIds}
+                                              imageBusyIds={imageBusyIds}
+                                              showNotes={customOnly}
+                                              onToggle={handleToggle}
+                                              onUploadImage={handleUploadImage}
+                                          />
+                                      ))}
                             </div>
                         )}
                     </section>

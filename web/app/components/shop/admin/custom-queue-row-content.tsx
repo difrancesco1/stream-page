@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { type RefObject } from "react";
 
 import Image from "next/image";
 
 import type { CustomizationQueueRow } from "@/app/api/shop/order-actions";
 
-import CopyAllIcon from '@mui/icons-material/CopyAll';
+import { CopyButton, Field, formatShippingAddress } from "./queue-row-helpers";
 
 interface CustomQueueRowContentProps {
     row: CustomizationQueueRow;
@@ -15,6 +15,7 @@ interface CustomQueueRowContentProps {
     placed: string;
     busy: boolean;
     imageBusy: boolean;
+    showNotes: boolean;
     fileInputRef: RefObject<HTMLInputElement | null>;
     onToggle: (next: boolean) => void;
     onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void | Promise<void>;
@@ -27,78 +28,6 @@ function siblingLabel(s: CustomizationQueueRow): string {
     return s.product_name;
 }
 
-function formatShippingAddress(row: CustomizationQueueRow): string {
-    const cityLine = [
-        row.shipping_city,
-        [row.shipping_state, row.shipping_zip].filter(Boolean).join(" "),
-    ]
-        .filter(Boolean)
-        .join(", ");
-    return [row.shipping_street, cityLine, row.shipping_country]
-        .filter((line) => line && line.trim().length > 0)
-        .join("\n");
-}
-
-function CopyButton({ label, value }: { label: string; value: string }) {
-    const [copied, setCopied] = useState(false);
-    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    useEffect(
-        () => () => {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        },
-        [],
-    );
-
-    const onClick = useCallback(async () => {
-        try {
-            await navigator.clipboard.writeText(value);
-            setCopied(true);
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            timeoutRef.current = setTimeout(() => setCopied(false), 1500);
-        } catch {
-            // Clipboard API can fail in insecure contexts; silently no-op so
-            // the admin can still read the value off the order detail page.
-        }
-    }, [value]);
-
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            disabled={!value}
-            className="pixel-borders pixel-btn-border px-[var(--spacing-sm)] py-[0.25rem]
-                main-text text-[0.625rem] uppercase cursor-pointer
-                disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-            {copied ? "copied!" : ` ${label} `} <CopyAllIcon className="!w-4 !h-4" />
-        </button>
-    );
-}
-
-function Field({
-    label,
-    children,
-    valueClassName,
-}: {
-    label: string;
-    children: React.ReactNode;
-    valueClassName?: string;
-}) {
-    return (
-        <div className="flex flex-col min-w-0 leading-none">
-            <span className="main-text text-[0.625rem] uppercase opacity-60">
-                {label}
-            </span>
-            <div
-                className={`main-text text-[0.875rem] break-words ${valueClassName ?? ""}`}
-            >
-                {children}
-            </div>
-        </div>
-    );
-}
-
 export default function CustomQueueRowContent({
     row,
     siblings,
@@ -106,6 +35,7 @@ export default function CustomQueueRowContent({
     placed,
     busy,
     imageBusy,
+    showNotes,
     fileInputRef,
     onToggle,
     onFileChange,
@@ -117,20 +47,20 @@ export default function CustomQueueRowContent({
         `${row.customer_first_name} ${row.customer_last_name}`.trim();
 
     return (
-        <div className="bg-foreground p-[var(--spacing-md)] flex flex-col gap-[var(--spacing-md)]">
-            <div className="flex justify-between gap-[var(--spacing-md)]">
+        <div className="bg-foreground p-[var(--spacing-sm)] flex flex-col gap-[var(--spacing-sm)]">
+            <div className="flex justify-between gap-[var(--spacing-sm)]">
                 <Field label="discord">{handle}</Field>
                 <Field label="date">{placed}</Field>
             </div>
             <hr />
 
-            <div className="flex justify-between gap-[var(--spacing-md)]">
-                <div className="flex-1 min-w-0 flex flex-col gap-[var(--spacing-md)]">
+            <div className="flex flex-col gap-[var(--spacing-sm)]">
+                <div className="flex-1 min-w-0 flex flex-col gap-[var(--spacing-sm)]">
                     <Field label={cardLabel} valueClassName="font-bold">
                         {row.card_name}
                     </Field>
 
-                    {row.description && (
+                    {showNotes && isCustom && row.description && (
                         <Field
                             label="notes"
                             valueClassName="whitespace-pre-wrap"
@@ -144,14 +74,14 @@ export default function CustomQueueRowContent({
                             href={row.image_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="pixel-borders bg-background p-[0.25rem] self-start w-[12rem]"
+                            className="pixel-borders bg-background p-[0.25rem] self-start w-[8rem]"
                         >
                             <div className="relative w-full aspect-square">
                                 <Image
                                     src={row.image_url}
                                     alt={`Card art for ${row.card_name}`}
                                     fill
-                                    sizes="192px"
+                                    sizes="128px"
                                     className="object-contain"
                                 />
                             </div>
@@ -160,7 +90,7 @@ export default function CustomQueueRowContent({
                 </div>
 
                 {siblings.length > 0 && (
-                    <div className="flex flex-col leading-none gap-[0.25rem] shrink-0 max-w-[14rem]">
+                    <div className="flex flex-col leading-none gap-[0.25rem] min-w-0">
                         <span className="main-text text-[0.625rem] uppercase opacity-60">
                             order items
                         </span>
@@ -184,7 +114,7 @@ export default function CustomQueueRowContent({
 
             <hr />
 
-            <div className="flex items-center justify-between gap-[var(--spacing-sm)]">
+            <div className="flex flex-wrap items-center justify-between gap-[var(--spacing-sm)]">
                 <div className="flex flex-wrap items-center gap-[var(--spacing-xs)]">
                     {isCustom && (
                         <>
@@ -212,10 +142,14 @@ export default function CustomQueueRowContent({
                             </button>
                         </>
                     )}
-
-                    <CopyButton label="name" value={customerName} />
-                    <CopyButton label="address" value={shippingAddress} />
                     <CopyButton label="email" value={row.customer_email} />
+                    <CopyButton label="name" value={customerName} />
+                    {shippingAddress && (
+                        <CopyButton label="address" value={shippingAddress} />
+                    )}
+                    <span className="main-text text-[0.625rem] uppercase opacity-80 pl-1">
+                            Shipping: {row.shipping_method ?? "—"}
+                    </span>
                 </div>
 
                 <label className="flex items-center gap-[var(--spacing-xs)] cursor-pointer">

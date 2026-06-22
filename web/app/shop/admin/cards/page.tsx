@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import PendingOrdersList from "@/app/components/shop/admin/pending-orders-list";
+import CustomQueueList from "@/app/components/shop/admin/custom-queue-list";
 import { useAuth } from "@/app/context/auth-context";
 
 function AdminBackground() {
@@ -19,7 +19,7 @@ function AdminBackground() {
     );
 }
 
-export default function ShopAdminPendingPage() {
+export default function ShopAdminCustomCardsPage() {
     const { user, isLoading, isAuthenticated } = useAuth();
 
     if (isLoading) {
@@ -60,7 +60,7 @@ export default function ShopAdminPendingPage() {
         <div className="relative w-full min-h-screen">
             <AdminBackground />
             <div className="relative p-[0.75rem] md:p-[1.25rem] lg:p-[1.825rem]">
-                <PendingOrdersList />
+                <CustomQueueList activeTab="cards" customOnly />
             </div>
         </div>
     );

@@ -152,8 +152,10 @@ class CustomizationQueueRow(BaseModel):
     shipping_state: str
     shipping_zip: str
     shipping_country: str
+    shipping_method: str | None = None
     product_name: str
     order_total_quantity: int
+    is_preorder: bool = False
 
 
 class CustomizationUpdateRequest(BaseModel):

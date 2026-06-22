@@ -45,8 +45,10 @@ export type CustomizationQueueRow = {
     shipping_state: string;
     shipping_zip: string;
     shipping_country: string;
+    shipping_method: string | null;
     product_name: string;
     order_total_quantity: number;
+    is_preorder: boolean;
 };
 
 export type ListCustomizationsResult =

@@ -1442,6 +1442,7 @@ def _customization_to_queue_row(
     order: Order,
     product_name: str,
     order_total_quantity: int,
+    category: ProductCategory,
 ) -> CustomizationQueueRow:
     return CustomizationQueueRow(
         id=str(customization.id),
@@ -1465,8 +1466,10 @@ def _customization_to_queue_row(
         shipping_state=order.shipping_state,
         shipping_zip=order.shipping_zip,
         shipping_country=order.shipping_country,
+        shipping_method=_shipping_method_label(order.shipping_method),
         product_name=product_name,
         order_total_quantity=order_total_quantity,
+        is_preorder=category == ProductCategory.PREORDER,
     )
 
 
@@ -1475,6 +1478,7 @@ def _orderitem_to_queue_row(
     order: Order,
     product_name: str,
     order_total_quantity: int,
+    category: ProductCategory,
 ) -> CustomizationQueueRow:
     """Map a non-custom ``OrderItem`` (stickers/tokens/etc.) into a queue row.
 
@@ -1501,8 +1505,10 @@ def _orderitem_to_queue_row(
         shipping_state=order.shipping_state,
         shipping_zip=order.shipping_zip,
         shipping_country=order.shipping_country,
+        shipping_method=_shipping_method_label(order.shipping_method),
         product_name=product_name,
         order_total_quantity=order_total_quantity,
+        is_preorder=category == ProductCategory.PREORDER,
     )
 
 
@@ -1575,13 +1581,13 @@ def list_customizations(
                 for c in customs_by_item.get(item.id, []):
                     result.append(
                         _customization_to_queue_row(
-                            c, order, product.name, total_qty
+                            c, order, product.name, total_qty, product.category
                         )
                     )
             else:
                 result.append(
                     _orderitem_to_queue_row(
-                        item, order, product.name, total_qty
+                        item, order, product.name, total_qty, product.category
                     )
                 )
 
