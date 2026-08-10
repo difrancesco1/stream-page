@@ -1220,6 +1220,7 @@ async def capture_order(paypal_order_id: str, request: OrderCreateRequest):
                     item_subtotal=item_subtotal,
                     shipping_cost=float(order.shipping_cost or 0),
                     discount_amount=float(order.discount_amount or 0),
+                    order_date=order.created_at,
                 )
 
                 if order.customer_email:
@@ -1414,6 +1415,7 @@ def create_custom_order(
                     for item in items
                 ],
                 order_url=order_url,
+                order_date=order.created_at,
             )
 
             if order.customer_email:
