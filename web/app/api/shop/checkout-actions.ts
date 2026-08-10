@@ -15,7 +15,11 @@ export type CartCustomizationPayload = {
     description: string;
 };
 
-export type ShippingMethodValue = "tracking" | "no_tracking" | "pickup";
+export type ShippingMethodValue =
+    | "tracking"
+    | "no_tracking"
+    | "pickup"
+    | "international";
 
 export type CheckoutCustomerInfo = {
     first_name: string;

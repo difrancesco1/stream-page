@@ -10,7 +10,6 @@ import CartSection from "./cart-section";
 import { useCart } from "./cart-context";
 import CheckoutModal from "./checkout-modal";
 import ContactModal from "./contact-modal";
-import CustomOrderModal from "./custom-order-modal";
 import type { ShopItem } from "./types";
 
 interface ShopShellProps {
@@ -92,7 +91,8 @@ export default function ShopShell({
         open={contactOpen}
         onOpenChange={setContactOpen}
       />
-      <CustomOrderModal
+      <CheckoutModal
+        mode="admin"
         open={customOrderOpen}
         onOpenChange={setCustomOrderOpen}
         items={items}
