@@ -11,7 +11,7 @@ import {
 export const TRACKING_COST = 6;
 export const NO_TRACKING_COST = 1;
 export const PICKUP_DISCOUNT_RATE = 0.2;
-export const INTERNATIONAL_SHIPPING_COST = 15;
+export const INTERNATIONAL_SHIPPING_COST = 10;
 
 export const SHIPPING_METHOD_LABELS: Record<ShippingMethod, string> = {
   tracking: "Tracking",
