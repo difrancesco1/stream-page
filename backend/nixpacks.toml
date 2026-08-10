@@ -1,0 +1,5 @@
+# Ensure the ffmpeg binary is available at build/runtime for media transcoding
+# (GIF -> animated WebP, MP4/WebM -> VP9 WebM). "..." preserves the packages
+# Nixpacks auto-detects for the Python app.
+[phases.setup]
+nixPkgs = ["...", "ffmpeg"]
