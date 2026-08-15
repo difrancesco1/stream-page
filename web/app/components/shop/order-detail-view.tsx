@@ -17,6 +17,7 @@ const SHIPPING_METHOD_LABELS: Record<OrderShippingMethod, string> = {
     tracking: "Tracking",
     no_tracking: "No tracking",
     pickup: "Pickup",
+    international: "International",
 };
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {

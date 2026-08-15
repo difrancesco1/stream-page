@@ -1,31 +1,25 @@
 import uuid
-from io import BytesIO
 from pathlib import Path
-from typing import Optional
 from supabase import create_client, Client
 from fastapi import HTTPException
-from PIL import Image, ImageOps
 
 from streampage.config import SUPABASE_URL, SUPABASE_SERVICE_KEY, SUPABASE_BUCKET
+from streampage.services.media_conversion import (
+    MediaConversionError,
+    image_to_webp,
+    video_to_webm,
+)
 
 
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
 ALLOWED_VIDEO_EXTENSIONS = {".mp4", ".webm"}
 MAX_VIDEO_BYTES = 50 * 1024 * 1024
 
+# Image inputs that we transcode to WebP before storing. GIF is included even
+# though it is not in ALLOWED_IMAGE_EXTENSIONS because several endpoints accept
+# GIF uploads and route them through upload_image.
+CONVERTIBLE_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 
-IMAGE_CONTENT_TYPES = {
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".png": "image/png",
-    ".gif": "image/gif",
-    ".webp": "image/webp",
-}
-
-VIDEO_CONTENT_TYPES = {
-    ".mp4": "video/mp4",
-    ".webm": "video/webm",
-}
 
 DOC_CONTENT_TYPES = {
     ".pdf": "application/pdf",
@@ -45,54 +39,6 @@ class SupabaseStorageService:
         self.supabase: Client = create_client(url, key)
         self.bucket = bucket
     
-    @staticmethod
-    def _maybe_compress_image(file_content: bytes, extension: str) -> bytes:
-        """
-        Best-effort image compression using Pillow.
-
-        - Only attempts JPEG/PNG/WebP
-        - Preserves the original extension/format
-        - Never returns a larger payload than the original (falls back to original)
-        - On any error, falls back to original
-        """
-        ext = (extension or "").lower()
-
-        if ext not in {".jpg", ".jpeg", ".png", ".webp"}:
-            return file_content
-
-        try:
-            img = Image.open(BytesIO(file_content))
-            img.load()
-            img = ImageOps.exif_transpose(img)
-
-            max_dim = 1920
-            w, h = img.size
-            largest = max(w, h)
-            if largest > max_dim:
-                scale = max_dim / float(largest)
-                new_size = (max(1, int(round(w * scale))), max(1, int(round(h * scale))))
-                img = img.resize(new_size, Image.LANCZOS)
-
-            out = BytesIO()
-
-            if ext in {".jpg", ".jpeg"}:
-                if img.mode not in {"RGB", "L"}:
-                    img = img.convert("RGB")
-                img.save(out, format="JPEG", quality=75, optimize=True, progressive=True)
-            elif ext == ".png":
-                # PNG optimization is lossless; may not always reduce size.
-                img.save(out, format="PNG", optimize=True, compress_level=9)
-            elif ext == ".webp":
-                img.save(out, format="WEBP", quality=75, method=6)
-
-            compressed = out.getvalue()
-            if compressed and len(compressed) < len(file_content):
-                return compressed
-
-            return file_content
-        except Exception:
-            return file_content
-
     _LONG_CACHE_CONTROL_SECONDS = "31536000"
 
     def _upload(self, path: str, file_content: bytes, content_type: str) -> str:
@@ -116,33 +62,48 @@ class SupabaseStorageService:
 
     def upload_image(self, file_content: bytes, category: str, extension: str) -> str:
         """
-        Upload an image to Supabase Storage.
+        Upload an image (or form document) to Supabase Storage.
+
+        Images are transcoded to WebP to minimize storage/egress; conversion is
+        mandatory, so a failure raises HTTP 422 and nothing is stored. Non-image
+        documents (PDF/DOC/DOCX) are stored as-is.
 
         Args:
             file_content: The file bytes to upload
             category: Subfolder name (e.g., 'profile', 'cats', 'featured', 'backgrounds')
-            extension: File extension including dot (e.g., '.jpg', '.png')
+            extension: File extension including dot (e.g., '.jpg', '.png', '.gif')
 
         Returns:
-            Public URL of the uploaded image
+            Public URL of the uploaded object
+
+        Raises:
+            HTTPException: 422 if an image cannot be converted to WebP
         """
         ext = (extension or "").lower()
-        content_type = (
-            IMAGE_CONTENT_TYPES.get(ext)
-            or DOC_CONTENT_TYPES.get(ext)
-            or "application/octet-stream"
-        )
 
-        compressed = self._maybe_compress_image(file_content, ext)
+        if ext in CONVERTIBLE_IMAGE_EXTENSIONS:
+            try:
+                converted = image_to_webp(file_content)
+            except MediaConversionError as exc:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Could not convert image to WebP; upload rejected: {exc}",
+                )
+            filename = f"{category}/{uuid.uuid4()}.webp"
+            return self._upload(filename, converted, "image/webp")
+
+        # Non-image documents (PDF/DOC/DOCX) are stored unchanged.
+        content_type = DOC_CONTENT_TYPES.get(ext, "application/octet-stream")
         filename = f"{category}/{uuid.uuid4()}{extension}"
-        return self._upload(filename, compressed, content_type)
+        return self._upload(filename, file_content, content_type)
 
     def upload_video(self, file_content: bytes, category: str, extension: str) -> str:
         """
         Upload a video to Supabase Storage.
 
-        Validates extension and size before uploading. No transcoding/compression
-        is performed; bytes are pushed as-is with the matching content-type.
+        Validates extension and size, then transcodes to WebM (VP9 + Opus) to
+        minimize storage/egress. Conversion is mandatory: a failure raises HTTP
+        422 and nothing is stored.
 
         Args:
             file_content: The file bytes to upload (raw video data)
@@ -150,10 +111,10 @@ class SupabaseStorageService:
             extension: File extension including dot (e.g., '.mp4', '.webm')
 
         Returns:
-            Public URL of the uploaded video
+            Public URL of the uploaded WebM video
 
         Raises:
-            HTTPException: If extension is unsupported or size exceeds the cap
+            HTTPException: If extension/size is invalid, or conversion fails
         """
         ext = (extension or "").lower()
         if ext not in ALLOWED_VIDEO_EXTENSIONS:
@@ -169,9 +130,16 @@ class SupabaseStorageService:
                 detail=f"Video exceeds the {MAX_VIDEO_BYTES // (1024 * 1024)} MB limit",
             )
 
-        content_type = VIDEO_CONTENT_TYPES.get(ext, "application/octet-stream")
-        filename = f"{category}/{uuid.uuid4()}{extension}"
-        return self._upload(filename, file_content, content_type)
+        try:
+            converted = video_to_webm(file_content)
+        except MediaConversionError as exc:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Could not convert video to WebM; upload rejected: {exc}",
+            )
+
+        filename = f"{category}/{uuid.uuid4()}.webm"
+        return self._upload(filename, converted, "video/webm")
 
     def delete_object(self, url: str) -> bool:
         """

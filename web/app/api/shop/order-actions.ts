@@ -93,7 +93,11 @@ export type OrderSummary = {
     created_at: string;
 };
 
-export type OrderShippingMethod = "tracking" | "no_tracking" | "pickup";
+export type OrderShippingMethod =
+    | "tracking"
+    | "no_tracking"
+    | "pickup"
+    | "international";
 
 export type OrderDetail = {
     id: string;

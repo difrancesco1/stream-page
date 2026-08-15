@@ -2,6 +2,7 @@ import logging
 import smtplib
 import threading
 from dataclasses import dataclass, field
+from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from html import escape
@@ -125,10 +126,18 @@ class OrderEmailContext:
     item_subtotal: float | None = None
     shipping_cost: float = 0.0
     discount_amount: float = 0.0
+    order_date: datetime | None = None
 
 
 def _format_money(value: float) -> str:
     return f"${value:.2f}"
+
+
+def _format_date(value: datetime | None) -> str:
+    """Human-friendly order date (e.g. "Aug 9, 2026"). Empty when missing."""
+    if value is None:
+        return ""
+    return value.strftime("%b %-d, %Y")
 
 
 def _items_text(items: list[OrderEmailLineItem]) -> str:
@@ -228,6 +237,164 @@ def _totals_html(order: "OrderEmailContext") -> str:
     )
 
 
+# ---------------------------------------------------------------------------
+# Styled receipt renderers (customer-facing order confirmation)
+# ---------------------------------------------------------------------------
+
+# Palette pulled from the order-confirmation mockup.
+_RECEIPT_PINK = "#f7c6d5"
+_RECEIPT_LAVENDER = "#f3ecfb"
+_RECEIPT_TEXT = "#2b2b2b"
+_RECEIPT_MUTED = "#8a8a8a"
+_RECEIPT_BORDER = "#d9d9d9"
+_RECEIPT_HEADER_BG = "#efefef"
+
+
+def _receipt_items_html(items: list[OrderEmailLineItem]) -> str:
+    """Bordered Product / Quantity / Price table for the customer receipt.
+
+    Kept separate from `_items_html` so the plainer admin email is unaffected.
+    """
+    cell = (
+        f"padding:14px 16px;border:1px solid {_RECEIPT_BORDER};"
+        f"font-size:16px;color:{_RECEIPT_TEXT};"
+    )
+    header_cell = (
+        f"padding:14px 16px;border:1px solid {_RECEIPT_BORDER};"
+        f"background:{_RECEIPT_HEADER_BG};font-size:16px;font-weight:bold;"
+        f"color:{_RECEIPT_TEXT};"
+    )
+    rows = "".join(
+        "<tr>"
+        f"<td style=\"{cell}text-align:left;\">{escape(item.name)}</td>"
+        f"<td style=\"{cell}text-align:center;\">{item.quantity}</td>"
+        f"<td style=\"{cell}text-align:center;\">{_format_money(item.line_total)}</td>"
+        "</tr>"
+        for item in items
+    )
+    return (
+        "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" "
+        "style=\"border-collapse:collapse;margin-top:12px;\">"
+        "<thead><tr>"
+        f"<th style=\"{header_cell}text-align:left;\">Product</th>"
+        f"<th style=\"{header_cell}text-align:center;\">Quantity</th>"
+        f"<th style=\"{header_cell}text-align:center;\">Price</th>"
+        "</tr></thead>"
+        f"<tbody>{rows}</tbody>"
+        "</table>"
+    )
+
+
+def _receipt_totals_html(order: "OrderEmailContext") -> str:
+    """Subtotal / Total block styled for the customer receipt."""
+    subtotal = (
+        order.item_subtotal
+        if order.item_subtotal is not None
+        else order.total_amount
+    )
+    label_cell = f"padding:4px 0;font-size:15px;color:{_RECEIPT_TEXT};text-align:left;"
+    value_cell = f"padding:4px 0;font-size:15px;color:{_RECEIPT_TEXT};text-align:right;"
+    rows = (
+        "<tr>"
+        f"<td style=\"{label_cell}\">Subtotal Price</td>"
+        f"<td style=\"{value_cell}\">{_format_money(subtotal)}</td>"
+        "</tr>"
+    )
+    if order.discount_amount:
+        rows += (
+            "<tr>"
+            f"<td style=\"{label_cell}\">Discount</td>"
+            f"<td style=\"{value_cell}\">-{_format_money(order.discount_amount)}</td>"
+            "</tr>"
+        )
+    rows += (
+        "<tr>"
+        f"<td style=\"{label_cell}font-weight:bold;\">Total Price</td>"
+        f"<td style=\"{value_cell}font-weight:bold;\">{_format_money(order.total_amount)}</td>"
+        "</tr>"
+    )
+    return (
+        "<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" "
+        "style=\"border-collapse:collapse;margin-top:8px;\">"
+        f"<tbody>{rows}</tbody>"
+        "</table>"
+    )
+
+
+def _receipt_shipping_method_html(order: "OrderEmailContext") -> str:
+    method = order.shipping_method_label
+    if not method and not order.shipping_cost:
+        return ""
+    label = escape(method) if method else "Shipping"
+    cost = f" {_format_money(order.shipping_cost)}" if order.shipping_cost else ""
+    return (
+        f"<p style=\"margin:16px 0 0;font-weight:bold;color:{_RECEIPT_TEXT};\">Shipping Method</p>"
+        f"<p style=\"margin:2px 0 0;color:{_RECEIPT_TEXT};\">{label}{cost}</p>"
+    )
+
+
+def _render_receipt_html(order: "OrderEmailContext") -> str:
+    full_name = f"{order.customer_first_name} {order.customer_last_name}".strip()
+    order_date = _format_date(order.order_date)
+
+    heading = (
+        f"font-size:22px;font-weight:bold;text-align:center;color:{_RECEIPT_TEXT};"
+        "margin:28px 0 0;"
+    )
+    rule = f"border:none;border-top:2px solid {_RECEIPT_TEXT};margin:20px 0;"
+
+    return (
+        "<!DOCTYPE html><html><head><meta charset=\"utf-8\">"
+        "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+        "</head>"
+        f"<body style=\"margin:0;padding:24px 0;background:#ffffff;"
+        "font-family:Arial,Helvetica,sans-serif;\">"
+        "<table role=\"presentation\" width=\"500\" align=\"center\" cellpadding=\"0\" "
+        "cellspacing=\"0\" style=\"max-width:500px;width:100%;margin:0 auto;\">"
+        "<tr><td>"
+        # Banner: solid light pink
+        f"<div style=\"background:{_RECEIPT_PINK};height:90px;line-height:90px;"
+        "text-align:center;border-radius:6px;font-size:26px;font-style:italic;"
+        f"font-weight:bold;color:#ffffff;\">roziggz.com</div>"
+        # Title
+        f"<h1 style=\"{heading}\">ORDER CONFIRMATION</h1>"
+        # Greeting box
+        f"<div style=\"background:{_RECEIPT_LAVENDER};border-radius:10px;"
+        "padding:20px 24px;margin:16px 0 0;text-align:center;font-size:15px;"
+        f"line-height:1.6;font-weight:bold;color:{_RECEIPT_TEXT};\">"
+        f"Hi {escape(order.customer_first_name)}, thank you for your order!<br>"
+        f"We&rsquo;ve received your order #{escape(order.order_id_short)}.<br>"
+        "The order will be in works in a few hours.<br>"
+        "If you ordered a custom card, please check the waitlist here: "
+        "<a href=\"https://www.roziggz.com/shop?tab=custom\" "
+        f"style=\"color:{_RECEIPT_TEXT};\">https://www.roziggz.com/shop?tab=custom</a><br>"
+        "one custom card will be completed per workday."
+        "</div>"
+        # Order Summary
+        f"<h2 style=\"{heading}\">Order Summary</h2>"
+        f"<p style=\"text-align:center;margin:2px 0 0;font-weight:bold;"
+        f"color:{_RECEIPT_TEXT};\">{escape(order_date)}</p>"
+        f"{_receipt_items_html(order.items)}"
+        # Order Total
+        f"<h2 style=\"{heading}\">Order Total</h2>"
+        f"{_receipt_totals_html(order)}"
+        f"<hr style=\"{rule}\">"
+        # Shipping
+        f"<h2 style=\"{heading}margin-top:0;\">Shipping</h2>"
+        f"<p style=\"margin:12px 0 0;font-weight:bold;color:{_RECEIPT_TEXT};\">Shipping</p>"
+        f"<p style=\"margin:2px 0 0;color:{_RECEIPT_MUTED};line-height:1.5;\">"
+        f"{escape(full_name)}<br>{_shipping_html(order.shipping_address_lines)}</p>"
+        f"{_receipt_shipping_method_html(order)}"
+        f"<hr style=\"{rule}\">"
+        # Footer
+        "<p style=\"text-align:center;margin:0;color:#555555;font-size:14px;\">"
+        "dm @ros.e on discord if any issues</p>"
+        "<p style=\"text-align:center;margin:4px 0 0;color:#555555;font-size:14px;\">"
+        "roziggz.com/shop</p>"
+        "</td></tr></table></body></html>"
+    )
+
+
 def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
     """Send the customer-facing itemized order receipt.
 
@@ -238,7 +405,6 @@ def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
     total = _format_money(order.total_amount)
 
     totals_text = _totals_text(order)
-    totals_html = _totals_html(order)
 
     body_text = (
         f"Hi {order.customer_first_name},\n\n"
@@ -250,18 +416,7 @@ def send_order_receipt_email(to_email: str, order: OrderEmailContext) -> None:
         f"Shipping to:\n{full_name}\n{_shipping_text(order.shipping_address_lines)}"
     )
 
-    body_html = (
-        "<html><body>"
-        f"<h2>Order #{escape(order.order_id_short)} confirmed</h2>"
-        f"<p>Hi {escape(order.customer_first_name)},</p>"
-        "<p>Thanks for your order! Your payment was received and your order is confirmed.</p>"
-        f"{_items_html(order.items)}"
-        f"{totals_html}"
-        f"<p style=\"margin-top:16px;\"><strong>Order total: {total}</strong></p>"
-        "<h3 style=\"margin-bottom:4px;\">Shipping to</h3>"
-        f"<p style=\"margin-top:0;\">{escape(full_name)}<br>{_shipping_html(order.shipping_address_lines)}</p>"
-        "</body></html>"
-    )
+    body_html = _render_receipt_html(order)
 
     _send_async(to_email, subject, body_text, body_html)
 

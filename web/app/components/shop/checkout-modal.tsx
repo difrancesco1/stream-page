@@ -3,125 +3,76 @@
 import { useEffect, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  PayPalButtons,
-  PayPalScriptProvider,
-} from "@paypal/react-paypal-js";
 
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 import {
   captureCheckoutOrder,
   createCheckoutOrder,
-  type CartCustomizationPayload,
-  type CartLineItem,
+  createCustomOrder,
   type CheckoutCustomerInfo,
 } from "@/app/api/shop/checkout-actions";
+import { useAuth } from "@/app/context/auth-context";
 
-import { useCart, type CartCustomization } from "./cart-context";
+import { useCart } from "./cart-context";
 import {
-  US_STATES,
   checkoutSchema,
+  customOrderSchema,
   PICKUP_ALLOWED_STATES,
   type CheckoutFormValues,
   type UsStateCode,
 } from "./checkout-schema";
-import {
-  CUSTOM_PICKUP_DISCOUNT_PER_UNIT,
-  NO_TRACKING_COST,
-  TRACKING_COST,
-  computeOrderTotals,
-  priceFormatter,
-} from "./pricing";
+import { computeOrderTotals } from "./pricing";
 import type { ShopItem } from "./types";
 import CardHeader from "../shared/card-header";
+import {
+  buildCartLineItems,
+  buildCustomizationPayload,
+  toCustomerPayload,
+} from "./checkout/checkout-helpers";
+import FormStep from "./checkout/form-step";
+import PayStep from "./checkout/pay-step";
+import SuccessStep from "./checkout/success-step";
+import { defaultFormValues, type CheckoutMode, type Step } from "./checkout/types";
 
 interface CheckoutModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   items: ShopItem[];
-}
-
-type Step = "customer" | "pay" | "success";
-
-const defaultFormValues: CheckoutFormValues = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  discordHandle: "",
-  shippingStreet: "",
-  shippingCity: "",
-  shippingState: "",
-  shippingZip: "",
-  shippingMethod: undefined as unknown as CheckoutFormValues["shippingMethod"],
-  notes: "",
-};
-
-const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
-const PAYPAL_TEST_MODE = process.env.NEXT_PUBLIC_PAYPAL_TEST_MODE === "true";
-
-function buildCartLineItems(
-  cart: Record<string, number>,
-  items: ShopItem[],
-): CartLineItem[] {
-  const itemMap = new Map(items.map((i) => [i.id, i]));
-  return Object.entries(cart)
-    .filter(([id]) => itemMap.has(id))
-    .map(([product_id, quantity]) => ({ product_id, quantity }));
-}
-
-function buildCustomizationPayload(
-  customizations: CartCustomization[],
-  items: ShopItem[],
-): CartCustomizationPayload[] {
-  const itemMap = new Map(items.map((i) => [i.id, i]));
-  return customizations
-    .filter((c) => itemMap.has(c.productId))
-    .map((c) => ({
-      product_id: c.productId,
-      card_name: c.cardName,
-      description: c.description,
-    }));
-}
-
-function toCustomerPayload(values: CheckoutFormValues): CheckoutCustomerInfo {
-  return {
-    first_name: values.firstName,
-    last_name: values.lastName,
-    email: values.email,
-    discord_handle: values.discordHandle,
-    shipping_street: values.shippingStreet,
-    shipping_city: values.shippingCity,
-    shipping_state: values.shippingState,
-    shipping_zip: values.shippingZip,
-    shipping_country: "US",
-    shipping_method: values.shippingMethod,
-    notes: values.notes?.trim() ? values.notes.trim() : null,
-  };
+  mode?: CheckoutMode;
 }
 
 export default function CheckoutModal({
   open,
   onOpenChange,
   items,
+  mode = "customer",
 }: CheckoutModalProps) {
   const { cart, customizations, clear } = useCart();
+  const { token } = useAuth();
 
-  const [step, setStep] = useState<Step>("customer");
+  const isAdmin = mode === "admin";
+
+  const [step, setStep] = useState<Step>("form");
   const [customer, setCustomer] = useState<CheckoutCustomerInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successOrderId, setSuccessOrderId] = useState<string | null>(null);
+  const [successEmail, setSuccessEmail] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [testProcessing, setTestProcessing] = useState(false);
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     watch,
     setValue,
     formState: { errors },
   } = useForm<CheckoutFormValues>({
-    resolver: zodResolver(checkoutSchema as never) as Resolver<CheckoutFormValues>,
+    resolver: zodResolver(
+      (isAdmin ? customOrderSchema : checkoutSchema) as never,
+    ) as Resolver<CheckoutFormValues>,
     defaultValues: defaultFormValues,
     mode: "onSubmit",
     reValidateMode: "onSubmit",
@@ -129,24 +80,40 @@ export default function CheckoutModal({
 
   const watchedState = watch("shippingState");
   const watchedMethod = watch("shippingMethod");
+  const watchedCountry = watch("shippingCountry");
   const pickupEligible =
+    watchedCountry === "US" &&
     typeof watchedState === "string" &&
     PICKUP_ALLOWED_STATES.has(watchedState as UsStateCode);
 
   useEffect(() => {
+    if (isAdmin) return;
     if (!pickupEligible && watchedMethod === "pickup") {
       setValue("shippingMethod", undefined as unknown as CheckoutFormValues["shippingMethod"], {
         shouldValidate: false,
       });
     }
-  }, [pickupEligible, watchedMethod, setValue]);
+  }, [isAdmin, pickupEligible, watchedMethod, setValue]);
+
+  // Clear the shipping method when the destination country changes so a US
+  // method doesn't linger on an international order (and vice versa).
+  useEffect(() => {
+    if (isAdmin) return;
+    setValue(
+      "shippingMethod",
+      undefined as unknown as CheckoutFormValues["shippingMethod"],
+      { shouldValidate: false },
+    );
+  }, [isAdmin, watchedCountry, setValue]);
 
   useEffect(() => {
     if (open) {
-      setStep("customer");
+      setStep("form");
       setCustomer(null);
       setError(null);
       setSuccessOrderId(null);
+      setSuccessEmail(null);
+      setSubmitting(false);
       setTestProcessing(false);
       reset(defaultFormValues);
     }
@@ -163,25 +130,121 @@ export default function CheckoutModal({
     cartSubtotal,
     watchedMethod ?? null,
     watchedState ?? null,
-    cart,
-    items,
   );
 
-  const onCustomerSubmit = handleSubmit((values) => {
+  const onFormSubmit = handleSubmit(async (values) => {
     setError(null);
     if (cartLineItems.length === 0) {
       setError("Your cart is empty");
       return;
     }
-    setCustomer(toCustomerPayload(values));
+
+    if (isAdmin) {
+      if (!token) {
+        setError("You must be signed in as the shop admin");
+        return;
+      }
+      setSubmitting(true);
+      try {
+        const adminCustomer = toCustomerPayload(values, mode);
+        const result = await createCustomOrder(
+          token,
+          cartLineItems,
+          adminCustomer,
+          customizationPayload,
+        );
+        if (!result.success) {
+          setError(result.error);
+          return;
+        }
+        setSuccessOrderId(result.order.id);
+        setSuccessEmail(result.order.customer_email);
+        clear();
+        setStep("success");
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    setCustomer(toCustomerPayload(values, mode));
     setStep("pay");
   });
 
-  const sdkConfigured = PAYPAL_CLIENT_ID.length > 0;
+  const handleCreatePaypalOrder = async (): Promise<string> => {
+    if (!customer) throw new Error("Missing customer info");
+    setError(null);
+    const result = await createCheckoutOrder(
+      cartLineItems,
+      customer,
+      customizationPayload,
+    );
+    if (!result.success) {
+      setError(result.error);
+      throw new Error(result.error);
+    }
+    return result.paypal_order_id;
+  };
 
-  const inputClass =
-    "p-[var(--spacing-sm)] pixel-borders bg-background main-text text-xs";
-  const fieldErrorClass = "main-text text-[10px] text-red-400";
+  const handleApprovePaypalOrder = async (orderID: string): Promise<void> => {
+    if (!customer) return;
+    setError(null);
+    const result = await captureCheckoutOrder(
+      orderID,
+      cartLineItems,
+      customer,
+      customizationPayload,
+    );
+    if (!result.success) {
+      setError(result.error);
+      return;
+    }
+    if (result.status !== "paid") {
+      setError(result.message || "Payment was not completed");
+      return;
+    }
+    setSuccessOrderId(result.order_id);
+    setSuccessEmail(customer.email);
+    clear();
+    setStep("success");
+  };
+
+  const handleTestPay = async (): Promise<void> => {
+    if (!customer) return;
+    setError(null);
+    setTestProcessing(true);
+    try {
+      const created = await createCheckoutOrder(
+        cartLineItems,
+        customer,
+        customizationPayload,
+      );
+      if (!created.success) {
+        setError(created.error);
+        return;
+      }
+      const captured = await captureCheckoutOrder(
+        created.paypal_order_id,
+        cartLineItems,
+        customer,
+        customizationPayload,
+      );
+      if (!captured.success) {
+        setError(captured.error);
+        return;
+      }
+      if (captured.status !== "paid") {
+        setError(captured.message || "Payment was not completed");
+        return;
+      }
+      setSuccessOrderId(captured.order_id);
+      setSuccessEmail(customer.email);
+      clear();
+      setStep("success");
+    } finally {
+      setTestProcessing(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -189,417 +252,50 @@ export default function CheckoutModal({
         showCloseButton={true}
         className="pixel-borders pixel-card bg-foreground border-[length:var(--border-width)] border-border max-h-[90vh] overflow-y-auto p-[var(--spacing-md)] max-w-[26rem]"
       >
-        <CardHeader title="checkout" exitbtn={true} showTabs={false}>
-        
+        <CardHeader
+          title={isAdmin ? "custom order" : "checkout"}
+          exitbtn={false}
+          showTabs={false}
+          variant="section"
+        >
+          {step === "form" && (
+            <FormStep
+              mode={mode}
+              register={register}
+              control={control}
+              errors={errors}
+              onSubmit={onFormSubmit}
+              pickupEligible={pickupEligible}
+              watchedMethod={watchedMethod}
+              totals={totals}
+              cartSubtotal={cartSubtotal}
+              submitting={submitting}
+              error={error}
+            />
+          )}
 
-        {step === "customer" && (
-          <form
-            onSubmit={onCustomerSubmit}
-            noValidate
-            className="flex flex-col gap-[var(--spacing-sm)]"
-          >
-            <div className="grid grid-cols-2 gap-[var(--spacing-sm)]">
-              <div className="flex flex-col gap-[var(--spacing-xs)]">
-                <label className="main-text text-xs">First name</label>
-                <input
-                  type="text"
-                  autoComplete="given-name"
-                  className={inputClass}
-                  {...register("firstName")}
-                />
-                {errors.firstName && (
-                  <p className={fieldErrorClass}>{errors.firstName.message}</p>
-                )}
-              </div>
-              <div className="flex flex-col gap-[var(--spacing-xs)]">
-                <label className="main-text text-xs">Last name</label>
-                <input
-                  type="text"
-                  autoComplete="family-name"
-                  className={inputClass}
-                  {...register("lastName")}
-                />
-                {errors.lastName && (
-                  <p className={fieldErrorClass}>{errors.lastName.message}</p>
-                )}
-              </div>
-            </div>
+          {step === "pay" && customer && (
+            <PayStep
+              customer={customer}
+              totals={totals}
+              error={error}
+              testProcessing={testProcessing}
+              onCreateOrder={handleCreatePaypalOrder}
+              onApprove={handleApprovePaypalOrder}
+              onTestPay={handleTestPay}
+              onError={setError}
+              onBack={() => setStep("form")}
+            />
+          )}
 
-            <div className="flex flex-col gap-[var(--spacing-xs)]">
-              <label className="main-text text-xs">Email</label>
-              <input
-                type="email"
-                autoComplete="email"
-                className={inputClass}
-                {...register("email")}
-              />
-              {errors.email && (
-                <p className={fieldErrorClass}>{errors.email.message}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-[var(--spacing-xs)]">
-              <label className="main-text text-xs">Discord handle</label>
-              <input
-                type="text"
-                autoComplete="off"
-                className={inputClass}
-                {...register("discordHandle")}
-              />
-              {errors.discordHandle && (
-                <p className={fieldErrorClass}>{errors.discordHandle.message}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-[var(--spacing-xs)]">
-              <label className="main-text text-xs">Street address</label>
-              <input
-                type="text"
-                autoComplete="street-address"
-                className={inputClass}
-                {...register("shippingStreet")}
-              />
-              {errors.shippingStreet && (
-                <p className={fieldErrorClass}>
-                  {errors.shippingStreet.message}
-                </p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-[var(--spacing-sm)]">
-              <div className="flex flex-col gap-[var(--spacing-xs)]">
-                <label className="main-text text-xs">City</label>
-                <input
-                  type="text"
-                  autoComplete="address-level2"
-                  className={inputClass}
-                  {...register("shippingCity")}
-                />
-                {errors.shippingCity && (
-                  <p className={fieldErrorClass}>
-                    {errors.shippingCity.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-col gap-[var(--spacing-xs)]">
-                <label className="main-text text-xs">State/Province</label>
-                <select
-                  autoComplete="address-level1"
-                  className={`${inputClass} appearance-none`}
-                  defaultValue=""
-                  {...register("shippingState")}
-                >
-                  <option value="" disabled>
-                    Select…
-                  </option>
-                  {US_STATES.map((code) => (
-                    <option key={code} value={code}>
-                      {code}
-                    </option>
-                  ))}
-                </select>
-                {errors.shippingState && (
-                  <p className={fieldErrorClass}>
-                    {errors.shippingState.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-[var(--spacing-sm)]">
-              <div className="flex flex-col gap-[var(--spacing-xs)]">
-                <label className="main-text text-xs">ZIP</label>
-                <input
-                  type="text"
-                  autoComplete="postal-code"
-                  inputMode="numeric"
-                  className={inputClass}
-                  {...register("shippingZip")}
-                />
-                {errors.shippingZip && (
-                  <p className={fieldErrorClass}>
-                    {errors.shippingZip.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-col gap-[var(--spacing-xs)]">
-                <label className="main-text text-xs">Country</label>
-                <input
-                  type="text"
-                  value="United States"
-                  readOnly
-                  aria-readonly
-                  tabIndex={-1}
-                  className={`${inputClass} opacity-70 cursor-not-allowed`}
-                />
-              </div>
-            </div>
-
-            <fieldset className="flex flex-col gap-[var(--spacing-xs)]">
-              <legend className="main-text text-xs">Shipping</legend>
-              <label className="main-text text-xs flex items-center gap-[var(--spacing-sm)]">
-                <input
-                  type="radio"
-                  value="tracking"
-                  {...register("shippingMethod")}
-                />
-                <span>
-                  Tracking{" "}
-                  <span className="opacity-70">
-                    (+{priceFormatter.format(TRACKING_COST)})
-                  </span>
-                </span>
-              </label>
-              <label className="main-text text-xs flex items-center gap-[var(--spacing-sm)]">
-                <input
-                  type="radio"
-                  value="no_tracking"
-                  {...register("shippingMethod")}
-                />
-                <span>
-                  No tracking{" "}
-                  <span className="opacity-70">
-                    (+{priceFormatter.format(NO_TRACKING_COST)})
-                  </span>
-                </span>
-              </label>
-              {pickupEligible ? (
-                <label className="main-text text-xs flex items-center gap-[var(--spacing-sm)]">
-                  <input
-                    type="radio"
-                    value="pickup"
-                    {...register("shippingMethod")}
-                  />
-                  <span>
-                    Local pickup (WA){" "}
-                    <span className="opacity-70">
-                      (free, -{priceFormatter.format(CUSTOM_PICKUP_DISCOUNT_PER_UNIT)} per custom card)
-                    </span>
-                  </span>
-                </label>
-              ) : (
-                <p className="main-text text-[10px] opacity-50">
-                  Local pickup is available for WA addresses.
-                </p>
-              )}
-              {errors.shippingMethod && (
-                <p className={fieldErrorClass}>
-                  {errors.shippingMethod.message}
-                </p>
-              )}
-            </fieldset>
-
-            <div className="flex flex-col gap-[var(--spacing-xs)]">
-              <label className="main-text text-xs">
-                Notes <span className="opacity-50">(optional)</span>
-              </label>
-              <textarea
-                rows={3}
-                placeholder="Anything you'd like us to know?"
-                className={`${inputClass} resize-y min-h-[3.5rem]`}
-                {...register("notes")}
-              />
-              {errors.notes && (
-                <p className={fieldErrorClass}>{errors.notes.message}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-[var(--spacing-xs)] pt-[var(--spacing-sm)] main-text text-xs">
-              <div className="flex justify-between opacity-70">
-                <span>Subtotal</span>
-                <span>{priceFormatter.format(totals.subtotal)}</span>
-              </div>
-              <div className="flex justify-between opacity-70">
-                <span>Shipping</span>
-                <span>
-                  {watchedMethod
-                    ? priceFormatter.format(totals.shipping)
-                    : "—"}
-                </span>
-              </div>
-              {totals.discount > 0 && (
-                <div className="flex justify-between opacity-70">
-                  <span>Discount</span>
-                  <span>-{priceFormatter.format(totals.discount)}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span>Total</span>
-                <span>{priceFormatter.format(totals.total)}</span>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-[var(--spacing-sm)]">
-              <button
-                type="submit"
-                className="pixel-borders pixel-btn-border px-[var(--spacing-md)]"
-              >
-                continue
-              </button>
-            </div>
-
-            {error && (
-              <p className="main-text text-xs text-red-400">{error}</p>
-            )}
-          </form>
-        )}
-
-        {step === "pay" && customer && (
-          <div className="flex flex-col gap-[var(--spacing-md)]">
-            <div className="main-text text-xs opacity-70">
-              Paying {priceFormatter.format(totals.total)} as {customer.email}
-            </div>
-
-            {PAYPAL_TEST_MODE ? (
-              <div className="flex flex-col gap-[var(--spacing-sm)]">
-                <p className="main-text text-xs text-yellow-400">
-                  Test mode — no real payment will be processed.
-                </p>
-                <button
-                  type="button"
-                  disabled={testProcessing}
-                  onClick={async () => {
-                    setError(null);
-                    setTestProcessing(true);
-                    try {
-                      const created = await createCheckoutOrder(
-                        cartLineItems,
-                        customer,
-                        customizationPayload,
-                      );
-                      if (!created.success) {
-                        setError(created.error);
-                        return;
-                      }
-                      const captured = await captureCheckoutOrder(
-                        created.paypal_order_id,
-                        cartLineItems,
-                        customer,
-                        customizationPayload,
-                      );
-                      if (!captured.success) {
-                        setError(captured.error);
-                        return;
-                      }
-                      if (captured.status !== "paid") {
-                        setError(
-                          captured.message || "Payment was not completed",
-                        );
-                        return;
-                      }
-                      setSuccessOrderId(captured.order_id);
-                      clear();
-                      setStep("success");
-                    } finally {
-                      setTestProcessing(false);
-                    }
-                  }}
-                  className="pixel-borders pixel-btn-border px-[var(--spacing-md)] py-[var(--spacing-sm)] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {testProcessing ? "processing…" : "pay (test mode)"}
-                </button>
-              </div>
-            ) : sdkConfigured ? (
-              <PayPalScriptProvider
-                options={{
-                  clientId: PAYPAL_CLIENT_ID,
-                  currency: "USD",
-                  intent: "capture",
-                }}
-              >
-                <PayPalButtons
-                  style={{ layout: "vertical" }}
-                  createOrder={async () => {
-                    setError(null);
-                    const result = await createCheckoutOrder(
-                      cartLineItems,
-                      customer,
-                      customizationPayload,
-                    );
-                    if (!result.success) {
-                      setError(result.error);
-                      throw new Error(result.error);
-                    }
-                    return result.paypal_order_id;
-                  }}
-                  onApprove={async (data) => {
-                    setError(null);
-                    const result = await captureCheckoutOrder(
-                      data.orderID,
-                      cartLineItems,
-                      customer,
-                      customizationPayload,
-                    );
-                    if (!result.success) {
-                      setError(result.error);
-                      return;
-                    }
-                    if (result.status !== "paid") {
-                      setError(
-                        result.message || "Payment was not completed",
-                      );
-                      return;
-                    }
-                    setSuccessOrderId(result.order_id);
-                    clear();
-                    setStep("success");
-                  }}
-                  onError={(err) => {
-                    setError(
-                      err instanceof Error
-                        ? err.message
-                        : "Something went wrong with PayPal",
-                    );
-                  }}
-                />
-              </PayPalScriptProvider>
-            ) : (
-              <p className="main-text text-xs text-red-400">
-                PayPal client id is not configured. Set
-                NEXT_PUBLIC_PAYPAL_CLIENT_ID and reload.
-              </p>
-            )}
-
-            {error && (
-              <p className="main-text text-xs text-red-400">{error}</p>
-            )}
-
-            <div className="flex justify-start">
-              <button
-                type="button"
-                onClick={() => setStep("customer")}
-                className="pixel-btn text-xs"
-              >
-                back
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === "success" && (
-          <div className="flex flex-col gap-[var(--spacing-md)]">
-            <p className="main-text text-sm">Payment successful</p>
-            {customer && (
-              <p className="main-text text-xs opacity-70">
-                We sent a confirmation to {customer.email}.
-              </p>
-            )}
-            {successOrderId && (
-              <p className="main-text text-xs opacity-70">
-                Order id: {successOrderId}
-              </p>
-            )}
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => onOpenChange(false)}
-                className="pixel-borders pixel-btn-border px-[var(--spacing-md)]"
-              >
-                done
-              </button>
-            </div>
-          </div>
-        )}
+          {step === "success" && (
+            <SuccessStep
+              isAdmin={isAdmin}
+              successEmail={successEmail}
+              successOrderId={successOrderId}
+              onDone={() => onOpenChange(false)}
+            />
+          )}
         </CardHeader>
       </DialogContent>
     </Dialog>

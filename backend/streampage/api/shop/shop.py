@@ -62,14 +62,17 @@ shop_router = APIRouter()
 
 TRACKING_COST = 6.0
 NO_TRACKING_COST = 1.0
-CUSTOM_PICKUP_DISCOUNT_PER_UNIT = 10.0
+PICKUP_DISCOUNT_RATE = 0.20
 PICKUP_ALLOWED_STATES = {"WA"}
+INTERNATIONAL_SHIPPING_COST = 10.0
+INTERNATIONAL_ALLOWED_COUNTRIES = {"CA"}
 
 
 _SHIPPING_METHOD_LABELS = {
     ShippingMethod.TRACKING: "Tracking",
     ShippingMethod.NO_TRACKING: "No tracking",
     ShippingMethod.PICKUP: "Pickup",
+    ShippingMethod.INTERNATIONAL: "International",
 }
 
 
@@ -80,14 +83,29 @@ def _shipping_method_label(method: ShippingMethod | None) -> str | None:
 def _compute_shipping_and_discount(
     method: ShippingMethod,
     shipping_state: str,
-    products: list[Product],
-    qty_map: dict[uuid.UUID, int],
+    shipping_country: str,
+    item_subtotal: float,
 ) -> tuple[float, float]:
     """Return ``(shipping_cost, discount_amount)`` for the given checkout.
 
-    Raises ``HTTPException(400)`` if the combination is invalid (currently:
-    PICKUP requires ``shipping_state`` in :data:`PICKUP_ALLOWED_STATES`).
+    Raises ``HTTPException(400)`` if the combination is invalid:
+    - INTERNATIONAL requires ``shipping_country`` in
+      :data:`INTERNATIONAL_ALLOWED_COUNTRIES`.
+    - Domestic methods (TRACKING/NO_TRACKING/PICKUP) require a US address.
+    - PICKUP requires ``shipping_state`` in :data:`PICKUP_ALLOWED_STATES`.
     """
+    if method == ShippingMethod.INTERNATIONAL:
+        if shipping_country not in INTERNATIONAL_ALLOWED_COUNTRIES:
+            raise HTTPException(
+                status_code=400,
+                detail="International shipping is only available for Canada",
+            )
+        return INTERNATIONAL_SHIPPING_COST, 0.0
+    if shipping_country != "US":
+        raise HTTPException(
+            status_code=400,
+            detail="Selected shipping method is only available for US addresses",
+        )
     if method == ShippingMethod.TRACKING:
         return TRACKING_COST, 0.0
     if method == ShippingMethod.NO_TRACKING:
@@ -98,12 +116,7 @@ def _compute_shipping_and_discount(
                 status_code=400,
                 detail="Pickup is only available for Washington (WA) addresses",
             )
-        custom_units = sum(
-            qty_map.get(p.id, 0)
-            for p in products
-            if p.category == ProductCategory.CUSTOM
-        )
-        return 0.0, CUSTOM_PICKUP_DISCOUNT_PER_UNIT * custom_units
+        return 0.0, round(item_subtotal * PICKUP_DISCOUNT_RATE, 2)
     raise HTTPException(status_code=400, detail="Invalid shipping method")
 
 
@@ -924,8 +937,8 @@ def _validate_checkout_request(
     shipping_cost, discount_amount = _compute_shipping_and_discount(
         cust.shipping_method,
         cust.shipping_state,
-        list(products),
-        qty_map,
+        cust.shipping_country,
+        item_subtotal,
     )
     total = max(0.0, item_subtotal + shipping_cost - discount_amount)
 
@@ -1207,6 +1220,7 @@ async def capture_order(paypal_order_id: str, request: OrderCreateRequest):
                     item_subtotal=item_subtotal,
                     shipping_cost=float(order.shipping_cost or 0),
                     discount_amount=float(order.discount_amount or 0),
+                    order_date=order.created_at,
                 )
 
                 if order.customer_email:
@@ -1401,6 +1415,7 @@ def create_custom_order(
                     for item in items
                 ],
                 order_url=order_url,
+                order_date=order.created_at,
             )
 
             if order.customer_email:

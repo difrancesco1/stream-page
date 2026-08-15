@@ -64,4 +64,5 @@ class ShippingMethod(PyEnum):
     TRACKING = "tracking"
     NO_TRACKING = "no_tracking"
     PICKUP = "pickup"
+    INTERNATIONAL = "international"
 
