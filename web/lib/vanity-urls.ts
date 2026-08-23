@@ -16,7 +16,7 @@ export const vanityUrls: VanityUrl[] = [
   {
     source: "/opgg",
     destination:
-    "https://op.gg/lol/multisearch/na?summoners=ignisfirebloom%23pass%2Cziggs7%23rosie%2Chardstuck+plat%23sry%2Ckeepyappingsilly%23kus",
+    "https://op.gg/lol/multisearch/na?summoners=ignisfirebloom%23pass%2Cragebaiter%23rosie%2Chardstuck+plat%23sry%2Ckeepyappingsilly%23kus",
   },
   {
     source: "/playlist",
