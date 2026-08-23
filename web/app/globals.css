@@ -182,12 +182,16 @@ html {
   * {
     @apply border-border outline-ring/50;
     user-select: none;
+  }
+  html:not(.shop-native-cursor) * {
     cursor: none !important;
+  }
+  html:not(.shop-native-cursor) body {
+    cursor: none;
   }
   body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
-    cursor: none;
   }
 }
 

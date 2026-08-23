@@ -123,7 +123,13 @@ export default function OrderDetailView({ order }: OrderDetailViewProps) {
                                     <span className="opacity-70"> ({shippingMethodLabel})</span>
                                 )}
                             </span>
-                            <span>{priceFormatter.format(shippingCost)}</span>
+                            <span>
+                                {shippingCost === 0 &&
+                                order.shipping_method &&
+                                order.shipping_method !== "pickup"
+                                    ? "Free"
+                                    : priceFormatter.format(shippingCost)}
+                            </span>
                         </div>
                         {discountAmount > 0 && (
                             <div className="flex items-center justify-between">

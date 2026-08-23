@@ -44,6 +44,8 @@ export type OrderTotals = {
   shipping: number;
   discount: number;
   total: number;
+  baseShipping: number;
+  freeShippingApplied: boolean;
 };
 
 export function computeOrderTotals(
@@ -51,11 +53,13 @@ export function computeOrderTotals(
   method: ShippingMethod | null,
   state: string | null,
 ): OrderTotals {
-  const shipping =
-    subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : shippingCostFor(method);
+  const baseShipping = shippingCostFor(method);
+  const freeShippingApplied =
+    method !== "pickup" && subtotal >= FREE_SHIPPING_THRESHOLD;
+  const shipping = freeShippingApplied ? 0 : baseShipping;
   const discount = discountFor(subtotal, method, state);
   const total = Math.max(0, subtotal + shipping - discount);
-  return { subtotal, shipping, discount, total };
+  return { subtotal, shipping, discount, total, baseShipping, freeShippingApplied };
 }
 
 export const priceFormatter = new Intl.NumberFormat("en-US", {

@@ -1,5 +1,5 @@
 import type { CheckoutFormValues } from "../checkout-schema";
-import { priceFormatter, type OrderTotals } from "../pricing";
+import { FREE_SHIPPING_THRESHOLD, priceFormatter, type OrderTotals } from "../pricing";
 import type { CheckoutMode } from "./types";
 
 interface OrderSummaryProps {
@@ -30,9 +30,27 @@ export default function OrderSummary({
         <span>{priceFormatter.format(totals.subtotal)}</span>
       </div>
       <div className="flex justify-between opacity-70">
-        <span>Shipping</span>
         <span>
-          {watchedMethod ? priceFormatter.format(totals.shipping) : "—"}
+          Shipping
+          {totals.freeShippingApplied && (
+            <span className="opacity-70"> (orders over ${FREE_SHIPPING_THRESHOLD})</span>
+          )}
+        </span>
+        <span>
+          {totals.freeShippingApplied ? (
+            <>
+              {totals.baseShipping > 0 && (
+                <span className="line-through opacity-50 mr-1">
+                  {priceFormatter.format(totals.baseShipping)}
+                </span>
+              )}
+              Free
+            </>
+          ) : watchedMethod ? (
+            priceFormatter.format(totals.shipping)
+          ) : (
+            "—"
+          )}
         </span>
       </div>
       {totals.discount > 0 && (

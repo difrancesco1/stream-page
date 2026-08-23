@@ -11,6 +11,7 @@ import { FIELD_ERROR_CLASS, type FieldGroupProps } from "./types";
 
 interface ShippingMethodFieldProps extends FieldGroupProps {
   pickupEligible: boolean;
+  freeShippingApplied?: boolean;
 }
 
 export default function ShippingMethodField({
@@ -18,6 +19,7 @@ export default function ShippingMethodField({
   control,
   errors,
   pickupEligible,
+  freeShippingApplied = false,
 }: ShippingMethodFieldProps) {
   const watchedCountry = useWatch({ control, name: "shippingCountry" });
   const isUS = watchedCountry === "US";
@@ -36,7 +38,9 @@ export default function ShippingMethodField({
             <span>
               Tracking{" "}
               <span className="opacity-70">
-                (+{priceFormatter.format(TRACKING_COST)})
+                {freeShippingApplied
+                  ? "(free)"
+                  : `(+${priceFormatter.format(TRACKING_COST)})`}
               </span>
             </span>
           </label>
@@ -49,7 +53,9 @@ export default function ShippingMethodField({
             <span>
               No tracking{" "}
               <span className="opacity-70">
-                (+{priceFormatter.format(NO_TRACKING_COST)})
+                {freeShippingApplied
+                  ? "(free)"
+                  : `(+${priceFormatter.format(NO_TRACKING_COST)})`}
               </span>
             </span>
           </label>
@@ -84,7 +90,9 @@ export default function ShippingMethodField({
             <span>
               International shipping{" "}
               <span className="opacity-70">
-                ({priceFormatter.format(INTERNATIONAL_SHIPPING_COST)} flat)
+                {freeShippingApplied
+                  ? "(free)"
+                  : `(${priceFormatter.format(INTERNATIONAL_SHIPPING_COST)} flat)`}
               </span>
             </span>
           </label>
