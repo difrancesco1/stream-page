@@ -4,14 +4,11 @@ import {
   type UsStateCode,
 } from "./checkout-schema";
 
-// Mirrors backend constants in `streampage/api/shop/shop.py`. The backend is
-// the source of truth at checkout — these values only power the live order
-// summary in the checkout modal and the rendered breakdown on the order
-// detail page.
 export const TRACKING_COST = 6;
 export const NO_TRACKING_COST = 1;
 export const PICKUP_DISCOUNT_RATE = 0.2;
 export const INTERNATIONAL_SHIPPING_COST = 10;
+export const FREE_SHIPPING_THRESHOLD = 75;
 
 export const SHIPPING_METHOD_LABELS: Record<ShippingMethod, string> = {
   tracking: "Tracking",
@@ -54,7 +51,8 @@ export function computeOrderTotals(
   method: ShippingMethod | null,
   state: string | null,
 ): OrderTotals {
-  const shipping = shippingCostFor(method);
+  const shipping =
+    subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : shippingCostFor(method);
   const discount = discountFor(subtotal, method, state);
   const total = Math.max(0, subtotal + shipping - discount);
   return { subtotal, shipping, discount, total };

@@ -39,6 +39,10 @@ export type CreateOrderResult =
     | { success: true; paypal_order_id: string }
     | { success: false; error: string };
 
+export type CreateStripeIntentResult =
+    | { success: true; payment_intent_id: string; client_secret: string }
+    | { success: false; error: string };
+
 export type CaptureOrderResult =
     | { success: true; order_id: string; status: string; message: string }
     | { success: false; error: string };
@@ -78,6 +82,82 @@ export async function createCheckoutOrder(
             paypal_order_id: string;
         };
         return { success: true, paypal_order_id: data.paypal_order_id };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function createStripeIntent(
+    items: CartLineItem[],
+    customer: CheckoutCustomerInfo,
+    customizations: CartCustomizationPayload[] = [],
+): Promise<CreateStripeIntentResult> {
+    try {
+        const response = await fetch(`${API_URL}/shop/orders/stripe/create-intent`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items, customer, customizations }),
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            const error = await parseError(response, `Server error: ${response.status}`);
+            return { success: false, error };
+        }
+
+        const data = (await response.json()) as {
+            payment_intent_id: string;
+            client_secret: string;
+        };
+        return {
+            success: true,
+            payment_intent_id: data.payment_intent_id,
+            client_secret: data.client_secret,
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "An unexpected error occurred",
+        };
+    }
+}
+
+export async function finalizeStripeOrder(
+    paymentIntentId: string,
+    items: CartLineItem[],
+    customer: CheckoutCustomerInfo,
+    customizations: CartCustomizationPayload[] = [],
+): Promise<CaptureOrderResult> {
+    try {
+        const response = await fetch(
+            `${API_URL}/shop/orders/stripe/${encodeURIComponent(paymentIntentId)}/finalize`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ items, customer, customizations }),
+                cache: "no-store",
+            },
+        );
+
+        if (!response.ok) {
+            const error = await parseError(response, `Server error: ${response.status}`);
+            return { success: false, error };
+        }
+
+        const data = (await response.json()) as {
+            order_id: string;
+            status: string;
+            message: string;
+        };
+        return {
+            success: true,
+            order_id: data.order_id,
+            status: data.status,
+            message: data.message,
+        };
     } catch (error) {
         return {
             success: false,

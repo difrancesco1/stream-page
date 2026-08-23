@@ -46,6 +46,9 @@ PAYPAL_CLIENT_SECRET: Final[str] = os.getenv("PAYPAL_CLIENT_SECRET", "")
 PAYPAL_SANDBOX: bool = os.getenv("PAYPAL_SANDBOX", "true").lower() in ("true", "1", "yes")
 PAYPAL_TEST_MODE: bool = os.getenv("PAYPAL_TEST_MODE", "false").lower() in ("true", "1", "yes")
 
+STRIPE_SECRET_KEY: Final[str] = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_TEST_MODE: bool = os.getenv("STRIPE_TEST_MODE", "false").lower() in ("true", "1", "yes")
+
 _supabase_url = os.getenv("SUPABASE_URL", "")
 # Ensure trailing slash for Supabase storage API compatibility
 SUPABASE_URL: Final[str] = _supabase_url.rstrip("/") + "/" if _supabase_url else ""

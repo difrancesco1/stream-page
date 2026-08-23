@@ -101,7 +101,7 @@ export default function CartSection({
           {totalItems} {totalItems === 1 ? "item" : "items"} 
           
         </span>
-        <span className="main-text">USA only &lt;3</span>
+        <span className="main-text">worldwide shipping &lt;3</span>
       </div>
 
       <div

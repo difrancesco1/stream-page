@@ -103,6 +103,10 @@ class OrderCreateRequest(BaseModel):
 class OrderCreateResponse(BaseModel):
     paypal_order_id: str
 
+class OrderStripeIntentResponse(BaseModel):
+    payment_intent_id: str
+    client_secret: str
+
 class OrderCaptureResponse(BaseModel):
     order_id: str
     status: str
@@ -190,6 +194,7 @@ class OrderDetail(BaseModel):
     """Full order payload returned by detail endpoints."""
     id: str
     status: str
+    payment_provider: str | None = None
     customer_first_name: str
     customer_last_name: str
     customer_email: str

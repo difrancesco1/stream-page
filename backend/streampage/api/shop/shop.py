@@ -21,6 +21,7 @@ from streampage.api.shop.models import (
     ProductReorderRequest,
     OrderCreateRequest,
     OrderCreateResponse,
+    OrderStripeIntentResponse,
     OrderCaptureResponse,
     OrderCustomizationResponse,
     OrderDetail,
@@ -48,6 +49,7 @@ from streampage.services.email import (
     send_order_receipt_email,
 )
 from streampage.services.paypal import paypal_service
+from streampage.services.stripe import stripe_service
 from streampage.services.storage import (
     storage_service,
     ALLOWED_IMAGE_EXTENSIONS,
@@ -65,7 +67,7 @@ NO_TRACKING_COST = 1.0
 PICKUP_DISCOUNT_RATE = 0.20
 PICKUP_ALLOWED_STATES = {"WA"}
 INTERNATIONAL_SHIPPING_COST = 10.0
-INTERNATIONAL_ALLOWED_COUNTRIES = {"CA"}
+FREE_SHIPPING_THRESHOLD = 75.0
 
 
 _SHIPPING_METHOD_LABELS = {
@@ -89,27 +91,33 @@ def _compute_shipping_and_discount(
     """Return ``(shipping_cost, discount_amount)`` for the given checkout.
 
     Raises ``HTTPException(400)`` if the combination is invalid:
-    - INTERNATIONAL requires ``shipping_country`` in
-      :data:`INTERNATIONAL_ALLOWED_COUNTRIES`.
+    - INTERNATIONAL is available for any non-US destination at a flat rate.
     - Domestic methods (TRACKING/NO_TRACKING/PICKUP) require a US address.
     - PICKUP requires ``shipping_state`` in :data:`PICKUP_ALLOWED_STATES`.
+
+    Orders with an item subtotal at or above :data:`FREE_SHIPPING_THRESHOLD`
+    ship free (the shipping cost is zeroed after validation).
     """
+
+    def _apply_free_shipping(cost: float) -> float:
+        return 0.0 if item_subtotal >= FREE_SHIPPING_THRESHOLD else cost
+
     if method == ShippingMethod.INTERNATIONAL:
-        if shipping_country not in INTERNATIONAL_ALLOWED_COUNTRIES:
+        if shipping_country == "US":
             raise HTTPException(
                 status_code=400,
-                detail="International shipping is only available for Canada",
+                detail="International shipping is not available for US addresses",
             )
-        return INTERNATIONAL_SHIPPING_COST, 0.0
+        return _apply_free_shipping(INTERNATIONAL_SHIPPING_COST), 0.0
     if shipping_country != "US":
         raise HTTPException(
             status_code=400,
             detail="Selected shipping method is only available for US addresses",
         )
     if method == ShippingMethod.TRACKING:
-        return TRACKING_COST, 0.0
+        return _apply_free_shipping(TRACKING_COST), 0.0
     if method == ShippingMethod.NO_TRACKING:
-        return NO_TRACKING_COST, 0.0
+        return _apply_free_shipping(NO_TRACKING_COST), 0.0
     if method == ShippingMethod.PICKUP:
         if shipping_state not in PICKUP_ALLOWED_STATES:
             raise HTTPException(
@@ -601,6 +609,7 @@ def _order_to_detail(
     return OrderDetail(
         id=str(order.id),
         status=order.status.value,
+        payment_provider=order.payment_provider,
         customer_first_name=order.customer_first_name,
         customer_last_name=order.customer_last_name,
         customer_email=order.customer_email,
@@ -1000,34 +1009,48 @@ async def create_order(request: OrderCreateRequest):
     return OrderCreateResponse(paypal_order_id=paypal_order_id)
 
 
-def _write_orphan_capture_row(
-    paypal_order_id: str,
+def _write_orphan_paid_order(
     request: OrderCreateRequest,
+    *,
+    provider: str,
     total: float,
     shipping_cost: float,
     discount_amount: float,
     reason: str,
+    paypal_order_id: str | None = None,
+    stripe_payment_intent_id: str | None = None,
 ) -> str | None:
-    """Write a minimal ``Order(status=FAILED)`` row when a PayPal capture
-    succeeded but the main DB transaction could not persist the full order.
+    """Write a minimal ``Order(status=FAILED)`` row when a payment succeeded
+    with the provider but the main DB transaction could not persist the full
+    order.
 
-    This is the failsafe that guarantees every successful PayPal charge has
-    *some* DB record an admin can find. Best-effort: returns the new order
-    id on success, ``None`` if even this insert fails (in which case the
-    error is logged and the admin will have to reconcile via the PayPal
-    dashboard alone).
+    This is the failsafe that guarantees every successful charge has *some*
+    DB record an admin can find. Best-effort: returns the new order id on
+    success, ``None`` if even this insert fails (in which case the error is
+    logged and the admin will have to reconcile via the provider dashboard
+    alone).
     """
     cust = request.customer
+    payment_ref = paypal_order_id or stripe_payment_intent_id
     try:
         with get_db_session() as session:
-            existing = session.execute(
-                select(Order).where(Order.paypal_order_id == paypal_order_id)
-            ).scalar_one_or_none()
+            if stripe_payment_intent_id is not None:
+                existing = session.execute(
+                    select(Order).where(
+                        Order.stripe_payment_intent_id == stripe_payment_intent_id
+                    )
+                ).scalar_one_or_none()
+            else:
+                existing = session.execute(
+                    select(Order).where(Order.paypal_order_id == paypal_order_id)
+                ).scalar_one_or_none()
             if existing is not None:
                 return str(existing.id)
 
             orphan = Order(
                 paypal_order_id=paypal_order_id,
+                stripe_payment_intent_id=stripe_payment_intent_id,
+                payment_provider=provider,
                 status=OrderStatus.FAILED,
                 customer_first_name=cust.first_name,
                 customer_last_name=cust.last_name,
@@ -1042,8 +1065,8 @@ def _write_orphan_capture_row(
                 shipping_cost=shipping_cost,
                 discount_amount=discount_amount,
                 notes=(
-                    f"AUTO: PayPal capture succeeded but order persist failed "
-                    f"({reason}). PayPal order id: {paypal_order_id}. "
+                    f"AUTO: {provider} payment succeeded but order persist failed "
+                    f"({reason}). Payment ref: {payment_ref}. "
                     f"Reconcile manually."
                 ),
                 total_amount=total,
@@ -1054,59 +1077,50 @@ def _write_orphan_capture_row(
             return str(orphan.id)
     except Exception:
         logger.exception(
-            "Failed to write orphan-capture row for PayPal order %s",
-            paypal_order_id,
+            "Failed to write orphan-paid row for %s payment %s",
+            provider,
+            payment_ref,
         )
         return None
 
 
-@shop_router.post("/orders/{paypal_order_id}/capture", response_model=OrderCaptureResponse)
-async def capture_order(paypal_order_id: str, request: OrderCreateRequest):
-    """Capture a PayPal payment, then persist the order in one transaction.
+def _persist_paid_order(
+    request: OrderCreateRequest,
+    *,
+    provider: str,
+    grouped_customizations,
+    shipping_cost: float,
+    discount_amount: float,
+    total: float,
+    paypal_order_id: str | None = None,
+    stripe_payment_intent_id: str | None = None,
+) -> OrderCaptureResponse:
+    """Persist a paid order (status=PAID) in a single transaction and send
+    receipt/admin emails. Idempotent on the provider's payment id.
 
-    The cart, customer info, and customizations are re-sent by the frontend
-    so the backend can persist the full order without ever leaving a
-    ``pending`` row in the DB. Validation is re-run server-side so a
-    tampered re-submission cannot slip past the original ``create`` check.
+    Assumes the payment has already been captured/confirmed with the
+    provider. Shared by the PayPal capture and Stripe finalize endpoints.
 
-    Flow:
-      1. Validate the resubmitted cart (products, stock, customizations).
-      2. Call PayPal capture. If it errors or is not ``COMPLETED``, return
-         an error and write nothing to the DB.
-      3. In a single transaction: lock product rows, re-check stock,
-         decrement, insert ``Order(status=PAID)`` + items + customizations.
-      4. Best-effort send receipt + admin emails.
-
-    If step 3 raises after the PayPal capture succeeded, we fall back to
-    inserting a minimal ``Order(status=FAILED)`` row so admins can always
-    reconcile a real charge.
+    In one transaction: lock product rows, re-check stock, decrement, insert
+    ``Order(status=PAID)`` + items + customizations, then best-effort send
+    the receipt + admin emails. If persistence raises after the payment
+    succeeded, a minimal ``Order(status=FAILED)`` row is written so admins
+    can always reconcile a real charge, and the error is re-raised.
     """
-    with get_db_session() as session:
-        (
-            _products,
-            _qty_map,
-            grouped_customizations,
-            _item_subtotal,
-            shipping_cost,
-            discount_amount,
-            total,
-        ) = _validate_checkout_request(session, request)
-
-    try:
-        capture_data = await paypal_service.capture_order(paypal_order_id)
-    except Exception as e:
-        logger.error("PayPal capture failed for %s: %s", paypal_order_id, e)
-        raise HTTPException(status_code=502, detail="Payment capture failed")
-
-    if capture_data.get("status") != "COMPLETED":
-        raise HTTPException(status_code=400, detail="Payment was not completed")
-
     cust = request.customer
+    payment_ref = paypal_order_id or stripe_payment_intent_id
     try:
         with get_db_session() as session:
-            existing = session.execute(
-                select(Order).where(Order.paypal_order_id == paypal_order_id)
-            ).scalar_one_or_none()
+            if stripe_payment_intent_id is not None:
+                existing = session.execute(
+                    select(Order).where(
+                        Order.stripe_payment_intent_id == stripe_payment_intent_id
+                    )
+                ).scalar_one_or_none()
+            else:
+                existing = session.execute(
+                    select(Order).where(Order.paypal_order_id == paypal_order_id)
+                ).scalar_one_or_none()
             if existing is not None:
                 return OrderCaptureResponse(
                     order_id=str(existing.id),
@@ -1140,6 +1154,8 @@ async def capture_order(paypal_order_id: str, request: OrderCreateRequest):
 
             order = Order(
                 paypal_order_id=paypal_order_id,
+                stripe_payment_intent_id=stripe_payment_intent_id,
+                payment_provider=provider,
                 status=OrderStatus.PAID,
                 customer_first_name=cust.first_name,
                 customer_last_name=cust.last_name,
@@ -1254,33 +1270,39 @@ async def capture_order(paypal_order_id: str, request: OrderCreateRequest):
                 message="Payment successful, order confirmed",
             )
     except HTTPException as http_exc:
-        orphan_id = _write_orphan_capture_row(
-            paypal_order_id,
+        orphan_id = _write_orphan_paid_order(
             request,
-            total,
-            shipping_cost,
-            discount_amount,
+            provider=provider,
+            total=total,
+            shipping_cost=shipping_cost,
+            discount_amount=discount_amount,
             reason=f"HTTP {http_exc.status_code}: {http_exc.detail}",
+            paypal_order_id=paypal_order_id,
+            stripe_payment_intent_id=stripe_payment_intent_id,
         )
         logger.error(
-            "Order persist failed post-capture for PayPal %s (orphan row: %s): %s",
-            paypal_order_id,
+            "Order persist failed post-payment for %s %s (orphan row: %s): %s",
+            provider,
+            payment_ref,
             orphan_id,
             http_exc.detail,
         )
         raise
     except Exception as exc:
-        orphan_id = _write_orphan_capture_row(
-            paypal_order_id,
+        orphan_id = _write_orphan_paid_order(
             request,
-            total,
-            shipping_cost,
-            discount_amount,
+            provider=provider,
+            total=total,
+            shipping_cost=shipping_cost,
+            discount_amount=discount_amount,
             reason=f"{type(exc).__name__}: {exc}",
+            paypal_order_id=paypal_order_id,
+            stripe_payment_intent_id=stripe_payment_intent_id,
         )
         logger.exception(
-            "Unexpected error persisting order after PayPal capture %s (orphan row: %s)",
-            paypal_order_id,
+            "Unexpected error persisting order after %s payment %s (orphan row: %s)",
+            provider,
+            payment_ref,
             orphan_id,
         )
         raise HTTPException(
@@ -1288,9 +1310,151 @@ async def capture_order(paypal_order_id: str, request: OrderCreateRequest):
             detail=(
                 "Payment succeeded but the order could not be saved. "
                 "Support has been notified — please contact us with your "
-                "PayPal confirmation."
+                "payment confirmation."
             ),
         )
+
+
+@shop_router.post("/orders/{paypal_order_id}/capture", response_model=OrderCaptureResponse)
+async def capture_order(paypal_order_id: str, request: OrderCreateRequest):
+    """Capture a PayPal payment, then persist the order in one transaction.
+
+    The cart, customer info, and customizations are re-sent by the frontend
+    so the backend can persist the full order without ever leaving a
+    ``pending`` row in the DB. Validation is re-run server-side so a
+    tampered re-submission cannot slip past the original ``create`` check.
+
+    Flow:
+      1. Validate the resubmitted cart (products, stock, customizations).
+      2. Call PayPal capture. If it errors or is not ``COMPLETED``, return
+         an error and write nothing to the DB.
+      3. Persist the paid order via :func:`_persist_paid_order`.
+    """
+    with get_db_session() as session:
+        (
+            _products,
+            _qty_map,
+            grouped_customizations,
+            _item_subtotal,
+            shipping_cost,
+            discount_amount,
+            total,
+        ) = _validate_checkout_request(session, request)
+
+    try:
+        capture_data = await paypal_service.capture_order(paypal_order_id)
+    except Exception as e:
+        logger.error("PayPal capture failed for %s: %s", paypal_order_id, e)
+        raise HTTPException(status_code=502, detail="Payment capture failed")
+
+    if capture_data.get("status") != "COMPLETED":
+        raise HTTPException(status_code=400, detail="Payment was not completed")
+
+    return _persist_paid_order(
+        request,
+        provider="paypal",
+        grouped_customizations=grouped_customizations,
+        shipping_cost=shipping_cost,
+        discount_amount=discount_amount,
+        total=total,
+        paypal_order_id=paypal_order_id,
+    )
+
+
+@shop_router.post("/orders/stripe/create-intent", response_model=OrderStripeIntentResponse)
+async def create_stripe_intent(request: OrderCreateRequest):
+    """Validate the cart and create a Stripe PaymentIntent. No DB rows written.
+
+    Mirrors :func:`create_order` (PayPal). The returned ``client_secret`` is
+    used by Stripe.js to confirm the payment on-page; the order is only
+    persisted afterwards via :func:`finalize_stripe_order`.
+    """
+    with get_db_session() as session:
+        (
+            _products,
+            _qty_map,
+            _grouped,
+            _item_subtotal,
+            _shipping_cost,
+            _discount_amount,
+            total,
+        ) = _validate_checkout_request(session, request)
+
+    cust = request.customer
+    metadata = {
+        "customer_email": cust.email,
+        "customer_discord_handle": cust.discord_handle,
+        "shipping_country": cust.shipping_country,
+    }
+
+    intent = await stripe_service.create_payment_intent(
+        total=f"{total:.2f}",
+        currency="usd",
+        metadata=metadata,
+    )
+
+    return OrderStripeIntentResponse(
+        payment_intent_id=intent["id"],
+        client_secret=intent["client_secret"],
+    )
+
+
+@shop_router.post(
+    "/orders/stripe/{payment_intent_id}/finalize",
+    response_model=OrderCaptureResponse,
+)
+async def finalize_stripe_order(payment_intent_id: str, request: OrderCreateRequest):
+    """Verify a Stripe payment succeeded, then persist the order.
+
+    Mirrors :func:`capture_order` (PayPal). The cart is re-validated so a
+    tampered re-submission cannot slip past the original ``create-intent``
+    check, and the PaymentIntent is retrieved from Stripe to confirm it
+    actually ``succeeded`` for the expected amount before anything is
+    written to the DB.
+    """
+    with get_db_session() as session:
+        (
+            _products,
+            _qty_map,
+            grouped_customizations,
+            _item_subtotal,
+            shipping_cost,
+            discount_amount,
+            total,
+        ) = _validate_checkout_request(session, request)
+
+    try:
+        intent = await stripe_service.retrieve_payment_intent(payment_intent_id)
+    except Exception as e:
+        logger.error("Stripe retrieve failed for %s: %s", payment_intent_id, e)
+        raise HTTPException(status_code=502, detail="Payment verification failed")
+
+    if intent.get("status") != "succeeded":
+        raise HTTPException(status_code=400, detail="Payment was not completed")
+
+    expected_cents = int(round(total * 100))
+    charged_cents = intent.get("amount_received") or intent.get("amount")
+    if not intent.get("test_mode") and charged_cents != expected_cents:
+        logger.error(
+            "Stripe amount mismatch for %s: charged=%s expected=%s",
+            payment_intent_id,
+            charged_cents,
+            expected_cents,
+        )
+        raise HTTPException(
+            status_code=400,
+            detail="Payment amount did not match the order total",
+        )
+
+    return _persist_paid_order(
+        request,
+        provider="stripe",
+        grouped_customizations=grouped_customizations,
+        shipping_cost=shipping_cost,
+        discount_amount=discount_amount,
+        total=total,
+        stripe_payment_intent_id=payment_intent_id,
+    )
 
 
 @shop_router.post("/orders/custom", response_model=OrderDetail)
@@ -1340,6 +1504,7 @@ def create_custom_order(
         cust = request.customer
         order = Order(
             paypal_order_id=None,
+            payment_provider="in_person",
             status=OrderStatus.IN_PERSON,
             customer_first_name=cust.first_name,
             customer_last_name=cust.last_name,
