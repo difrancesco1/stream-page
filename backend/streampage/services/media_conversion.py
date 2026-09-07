@@ -72,7 +72,8 @@ def _run_ffmpeg(args: list[str]) -> None:
 
 
 def _is_animated(img: Image.Image) -> bool:
-    logger.info(f"Image format is: {img.format}")
+    if img.format == "MPO":
+       return False 
     return getattr(img, "is_animated", False) and getattr(img, "n_frames", 1) > 1
 
 
