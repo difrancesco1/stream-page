@@ -20,7 +20,19 @@ from pathlib import Path
 from PIL import Image, ImageOps
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
+
+if not any(
+    isinstance(h, logging.FileHandler)
+    and getattr(h, "baseFilename", "").endswith("app.log")
+    for h in logger.handlers
+):
+    _file_handler = logging.FileHandler("app.log", mode="a")
+    _file_handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    )
+    logger.addHandler(_file_handler)
 
 # Tuning knobs (kept here so they are easy to find/adjust)
 WEBP_QUALITY = 80
@@ -60,6 +72,7 @@ def _run_ffmpeg(args: list[str]) -> None:
 
 
 def _is_animated(img: Image.Image) -> bool:
+    logger.info(f"Image format is: {img.format}")
     return getattr(img, "is_animated", False) and getattr(img, "n_frames", 1) > 1
 
 
