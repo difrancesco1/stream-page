@@ -10,6 +10,7 @@ interface OrderCardItemProps {
     row: CustomizationQueueRow;
     imageBusy: boolean;
     onUploadImage: (file: File) => Promise<void>;
+    onRemoveImage: () => Promise<void>;
 }
 
 function itemTitle(row: CustomizationQueueRow): string {
@@ -23,6 +24,7 @@ export default function OrderCardItem({
     row,
     imageBusy,
     onUploadImage,
+    onRemoveImage,
 }: OrderCardItemProps) {
     const isCustom = row.kind === "custom";
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -102,6 +104,27 @@ export default function OrderCardItem({
                                   ? "replace image"
                                   : "attach image"}
                         </button>
+                        {row.image_url && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (
+                                        window.confirm(
+                                            "Remove this image? This can't be undone.",
+                                        )
+                                    ) {
+                                        void onRemoveImage();
+                                    }
+                                }}
+                                disabled={imageBusy}
+                                className="pixel-borders pixel-btn-border px-[var(--spacing-sm)] py-[0.25rem] self-start
+                                    !bg-transparent !text-red-700 main-text text-[0.6875rem] cursor-pointer
+                                    hover:bg-red-500/20
+                                    disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {imageBusy ? "removing..." : "remove image"}
+                            </button>
+                        )}
                     </>
                 )}
             </div>

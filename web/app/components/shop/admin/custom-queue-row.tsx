@@ -17,6 +17,7 @@ interface CustomQueueRowProps {
     showNotes: boolean;
     onToggle: (next: boolean) => void;
     onUploadImage: (file: File) => Promise<void>;
+    onRemoveImage: () => Promise<void>;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -32,6 +33,7 @@ export default function CustomQueueRow({
     showNotes,
     onToggle,
     onUploadImage,
+    onRemoveImage,
 }: CustomQueueRowProps) {
     const placed = dateFormatter.format(new Date(row.order_created_at));
     const handle =
@@ -92,6 +94,7 @@ export default function CustomQueueRow({
                 fileInputRef={fileInputRef}
                 onToggle={onToggle}
                 onFileChange={handleFileChange}
+                onRemoveImage={onRemoveImage}
             />
         </div>
     );

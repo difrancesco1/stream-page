@@ -13,6 +13,7 @@ interface OrderCardProps {
     imageBusyIds: Set<string>;
     onToggle: (row: CustomizationQueueRow, next: boolean) => void;
     onUploadImage: (row: CustomizationQueueRow, file: File) => Promise<void>;
+    onRemoveImage: (row: CustomizationQueueRow) => Promise<void>;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -26,6 +27,7 @@ export default function OrderCard({
     imageBusyIds,
     onToggle,
     onUploadImage,
+    onRemoveImage,
 }: OrderCardProps) {
     const head = rows[0];
     if (!head) return null;
@@ -95,6 +97,7 @@ export default function OrderCard({
                                 onUploadImage={(file) =>
                                     onUploadImage(r, file)
                                 }
+                                onRemoveImage={() => onRemoveImage(r)}
                             />
                         ))}
                     </div>
