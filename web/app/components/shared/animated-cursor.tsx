@@ -1,14 +1,25 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 export function AnimatedCursor() {
+  const pathname = usePathname();
+  const isShop = pathname?.startsWith("/shop") ?? false;
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    document.documentElement.classList.toggle("shop-native-cursor", isShop);
+    return () => {
+      document.documentElement.classList.remove("shop-native-cursor");
+    };
+  }, [isShop]);
+
+  useEffect(() => {
+    if (isShop) return;
     const updatePosition = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY });
       if (!isVisible) setIsVisible(true);
@@ -46,7 +57,9 @@ export function AnimatedCursor() {
         clearTimeout(clickTimeoutRef.current);
       }
     };
-  }, [isVisible]);
+  }, [isVisible, isShop]);
+
+  if (isShop) return null;
 
   return (
     <img

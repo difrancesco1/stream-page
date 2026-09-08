@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
+    deleteCustomizationImage,
     listCustomizations,
     updateCustomization,
     updateOrderItem,
@@ -176,6 +177,25 @@ export default function CustomQueueList({
         [token, markImageBusy],
     );
 
+    const handleRemoveImage = useCallback(
+        async (row: CustomizationQueueRow) => {
+            if (!token) return;
+
+            markImageBusy(row.id, true);
+            const result = await deleteCustomizationImage(token, row.id);
+            markImageBusy(row.id, false);
+
+            if (result.success) {
+                setRows((prev) =>
+                    prev.map((r) => (r.id === row.id ? result.row : r)),
+                );
+            } else {
+                setError(result.error);
+            }
+        },
+        [token, markImageBusy],
+    );
+
     return (
         <div className="w-full max-w-[80rem] mx-auto flex flex-col gap-[var(--spacing-md)]">
             <div className="flex items-center justify-between gap-[var(--spacing-sm)]">
@@ -248,6 +268,9 @@ export default function CustomQueueList({
                                               onUploadImage={(file) =>
                                                   handleUploadImage(r, file)
                                               }
+                                              onRemoveImage={() =>
+                                                  handleRemoveImage(r)
+                                              }
                                           />
                                       ))
                                     : todoOrders.map((group) => (
@@ -258,6 +281,7 @@ export default function CustomQueueList({
                                               imageBusyIds={imageBusyIds}
                                               onToggle={handleToggle}
                                               onUploadImage={handleUploadImage}
+                                              onRemoveImage={handleRemoveImage}
                                           />
                                       ))}
                             </div>
@@ -306,6 +330,9 @@ export default function CustomQueueList({
                                               onUploadImage={(file) =>
                                                   handleUploadImage(r, file)
                                               }
+                                              onRemoveImage={() =>
+                                                  handleRemoveImage(r)
+                                              }
                                           />
                                       ))
                                     : doneOrders.map((group) => (
@@ -316,6 +343,7 @@ export default function CustomQueueList({
                                               imageBusyIds={imageBusyIds}
                                               onToggle={handleToggle}
                                               onUploadImage={handleUploadImage}
+                                              onRemoveImage={handleRemoveImage}
                                           />
                                       ))}
                             </div>

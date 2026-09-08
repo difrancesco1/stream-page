@@ -10,6 +10,8 @@ import {
   captureCheckoutOrder,
   createCheckoutOrder,
   createCustomOrder,
+  createStripeIntent,
+  finalizeStripeOrder,
   type CheckoutCustomerInfo,
 } from "@/app/api/shop/checkout-actions";
 import { useAuth } from "@/app/context/auth-context";
@@ -95,15 +97,20 @@ export default function CheckoutModal({
     }
   }, [isAdmin, pickupEligible, watchedMethod, setValue]);
 
-  // Clear the shipping method when the destination country changes so a US
-  // method doesn't linger on an international order (and vice versa).
+  // When the destination country changes, reset the shipping method so a US
+  // method doesn't linger on an international order (and vice versa). For
+  // non-US countries there's only one option, so auto-select International.
   useEffect(() => {
     if (isAdmin) return;
-    setValue(
-      "shippingMethod",
-      undefined as unknown as CheckoutFormValues["shippingMethod"],
-      { shouldValidate: false },
-    );
+    if (watchedCountry && watchedCountry !== "US") {
+      setValue("shippingMethod", "international", { shouldValidate: false });
+    } else {
+      setValue(
+        "shippingMethod",
+        undefined as unknown as CheckoutFormValues["shippingMethod"],
+        { shouldValidate: false },
+      );
+    }
   }, [isAdmin, watchedCountry, setValue]);
 
   useEffect(() => {
@@ -209,6 +216,52 @@ export default function CheckoutModal({
     setStep("success");
   };
 
+  const handleCreateStripeIntent = async (): Promise<{
+    paymentIntentId: string;
+    clientSecret: string;
+  }> => {
+    if (!customer) throw new Error("Missing customer info");
+    setError(null);
+    const result = await createStripeIntent(
+      cartLineItems,
+      customer,
+      customizationPayload,
+    );
+    if (!result.success) {
+      setError(result.error);
+      throw new Error(result.error);
+    }
+    return {
+      paymentIntentId: result.payment_intent_id,
+      clientSecret: result.client_secret,
+    };
+  };
+
+  const handleFinalizeStripeOrder = async (
+    paymentIntentId: string,
+  ): Promise<void> => {
+    if (!customer) return;
+    setError(null);
+    const result = await finalizeStripeOrder(
+      paymentIntentId,
+      cartLineItems,
+      customer,
+      customizationPayload,
+    );
+    if (!result.success) {
+      setError(result.error);
+      return;
+    }
+    if (result.status !== "paid") {
+      setError(result.message || "Payment was not completed");
+      return;
+    }
+    setSuccessOrderId(result.order_id);
+    setSuccessEmail(customer.email);
+    clear();
+    setStep("success");
+  };
+
   const handleTestPay = async (): Promise<void> => {
     if (!customer) return;
     setError(null);
@@ -283,6 +336,8 @@ export default function CheckoutModal({
               onCreateOrder={handleCreatePaypalOrder}
               onApprove={handleApprovePaypalOrder}
               onTestPay={handleTestPay}
+              onCreateStripeIntent={handleCreateStripeIntent}
+              onFinalizeStripe={handleFinalizeStripeOrder}
               onError={setError}
               onBack={() => setStep("form")}
             />

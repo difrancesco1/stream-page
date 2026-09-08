@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import type { CartCustomization } from "./cart-context";
+import { FREE_SHIPPING_THRESHOLD } from "./pricing";
 import { featuredMedia, type ShopItem } from "./types";
 
 interface CartSectionProps {
@@ -91,17 +92,21 @@ export default function CartSection({
   return (
     <section className="flex flex-col gap-[var(--spacing-xs)]">
       <div
-        className="bg-background h-[1.5rem] md:h-[1.75rem] px-[var(--spacing-sm)]
-          pixel-borders border-accent
-          flex items-center justify-between"
+        className="bg-background min-h-[1.5rem] md:min-h-[1.75rem] px-[var(--spacing-sm)]
+          py-[0.125rem] pixel-borders border-accent
+          flex items-center justify-between gap-[var(--spacing-sm)]"
       >
-        <span className="main-text flex items-center gap-[var(--spacing-xs)]">
+        <span className="main-text flex items-center gap-[var(--spacing-xs)] shrink-0">
           cart
           <CartIcon />
-          {totalItems} {totalItems === 1 ? "item" : "items"} 
-          
+          {totalItems} {totalItems === 1 ? "item" : "items"}
         </span>
-        <span className="main-text">USA only &lt;3</span>
+        <p className="main-text m-0 text-right leading-tight min-w-0">
+          worldwide shipping &lt;3{" "}
+          <span className="opacity-70">
+            free shipping for orders over ${FREE_SHIPPING_THRESHOLD}
+          </span>
+        </p>
       </div>
 
       <div
@@ -258,7 +263,9 @@ export default function CartSection({
               Total
             </span>
             <span className="main-text text-[1rem] md:text-[1.125rem] leading-none">
-              {priceFormatter.format(totalCost)} + shipping
+              {totalCost >= FREE_SHIPPING_THRESHOLD
+                ? `${priceFormatter.format(totalCost)} · free shipping`
+                : `${priceFormatter.format(totalCost)} + shipping`}
             </span>
           </div>
           <div className="flex gap-[var(--spacing-xs)]">

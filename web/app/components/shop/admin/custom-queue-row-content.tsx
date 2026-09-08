@@ -19,6 +19,7 @@ interface CustomQueueRowContentProps {
     fileInputRef: RefObject<HTMLInputElement | null>;
     onToggle: (next: boolean) => void;
     onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void | Promise<void>;
+    onRemoveImage: () => void | Promise<void>;
 }
 
 function siblingLabel(s: CustomizationQueueRow): string {
@@ -39,6 +40,7 @@ export default function CustomQueueRowContent({
     fileInputRef,
     onToggle,
     onFileChange,
+    onRemoveImage,
 }: CustomQueueRowContentProps) {
     const isCustom = row.kind === "custom";
     const cardLabel = isCustom ? "card name" : "product";
@@ -140,6 +142,27 @@ export default function CustomQueueRowContent({
                                       ? "replace image"
                                       : "attach image"}
                             </button>
+                            {row.image_url && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (
+                                            window.confirm(
+                                                "Remove this image? This can't be undone.",
+                                            )
+                                        ) {
+                                            void onRemoveImage();
+                                        }
+                                    }}
+                                    disabled={imageBusy}
+                                    className="pixel-borders pixel-btn-border px-[var(--spacing-sm)] py-[0.25rem]
+                                        !bg-transparent !text-red-700 main-text text-[0.6875rem] cursor-pointer
+                                        hover:bg-red-500/20
+                                        disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {imageBusy ? "removing..." : "remove image"}
+                                </button>
+                            )}
                         </>
                     )}
                     <CopyButton label="email" value={row.customer_email} />

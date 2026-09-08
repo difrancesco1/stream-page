@@ -11,6 +11,7 @@ import { FIELD_ERROR_CLASS, type FieldGroupProps } from "./types";
 
 interface ShippingMethodFieldProps extends FieldGroupProps {
   pickupEligible: boolean;
+  freeShippingApplied?: boolean;
 }
 
 export default function ShippingMethodField({
@@ -18,6 +19,7 @@ export default function ShippingMethodField({
   control,
   errors,
   pickupEligible,
+  freeShippingApplied = false,
 }: ShippingMethodFieldProps) {
   const watchedCountry = useWatch({ control, name: "shippingCountry" });
   const isUS = watchedCountry === "US";
@@ -36,7 +38,9 @@ export default function ShippingMethodField({
             <span>
               Tracking{" "}
               <span className="opacity-70">
-                (+{priceFormatter.format(TRACKING_COST)})
+                {freeShippingApplied
+                  ? "(free)"
+                  : `(+${priceFormatter.format(TRACKING_COST)})`}
               </span>
             </span>
           </label>
@@ -49,7 +53,9 @@ export default function ShippingMethodField({
             <span>
               No tracking{" "}
               <span className="opacity-70">
-                (+{priceFormatter.format(NO_TRACKING_COST)})
+                {freeShippingApplied
+                  ? "(free)"
+                  : `(+${priceFormatter.format(NO_TRACKING_COST)})`}
               </span>
             </span>
           </label>
@@ -74,19 +80,26 @@ export default function ShippingMethodField({
           )}
         </>
       ) : (
-        <label className="main-text text-xs flex items-center gap-[var(--spacing-sm)]">
-          <input
-            type="radio"
-            value="international"
-            {...register("shippingMethod")}
-          />
-          <span>
-            International shipping{" "}
-            <span className="opacity-70">
-              ({priceFormatter.format(INTERNATIONAL_SHIPPING_COST)} flat)
+        <>
+          <label className="main-text text-xs flex items-center gap-[var(--spacing-sm)]">
+            <input
+              type="radio"
+              value="international"
+              {...register("shippingMethod")}
+            />
+            <span>
+              International shipping{" "}
+              <span className="opacity-70">
+                {freeShippingApplied
+                  ? "(free)"
+                  : `(${priceFormatter.format(INTERNATIONAL_SHIPPING_COST)} flat)`}
+              </span>
             </span>
-          </span>
-        </label>
+          </label>
+          <p className="main-text text-[10px] opacity-50">
+            Shipping takes 2-4 weeks for international orders.
+          </p>
+        </>
       )}
       {errors.shippingMethod && (
         <p className={FIELD_ERROR_CLASS}>{errors.shippingMethod.message}</p>

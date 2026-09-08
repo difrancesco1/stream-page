@@ -57,6 +57,7 @@ export default function FormStep({
           control={control}
           errors={errors}
           pickupEligible={pickupEligible}
+          freeShippingApplied={totals.freeShippingApplied}
         />
       )}
 
