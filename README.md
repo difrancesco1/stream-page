@@ -8,7 +8,6 @@ A self-hostable, all-in-one home page for streamers and creators. Stream Page gi
 
 - [Features](#features)
 - [Tech stack](#tech-stack)
-- [Architecture](#architecture)
 - [Getting started](#getting-started)
 - [Make it yours](#make-it-yours)
 - [Configuration reference](#configuration-reference)
