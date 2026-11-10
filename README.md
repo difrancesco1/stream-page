@@ -2,8 +2,6 @@
 
 A self-hostable, all-in-one home page for streamers and creators. Stream Page gives you a profile hub, a clip wall, League of Legends trackers, community features and a full storefront, all on one page you control and theme yourself.
 
-![Stream Page preview](docs/preview.png)
-
 ---
 
 ## Table of contents
@@ -15,7 +13,6 @@ A self-hostable, all-in-one home page for streamers and creators. Stream Page gi
 - [Make it yours](#make-it-yours)
 - [Configuration reference](#configuration-reference)
 - [Deployment (Railway)](#deployment-railway)
-- [Development](#development)
 - [License](#license)
 
 ---
