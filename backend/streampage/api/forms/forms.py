@@ -34,7 +34,7 @@ from streampage.db.models import (
     FormAnswer,
     User,
 )
-from streampage.services.storage import storage_service
+from streampage.services.storage import storage_service, is_managed_media_url
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ def _cleanup_form_file_uploads(session, form: Form):
         for ans in resp.answers:
             if ans.question_id in file_question_ids and ans.answer_value:
                 url = ans.answer_value if isinstance(ans.answer_value, str) else str(ans.answer_value)
-                if "supabase.co" in url:
+                if is_managed_media_url(url):
                     storage_service.delete_image(url)
 
 

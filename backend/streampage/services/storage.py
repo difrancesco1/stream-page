@@ -3,12 +3,18 @@ from pathlib import Path
 from supabase import create_client, Client
 from fastapi import HTTPException
 
-from streampage.config import SUPABASE_URL, SUPABASE_SERVICE_KEY, SUPABASE_BUCKET
+from streampage.config import (
+    MEDIA_CDN_URL,
+    SUPABASE_URL,
+    SUPABASE_SERVICE_KEY,
+    SUPABASE_BUCKET,
+)
 from streampage.services.media_conversion import (
     MediaConversionError,
     image_to_webp,
     video_to_webm,
 )
+from streampage.services.r2_storage import r2_storage_service
 
 
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
@@ -41,6 +47,21 @@ class SupabaseStorageService:
     
     _LONG_CACHE_CONTROL_SECONDS = "31536000"
 
+    def _to_public_url(self, url: str) -> str:
+        """
+        Point a Supabase public URL at the CDN host when one is configured.
+
+        The path is left byte-identical so only the origin differs, which keeps
+        delete_object's bucket-based path parsing working for both forms.
+        """
+        url = url.rstrip("?")
+        if not MEDIA_CDN_URL or not SUPABASE_URL:
+            return url
+        origin = SUPABASE_URL.rstrip("/")
+        if url.startswith(origin):
+            return MEDIA_CDN_URL + url[len(origin):]
+        return url
+
     def _upload(self, path: str, file_content: bytes, content_type: str) -> str:
         """Low-level helper that pushes bytes to Supabase and returns public URL."""
         try:
@@ -53,7 +74,9 @@ class SupabaseStorageService:
                     "cache-control": self._LONG_CACHE_CONTROL_SECONDS,
                 },
             )
-            return self.supabase.storage.from_(self.bucket).get_public_url(path)
+            return self._to_public_url(
+                self.supabase.storage.from_(self.bucket).get_public_url(path)
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=500,
@@ -105,6 +128,10 @@ class SupabaseStorageService:
         minimize storage/egress. Conversion is mandatory: a failure raises HTTP
         422 and nothing is stored.
 
+        Stored in Cloudflare R2 when configured, since Cloudflare's CDN terms
+        do not allow serving video from a third-party origin; otherwise falls
+        back to Supabase.
+
         Args:
             file_content: The file bytes to upload (raw video data)
             category: Subfolder name (e.g., 'shop/products')
@@ -139,15 +166,21 @@ class SupabaseStorageService:
             )
 
         filename = f"{category}/{uuid.uuid4()}.webm"
+        if r2_storage_service.is_configured:
+            return r2_storage_service.upload(filename, converted, "video/webm")
         return self._upload(filename, converted, "video/webm")
 
     def delete_object(self, url: str) -> bool:
         """
         Delete a stored object (image, video, or other) by its public URL.
 
-        Returns True on success, False if the URL is not in this bucket or the
-        delete failed (best-effort; never raises).
+        Dispatches to R2 for videos stored there, otherwise treats the URL as
+        Supabase-hosted. Returns True on success, False if the URL is not ours
+        or the delete failed (best-effort; never raises).
         """
+        if r2_storage_service.owns_url(url):
+            return r2_storage_service.delete(url)
+
         try:
             if f'/{self.bucket}/' not in url:
                 return False
@@ -170,3 +203,18 @@ storage_service = SupabaseStorageService(
     key=SUPABASE_SERVICE_KEY,
     bucket=SUPABASE_BUCKET
 )
+
+
+def is_managed_media_url(url: str | None) -> bool:
+    """
+    True if the URL points at storage we own, so it is safe to delete.
+
+    Covers the Supabase bucket whether addressed directly or through the CDN
+    host, plus anything in R2. Call this before delete_object so user-supplied
+    external links are never touched.
+    """
+    if not url:
+        return False
+    if r2_storage_service.owns_url(url):
+        return True
+    return f"/{SUPABASE_BUCKET}/" in url

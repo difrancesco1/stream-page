@@ -54,3 +54,17 @@ _supabase_url = os.getenv("SUPABASE_URL", "")
 SUPABASE_URL: Final[str] = _supabase_url.rstrip("/") + "/" if _supabase_url else ""
 SUPABASE_SERVICE_KEY: Final[str] = os.getenv("SUPABASE_SERVICE_KEY", "")
 SUPABASE_BUCKET: Final[str] = os.getenv("SUPABASE_BUCKET", "linqq-uploads")
+
+# Cloudflare host that fronts the Supabase storage bucket, so image reads are
+# served from the edge instead of billing against Supabase egress. Unset means
+# hand out Supabase URLs directly.
+MEDIA_CDN_URL: Final[str] = os.getenv("MEDIA_CDN_URL", "").rstrip("/")
+
+# Video lives in Cloudflare R2 rather than Supabase: Cloudflare's CDN terms do
+# not allow serving video from a third-party origin, and R2 has no egress fees.
+# Unset means fall back to storing video in Supabase.
+R2_ACCOUNT_ID: Final[str] = os.getenv("R2_ACCOUNT_ID", "")
+R2_ACCESS_KEY_ID: Final[str] = os.getenv("R2_ACCESS_KEY_ID", "")
+R2_SECRET_ACCESS_KEY: Final[str] = os.getenv("R2_SECRET_ACCESS_KEY", "")
+R2_BUCKET: Final[str] = os.getenv("R2_BUCKET", "")
+R2_PUBLIC_BASE_URL: Final[str] = os.getenv("R2_PUBLIC_BASE_URL", "").rstrip("/")

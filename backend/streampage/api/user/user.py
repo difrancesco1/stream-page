@@ -31,7 +31,7 @@ from streampage.db.enums import Platform
 from streampage.db.engine import get_db_session
 from sqlalchemy import func
 from streampage.db.models import User, UserLogin, Biography, Social, FeaturedImages
-from streampage.services.storage import storage_service
+from streampage.services.storage import storage_service, is_managed_media_url
 
 users_router = APIRouter()
 
@@ -247,7 +247,7 @@ async def upload_profile_picture(
         user = session.query(User).filter(User.id == current_user.id).first()
         if user:
             # Delete old image from Supabase if it exists
-            if user.profile_picture and "supabase.co" in user.profile_picture:
+            if is_managed_media_url(user.profile_picture):
                 storage_service.delete_image(user.profile_picture)
             
             user.profile_picture = public_url
@@ -290,7 +290,7 @@ async def upload_featured_image(
             # Delete old image from Supabase if it exists
             if featured_images.images and len(featured_images.images) > 0:
                 old_url = featured_images.images[0]
-                if "supabase.co" in old_url:
+                if is_managed_media_url(old_url):
                     storage_service.delete_image(old_url)
             
             # Update existing entry - replace the first image

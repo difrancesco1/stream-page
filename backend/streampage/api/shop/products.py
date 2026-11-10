@@ -25,6 +25,7 @@ from streampage.db.models import (
 )
 from streampage.services.storage import (
     storage_service,
+    is_managed_media_url,
     ALLOWED_IMAGE_EXTENSIONS,
     ALLOWED_VIDEO_EXTENSIONS,
     MAX_VIDEO_BYTES,
@@ -238,7 +239,7 @@ def delete_product(
         session.commit()
 
     for url in media_urls:
-        if "supabase.co" in url:
+        if is_managed_media_url(url):
             storage_service.delete_object(url)
 
     return ResponseMessage(message="Product deleted")
@@ -394,7 +395,7 @@ def delete_product_media(
         session.delete(media)
         session.commit()
 
-    if url and "supabase.co" in url:
+    if is_managed_media_url(url):
         storage_service.delete_object(url)
 
     return ResponseMessage(message="Media deleted")

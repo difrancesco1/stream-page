@@ -13,7 +13,7 @@ from streampage.api.cat.models import (
 )
 from streampage.db.engine import get_db_session
 from streampage.db.models import CatEntry, User
-from streampage.services.storage import storage_service
+from streampage.services.storage import storage_service, is_managed_media_url
 
 
 cat_router = APIRouter()
@@ -92,7 +92,7 @@ def remove_cat_image(
             raise HTTPException(status_code=403, detail="Not authorized to delete this image")
         
         # Delete file from Supabase Storage
-        if "supabase.co" in cat_entry.image_url:
+        if is_managed_media_url(cat_entry.image_url):
             storage_service.delete_image(cat_entry.image_url)
         
         # Delete database entry

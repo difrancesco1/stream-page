@@ -6,7 +6,7 @@ from streampage.api.middleware.authenticator import require_creator, get_optiona
 from streampage.api.page.models import ResponseMessage, PageConfigResponse
 from streampage.db.engine import get_db_session
 from streampage.db.models import User, PageConfig
-from streampage.services.storage import storage_service
+from streampage.services.storage import storage_service, is_managed_media_url
 
 
 page_router = APIRouter()
@@ -42,7 +42,7 @@ async def upload_background_image(
         
         if config:
             # Delete old background from Supabase if it exists
-            if config.background_image and "supabase.co" in config.background_image:
+            if is_managed_media_url(config.background_image):
                 storage_service.delete_image(config.background_image)
             
             config.background_image = public_url

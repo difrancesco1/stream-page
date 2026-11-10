@@ -24,6 +24,7 @@ from streampage.db.models import (
 )
 from streampage.services.storage import (
     storage_service,
+    is_managed_media_url,
     ALLOWED_IMAGE_EXTENSIONS,
 )
 
@@ -355,7 +356,7 @@ async def upload_customization_image(
             customization, order, product.name, total_qty, product.category
         )
 
-    if previous_url and previous_url != new_url and "supabase.co" in previous_url:
+    if previous_url != new_url and is_managed_media_url(previous_url):
         storage_service.delete_object(previous_url)
 
     return response
@@ -386,7 +387,7 @@ def delete_customization_image(
             customization, order, product.name, total_qty, product.category
         )
 
-    if previous_url and "supabase.co" in previous_url:
+    if is_managed_media_url(previous_url):
         storage_service.delete_object(previous_url)
 
     return response
