@@ -75,51 +75,7 @@ A self-hostable, all-in-one home page for streamers and creators. Stream Page gi
 
 ---
 
-## Architecture
-
-```mermaid
-flowchart LR
-    Browser --> NextApp["Next.js frontend"]
-    Browser --> FastAPI["FastAPI backend"]
-    NextApp --> FastAPI
-    FastAPI --> Postgres[(PostgreSQL)]
-    FastAPI --> Supabase["Supabase Storage (images)"]
-    FastAPI --> R2["Cloudflare R2 (video)"]
-    Supabase --> CDN["Cloudflare CDN"]
-    CDN --> Browser
-    R2 --> Browser
-    FastAPI --> Riot["Riot API"]
-    FastAPI --> Payments["Stripe and PayPal"]
-    FastAPI --> SMTP["SMTP email"]
-    Scheduler["APScheduler (24h refresh)"] --> FastAPI
-```
-
 The frontend is a Next.js App Router app that talks to the FastAPI backend over REST. The backend owns all data, auth, media processing, payments and email. A background scheduler inside the backend refreshes Riot data once a day.
-
-### Repository layout
-
-```text
-stream-page/
-├── backend/
-│   ├── alembic/              # Database migrations
-│   ├── scripts/              # One-off maintenance scripts (media URL rewrites, R2 migration)
-│   └── streampage/
-│       ├── api/              # One sub-package per domain: user, page, media, cat, forms,
-│       │                     # opgg, riot, duo, first, shop, middleware
-│       ├── db/               # SQLAlchemy models, engine, enums, Riot data helpers
-│       ├── services/         # Storage, R2, media conversion, email, Stripe, PayPal, scheduler
-│       ├── config.py         # Environment configuration
-│       └── main.py           # App entrypoint, routers, CORS, scheduler
-└── web/
-    ├── app/
-    │   ├── api/              # Typed API clients, one folder per backend domain
-    │   ├── components/       # One folder per card (main-card, media, opgg, shop, ...)
-    │   ├── context/          # Auth, profile and edit-mode providers
-    │   └── shop/             # Shop and admin routes
-    ├── components/ui/        # shadcn/ui components
-    ├── lib/                  # API base URL, site config, vanity URLs, utilities
-    └── public/               # Theme assets: background, profile GIF, fonts, art
-```
 
 ---
 
