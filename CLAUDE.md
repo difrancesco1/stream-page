@@ -34,7 +34,7 @@ cd backend && python reset_db.py
 
 ## Environment Variables
 
-- **Backend** (`.env`): `DATABASE_URL`, `FRONTEND_URL`, `SECRET_KEY`, `RIOT_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`
+- **Backend** (`.env`): `DATABASE_URL`, `FRONTEND_URL`, `SECRET_KEY`, `RIOT_API_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL` (optional legacy: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`)
 - **Frontend**: `NEXT_PUBLIC_API_URL`
 
 ## Conventions
@@ -54,6 +54,6 @@ cd backend && python reset_db.py
 
 ## Good to know
 
-- Media uploads go through Supabase storage (`services/storage.py`), not the local filesystem
+- Media uploads go through `services/storage.py` into Cloudflare R2 (`services/r2_storage.py`), not the local filesystem. Supabase is only kept for deleting legacy objects
 - Middleware order in `main.py` matters, don't reorder without understanding the auth flow
 - If changing an endpoint shape, both backend route and the corresponding frontend api logic must be updated together

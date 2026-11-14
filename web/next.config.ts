@@ -18,15 +18,23 @@ const nextConfig: NextConfig = {
 
       {
         protocol: "https",
-        hostname: "xbxvotbjgwkwhwaqwdho.supabase.co",
+        hostname: "cdn.roziggz.com",
         pathname: "/storage/v1/object/public/**",
       },
+      {
+        protocol: "https",
+        hostname: "media.roziggz.com",
+      },
+      // Kept so media not yet migrated to the CDN still renders.
       {
         protocol: "https",
         hostname: "*.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
     ],
+    // The optimizer cache on Railway is ephemeral, so a short TTL means
+    // repeatedly re-fetching originals after every expiry or redeploy.
+    minimumCacheTTL: 2678400,
   },
   experimental: {
     serverActions: {

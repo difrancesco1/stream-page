@@ -24,6 +24,7 @@ from streampage.db.models import (
 )
 from streampage.services.storage import (
     storage_service,
+    is_managed_media_url,
     ALLOWED_IMAGE_EXTENSIONS,
 )
 
@@ -320,7 +321,7 @@ async def upload_customization_image(
 ):
     """Attach (or replace) the finished card-art image for a customization.
 
-    Stored in Supabase under ``shop/customizations/``. If the row already had
+    Stored in R2 under ``shop/customizations/``. If the row already had
     an image URL pointing at our bucket, the previous object is best-effort
     deleted after the new URL is committed.
     """
@@ -355,7 +356,7 @@ async def upload_customization_image(
             customization, order, product.name, total_qty, product.category
         )
 
-    if previous_url and previous_url != new_url and "supabase.co" in previous_url:
+    if previous_url != new_url and is_managed_media_url(previous_url):
         storage_service.delete_object(previous_url)
 
     return response
@@ -386,7 +387,7 @@ def delete_customization_image(
             customization, order, product.name, total_qty, product.category
         )
 
-    if previous_url and "supabase.co" in previous_url:
+    if is_managed_media_url(previous_url):
         storage_service.delete_object(previous_url)
 
     return response

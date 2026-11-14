@@ -31,7 +31,7 @@ from streampage.db.enums import Platform
 from streampage.db.engine import get_db_session
 from sqlalchemy import func
 from streampage.db.models import User, UserLogin, Biography, Social, FeaturedImages
-from streampage.services.storage import storage_service
+from streampage.services.storage import storage_service, is_managed_media_url
 
 users_router = APIRouter()
 
@@ -239,15 +239,15 @@ async def upload_profile_picture(
     # Read file content
     contents = await file.read()
     
-    # Upload to Supabase
+    # Upload to storage
     public_url = storage_service.upload_image(contents, "profile", file_extension)
     
     # Update user's profile_picture in database
     with get_db_session() as session:
         user = session.query(User).filter(User.id == current_user.id).first()
         if user:
-            # Delete old image from Supabase if it exists
-            if user.profile_picture and "supabase.co" in user.profile_picture:
+            # Delete old image from storage if it exists
+            if is_managed_media_url(user.profile_picture):
                 storage_service.delete_image(user.profile_picture)
             
             user.profile_picture = public_url
@@ -277,7 +277,7 @@ async def upload_featured_image(
     # Read file content
     contents = await file.read()
     
-    # Upload to Supabase
+    # Upload to storage
     public_url = storage_service.upload_image(contents, "featured", file_extension)
     
     # Store the URL in the FeaturedImages table
@@ -287,10 +287,10 @@ async def upload_featured_image(
         ).first()
         
         if featured_images:
-            # Delete old image from Supabase if it exists
+            # Delete old image from storage if it exists
             if featured_images.images and len(featured_images.images) > 0:
                 old_url = featured_images.images[0]
-                if "supabase.co" in old_url:
+                if is_managed_media_url(old_url):
                     storage_service.delete_image(old_url)
             
             # Update existing entry - replace the first image

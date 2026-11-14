@@ -2,7 +2,7 @@
 Media transcoding helpers.
 
 Goal: every stored media file is in its lightest viable format so the project
-stays within Supabase's free-tier storage and egress limits. All images are
+stays within Cloudflare R2's free-tier storage limit. All images are
 converted to WebP and all videos to WebM (VP9 + Opus).
 
 Design contract: these functions convert or raise. There is intentionally no
