@@ -35,7 +35,7 @@ A self-hostable, all-in-one home page for streamers and creators. Stream Page gi
 
 - **Clip and media wall** where you and your community can post clips, GIFs and images. The creator can edit, remove and reorder entries.
 - **Automatic transcoding** with ffmpeg: GIFs become animated WebP, and MP4 and WebM uploads become VP9 WebM for small, fast-loading files.
-- **CDN delivery**: images are served through a Cloudflare-fronted Supabase bucket, and video is served from Cloudflare R2, which has no egress fees.
+- **CDN delivery**: all images, video and documents are stored in and served from Cloudflare R2, which has no egress fees.
 
 ### Community
 
@@ -71,7 +71,7 @@ A self-hostable, all-in-one home page for streamers and creators. Stream Page gi
 | Frontend | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui, react-hook-form and zod |
 | Backend | FastAPI, SQLAlchemy 2, Alembic, Pydantic, APScheduler |
 | Database | PostgreSQL (pgvector image) |
-| Media | Supabase Storage, Cloudflare CDN, Cloudflare R2, ffmpeg, Pillow |
+| Media | Cloudflare R2, ffmpeg, Pillow |
 | Payments | Stripe, PayPal |
 | Email | SMTP |
 | Hosting | Railway (Nixpacks) |
@@ -86,10 +86,7 @@ flowchart LR
     Browser --> FastAPI["FastAPI backend"]
     NextApp --> FastAPI
     FastAPI --> Postgres[(PostgreSQL)]
-    FastAPI --> Supabase["Supabase Storage (images)"]
-    FastAPI --> R2["Cloudflare R2 (video)"]
-    Supabase --> CDN["Cloudflare CDN"]
-    CDN --> Browser
+    FastAPI --> R2["Cloudflare R2 (media)"]
     R2 --> Browser
     FastAPI --> Riot["Riot API"]
     FastAPI --> Payments["Stripe and PayPal"]
@@ -282,15 +279,15 @@ Global styles live in `web/app/globals.css` and `web/app/styles`.
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `SUPABASE_URL` | Yes | Supabase project URL |
-| `SUPABASE_SERVICE_KEY` | Yes | Supabase service role key |
-| `SUPABASE_BUCKET` | No | Storage bucket name |
-| `MEDIA_CDN_URL` | No | CDN host in front of the Supabase bucket. When unset, Supabase URLs are served directly. |
-| `R2_ACCOUNT_ID` | No | Cloudflare account ID for R2 |
-| `R2_ACCESS_KEY_ID` | No | R2 access key |
-| `R2_SECRET_ACCESS_KEY` | No | R2 secret key |
-| `R2_BUCKET` | No | R2 bucket for video |
-| `R2_PUBLIC_BASE_URL` | No | Public URL of the R2 bucket. When the R2 settings are unset, video is stored in Supabase. |
+| `R2_ACCOUNT_ID` | Yes | Cloudflare account ID for R2 |
+| `R2_ACCESS_KEY_ID` | Yes | R2 access key |
+| `R2_SECRET_ACCESS_KEY` | Yes | R2 secret key |
+| `R2_BUCKET` | Yes | R2 bucket for all media. Use a separate bucket for local development. |
+| `R2_PUBLIC_BASE_URL` | Yes | Public URL of the R2 bucket. Without the R2 settings, uploads fail. |
+| `SUPABASE_URL` | No | Legacy. Only used to delete objects that still have Supabase URLs. |
+| `SUPABASE_SERVICE_KEY` | No | Legacy. Supabase service role key. |
+| `SUPABASE_BUCKET` | No | Legacy. Supabase bucket name. |
+| `MEDIA_CDN_URL` | No | Legacy. CDN host in front of the Supabase bucket; the migration script downloads through it. |
 
 **Payments**
 
@@ -342,8 +339,8 @@ Stream Page deploys as two Railway services plus a PostgreSQL database.
 
 Run these from `backend/` with the venv active. Both support `--dry-run`.
 
-- `python scripts/rewrite_media_urls.py` rewrites stored image URLs from the Supabase origin to your CDN host. It is idempotent and can be reversed with `--from` and `--to`.
-- `python scripts/migrate_videos_to_r2.py` copies existing videos from Supabase to R2 and updates their URLs. The source files stay in place until you remove them.
+- `python scripts/migrate_media_to_r2.py` copies all existing media (images, videos and form files) from Supabase to R2 and updates their URLs. It downloads through `MEDIA_CDN_URL` when set, skips anything already on R2, and leaves the source files in place until you remove them.
+- `python scripts/rewrite_media_urls.py` (legacy) rewrites stored image URLs from the Supabase origin to the CDN host. It is idempotent and can be reversed with `--from` and `--to`.
 
 ---
 
@@ -369,7 +366,7 @@ pnpm lint
 - **Backend**: async FastAPI routes, Pydantic models for every request and response, and one sub-package per domain under `streampage/api/` (each with its own router and `models.py`).
 - **Frontend**: Tailwind for styling, shadcn/ui components where possible, and kebab-case file names (`example-component.tsx`).
 - **API contracts**: when you change an endpoint's shape, update the backend route and its client in `web/app/api/` together.
-- **Media**: uploads go through `services/storage.py` (and `services/r2_storage.py` for video), never the local filesystem.
+- **Media**: uploads go through `services/storage.py` into R2 (`services/r2_storage.py`), never the local filesystem.
 
 ### Adding a new card
 

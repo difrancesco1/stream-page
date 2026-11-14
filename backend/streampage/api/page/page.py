@@ -33,7 +33,7 @@ async def upload_background_image(
     # Read file content
     contents = await file.read()
     
-    # Upload to Supabase
+    # Upload to storage
     public_url = storage_service.upload_image(contents, "backgrounds", file_extension)
     
     # Update page config in database
@@ -41,7 +41,7 @@ async def upload_background_image(
         config = session.query(PageConfig).filter(PageConfig.owner_id == user.id).first()
         
         if config:
-            # Delete old background from Supabase if it exists
+            # Delete old background from storage if it exists
             if is_managed_media_url(config.background_image):
                 storage_service.delete_image(config.background_image)
             

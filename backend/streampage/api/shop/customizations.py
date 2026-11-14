@@ -321,7 +321,7 @@ async def upload_customization_image(
 ):
     """Attach (or replace) the finished card-art image for a customization.
 
-    Stored in Supabase under ``shop/customizations/``. If the row already had
+    Stored in R2 under ``shop/customizations/``. If the row already had
     an image URL pointing at our bucket, the previous object is best-effort
     deleted after the new URL is committed.
     """

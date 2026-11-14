@@ -11,8 +11,8 @@ Usage (from the backend directory, with the venv active):
     python scripts/rewrite_media_urls.py --dry-run
     python scripts/rewrite_media_urls.py
 
-Video rows are intentionally skipped; those move to R2 via
-migrate_videos_to_r2.py, which rewrites their URLs itself.
+Superseded by migrate_media_to_r2.py, which moves the objects themselves off
+Supabase. Video rows are intentionally skipped.
 """
 
 import argparse

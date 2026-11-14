@@ -53,7 +53,7 @@ async def add_cat_image(
     # Read file content
     contents = await file.read()
     
-    # Upload to Supabase
+    # Upload to storage
     public_url = storage_service.upload_image(contents, "cats", file_ext)
     
     # Get rosie's user ID
@@ -91,7 +91,7 @@ def remove_cat_image(
         if user.username != "rosie" and cat_entry.contributor_id != user.id:
             raise HTTPException(status_code=403, detail="Not authorized to delete this image")
         
-        # Delete file from Supabase Storage
+        # Delete file from storage
         if is_managed_media_url(cat_entry.image_url):
             storage_service.delete_image(cat_entry.image_url)
         

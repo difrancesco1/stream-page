@@ -81,7 +81,7 @@ def _parse_uuid(value: str, label: str = "ID") -> uuid.UUID:
 
 
 def _cleanup_form_file_uploads(session, form: Form):
-    """Delete Supabase files for any file-upload answers in this form."""
+    """Delete stored files for any file-upload answers in this form."""
     file_question_ids = {
         q.id for q in form.questions if q.question_type == QuestionType.FILE_UPLOAD
     }

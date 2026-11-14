@@ -1,13 +1,11 @@
-"""Cloudflare R2 storage, used for video.
+"""Cloudflare R2 storage, used for all uploaded media.
 
-Images are fine to serve from Supabase behind a caching Cloudflare Worker, but
-Cloudflare's CDN terms do not permit serving video from a third-party origin on
-the free plan. Video therefore lives in R2, which is both sanctioned for this
-and free of egress fees.
+R2 has no egress fees and serves directly from Cloudflare (including video,
+which Cloudflare's CDN terms do not allow from a third-party origin).
 
-R2 speaks the S3 API, so this wraps boto3. The service is optional: when the
-R2_* env vars are unset, `is_configured` is False and callers fall back to
-Supabase, which keeps local development working with no extra setup.
+R2 speaks the S3 API, so this wraps boto3. The R2_* env vars are required for
+uploads in every environment; use a separate bucket for local development.
+Without them the app still starts, but uploads fail with HTTP 500.
 """
 
 import boto3
@@ -119,7 +117,7 @@ class R2StorageService:
         Delete an object by public URL or raw key.
 
         Returns True on success, False if the delete failed (best-effort; never
-        raises, matching SupabaseStorageService.delete_object).
+        raises, matching StorageService.delete_object).
         """
         key = self.key_from_url(url_or_key) or url_or_key
         try:

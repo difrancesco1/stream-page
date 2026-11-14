@@ -1,10 +1,7 @@
 import uuid
-from pathlib import Path
-from supabase import create_client, Client
 from fastapi import HTTPException
 
 from streampage.config import (
-    MEDIA_CDN_URL,
     SUPABASE_URL,
     SUPABASE_SERVICE_KEY,
     SUPABASE_BUCKET,
@@ -34,58 +31,32 @@ DOC_CONTENT_TYPES = {
 }
 
 
-class SupabaseStorageService:
-    """Service for handling file uploads to Supabase Storage."""
-    
-    def __init__(self, url: str, key: str, bucket: str):
-        """Initialize Supabase client with credentials."""
-        if not url or not key:
-            raise ValueError("Supabase URL and Service Key are required")
-        
-        self.supabase: Client = create_client(url, key)
-        self.bucket = bucket
-    
-    _LONG_CACHE_CONTROL_SECONDS = "31536000"
+class StorageService:
+    """
+    Service for handling media uploads.
 
-    def _to_public_url(self, url: str) -> str:
-        """
-        Point a Supabase public URL at the CDN host when one is configured.
+    All new objects are stored in Cloudflare R2. Supabase is only used, when
+    configured, to delete legacy objects whose URLs still point at the old
+    Supabase bucket (directly or through the CDN host).
+    """
 
-        The path is left byte-identical so only the origin differs, which keeps
-        delete_object's bucket-based path parsing working for both forms.
-        """
-        url = url.rstrip("?")
-        if not MEDIA_CDN_URL or not SUPABASE_URL:
-            return url
-        origin = SUPABASE_URL.rstrip("/")
-        if url.startswith(origin):
-            return MEDIA_CDN_URL + url[len(origin):]
-        return url
+    def __init__(self, supabase_url: str, supabase_key: str, supabase_bucket: str):
+        self._supabase_url = supabase_url
+        self._supabase_key = supabase_key
+        self._supabase_bucket = supabase_bucket
+        self._supabase = None
 
-    def _upload(self, path: str, file_content: bytes, content_type: str) -> str:
-        """Low-level helper that pushes bytes to Supabase and returns public URL."""
-        try:
-            self.supabase.storage.from_(self.bucket).upload(
-                path=path,
-                file=file_content,
-                file_options={
-                    "content-type": content_type,
-                    "upsert": "true",
-                    "cache-control": self._LONG_CACHE_CONTROL_SECONDS,
-                },
-            )
-            return self._to_public_url(
-                self.supabase.storage.from_(self.bucket).get_public_url(path)
-            )
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Failed to upload to storage: {str(e)}",
-            )
+    def _legacy_supabase(self):
+        """Lazily build the Supabase client, or None when it is not configured."""
+        if self._supabase is None and self._supabase_url and self._supabase_key:
+            from supabase import create_client
+
+            self._supabase = create_client(self._supabase_url, self._supabase_key)
+        return self._supabase
 
     def upload_image(self, file_content: bytes, category: str, extension: str) -> str:
         """
-        Upload an image (or form document) to Supabase Storage.
+        Upload an image (or form document) to R2.
 
         Images are transcoded to WebP to minimize storage/egress; conversion is
         mandatory, so a failure raises HTTP 422 and nothing is stored. Non-image
@@ -113,24 +84,20 @@ class SupabaseStorageService:
                     detail=f"Could not convert image to WebP; upload rejected: {exc}",
                 )
             filename = f"{category}/{uuid.uuid4()}.webp"
-            return self._upload(filename, converted, "image/webp")
+            return r2_storage_service.upload(filename, converted, "image/webp")
 
         # Non-image documents (PDF/DOC/DOCX) are stored unchanged.
         content_type = DOC_CONTENT_TYPES.get(ext, "application/octet-stream")
         filename = f"{category}/{uuid.uuid4()}{extension}"
-        return self._upload(filename, file_content, content_type)
+        return r2_storage_service.upload(filename, file_content, content_type)
 
     def upload_video(self, file_content: bytes, category: str, extension: str) -> str:
         """
-        Upload a video to Supabase Storage.
+        Upload a video to R2.
 
         Validates extension and size, then transcodes to WebM (VP9 + Opus) to
         minimize storage/egress. Conversion is mandatory: a failure raises HTTP
         422 and nothing is stored.
-
-        Stored in Cloudflare R2 when configured, since Cloudflare's CDN terms
-        do not allow serving video from a third-party origin; otherwise falls
-        back to Supabase.
 
         Args:
             file_content: The file bytes to upload (raw video data)
@@ -166,27 +133,30 @@ class SupabaseStorageService:
             )
 
         filename = f"{category}/{uuid.uuid4()}.webm"
-        if r2_storage_service.is_configured:
-            return r2_storage_service.upload(filename, converted, "video/webm")
-        return self._upload(filename, converted, "video/webm")
+        return r2_storage_service.upload(filename, converted, "video/webm")
 
     def delete_object(self, url: str) -> bool:
         """
         Delete a stored object (image, video, or other) by its public URL.
 
-        Dispatches to R2 for videos stored there, otherwise treats the URL as
-        Supabase-hosted. Returns True on success, False if the URL is not ours
-        or the delete failed (best-effort; never raises).
+        Dispatches to R2 for objects stored there, otherwise treats the URL as
+        a legacy Supabase object. Returns True on success, False if the URL is
+        not ours or the delete failed (best-effort; never raises).
         """
         if r2_storage_service.owns_url(url):
             return r2_storage_service.delete(url)
 
         try:
-            if f'/{self.bucket}/' not in url:
+            if f'/{self._supabase_bucket}/' not in url:
                 return False
 
-            path = url.split(f'/{self.bucket}/')[-1]
-            self.supabase.storage.from_(self.bucket).remove([path])
+            supabase = self._legacy_supabase()
+            if supabase is None:
+                print(f"Warning: Supabase is not configured; leaving legacy object {url}")
+                return False
+
+            path = url.split(f'/{self._supabase_bucket}/')[-1].split("?")[0]
+            supabase.storage.from_(self._supabase_bucket).remove([path])
             return True
         except Exception as e:
             print(f"Warning: Failed to delete object from storage: {str(e)}")
@@ -198,10 +168,10 @@ class SupabaseStorageService:
 
 
 # Create singleton instance
-storage_service = SupabaseStorageService(
-    url=SUPABASE_URL,
-    key=SUPABASE_SERVICE_KEY,
-    bucket=SUPABASE_BUCKET
+storage_service = StorageService(
+    supabase_url=SUPABASE_URL,
+    supabase_key=SUPABASE_SERVICE_KEY,
+    supabase_bucket=SUPABASE_BUCKET,
 )
 
 
@@ -209,9 +179,9 @@ def is_managed_media_url(url: str | None) -> bool:
     """
     True if the URL points at storage we own, so it is safe to delete.
 
-    Covers the Supabase bucket whether addressed directly or through the CDN
-    host, plus anything in R2. Call this before delete_object so user-supplied
-    external links are never touched.
+    Covers anything in R2, plus legacy objects in the Supabase bucket whether
+    addressed directly or through the CDN host. Call this before delete_object
+    so user-supplied external links are never touched.
     """
     if not url:
         return False
