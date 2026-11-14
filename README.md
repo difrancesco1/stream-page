@@ -2,20 +2,16 @@
 
 A self-hostable, all-in-one home page for streamers and creators. Stream Page gives you a profile hub, a clip wall, League of Legends trackers, community features and a full storefront, all on one page you control and theme yourself.
 
-![Stream Page preview](docs/preview.png)
-
 ---
 
 ## Table of contents
 
 - [Features](#features)
 - [Tech stack](#tech-stack)
-- [Architecture](#architecture)
 - [Getting started](#getting-started)
 - [Make it yours](#make-it-yours)
 - [Configuration reference](#configuration-reference)
 - [Deployment (Railway)](#deployment-railway)
-- [Development](#development)
 - [License](#license)
 
 ---
@@ -95,31 +91,6 @@ flowchart LR
 ```
 
 The frontend is a Next.js App Router app that talks to the FastAPI backend over REST. The backend owns all data, auth, media processing, payments and email. A background scheduler inside the backend refreshes Riot data once a day.
-
-### Repository layout
-
-```text
-stream-page/
-├── backend/
-│   ├── alembic/              # Database migrations
-│   ├── scripts/              # One-off maintenance scripts (media URL rewrites, R2 migration)
-│   └── streampage/
-│       ├── api/              # One sub-package per domain: user, page, media, cat, forms,
-│       │                     # opgg, riot, duo, first, shop, middleware
-│       ├── db/               # SQLAlchemy models, engine, enums, Riot data helpers
-│       ├── services/         # Storage, R2, media conversion, email, Stripe, PayPal, scheduler
-│       ├── config.py         # Environment configuration
-│       └── main.py           # App entrypoint, routers, CORS, scheduler
-└── web/
-    ├── app/
-    │   ├── api/              # Typed API clients, one folder per backend domain
-    │   ├── components/       # One folder per card (main-card, media, opgg, shop, ...)
-    │   ├── context/          # Auth, profile and edit-mode providers
-    │   └── shop/             # Shop and admin routes
-    ├── components/ui/        # shadcn/ui components
-    ├── lib/                  # API base URL, site config, vanity URLs, utilities
-    └── public/               # Theme assets: background, profile GIF, fonts, art
-```
 
 ---
 
